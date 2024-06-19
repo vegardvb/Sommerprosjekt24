@@ -46,3 +46,7 @@ Thumbs.db
 ./docs/notes.md
 /docs/notes.md
 /docs
+
+
+# Local environment variables
+./backend/.env
