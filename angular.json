@@ -1,9 +1,17 @@
 {
+<<<<<<< HEAD
   "$schema": "node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
     "cable_network_visualization": {
+=======
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "cesium-angular-example": {
+>>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -11,6 +19,7 @@
       "prefix": "app",
       "architect": {
         "build": {
+<<<<<<< HEAD
           "builder": "@angular-builders/build-angular:application",
           "options": {
             "outputPath": "dist/cable_network_visualization",
@@ -49,12 +58,67 @@
               "src/styles.css",
               "node_modules/@cesium/widgets/Source/widgets.css"
             ]
+=======
+          "builder": "@angular-builders/custom-webpack:browser",
+          "options": {
+            "outputPath": "dist/cesium-angular-example",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/cesium/Build/Cesium/Workers",
+                "output": "/assets/cesium/Workers"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/cesium/Build/Cesium/ThirdParty",
+                "output": "/assets/cesium/ThirdParty"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/cesium/Build/Cesium/Assets",
+                "output": "/assets/cesium/Assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/cesium/Build/Cesium/Widgets",
+                "output": "/assets/cesium/Widgets"
+              }
+            ],
+            "styles": [
+              "node_modules/cesium/Build/Cesium/Widgets/widgets.css",
+              "src/styles.css"
+            ],
+            "scripts": [],
+            "customWebpackConfig": {
+              "path": "./extra-webpack.config.js"
+            },
+            "allowedCommonJsDependencies": [
+              "dompurify",
+              "protobufjs",
+              "mersenne-twister",
+              "earcut",
+              "rbush",
+              "urijs",
+              "grapheme-splitter",
+              "nosleep.js",
+              "bitmap-sdf"
+           ]
+>>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
+<<<<<<< HEAD
                   "maximumWarning": "500kB",
                   "maximumError": "1MB"
                 },
@@ -62,19 +126,38 @@
                   "type": "anyComponentStyle",
                   "maximumWarning": "2kB",
                   "maximumError": "4kB"
+=======
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+>>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
                 }
               ],
               "outputHashing": "all"
             },
             "development": {
+<<<<<<< HEAD
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+=======
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+>>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
+<<<<<<< HEAD
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
@@ -82,11 +165,21 @@
             },
             "development": {
               "buildTarget": "cable_network_visualization:build:development"
+=======
+          "builder": "@angular-builders/custom-webpack:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "cesium-angular-example:build:production"
+            },
+            "development": {
+              "buildTarget": "cesium-angular-example:build:development"
+>>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
             }
           },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
+<<<<<<< HEAD
           "builder": "@angular-devkit/build-angular:extract-i18n"
         },
         "test": {
@@ -102,12 +195,62 @@
             ],
             "styles": ["src/styles.css"],
             "scripts": []
+=======
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "cesium-angular-example:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-builders/custom-webpack:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/cesium/Build/Cesium/Workers",
+                "output": "/assets/cesium/Workers"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/cesium/Build/Cesium/ThirdParty",
+                "output": "/assets/cesium/ThirdParty"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/cesium/Build/Cesium/Assets",
+                "output": "/assets/cesium/Assets"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/cesium/Build/Cesium/Widgets",
+                "output": "/assets/cesium/Widgets"
+              }
+            ],
+            "styles": [
+              "node_modules/cesium/Build/Cesium/Widgets/widgets.css",
+              "src/styles.css"
+            ],
+            "scripts": [],
+            "customWebpackConfig": {
+              "path": "./extra-webpack.config.js"
+            }
+>>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
           }
         }
       }
     }
+<<<<<<< HEAD
   },
   "cli": {
     "analytics": false
+=======
+>>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
   }
 }
