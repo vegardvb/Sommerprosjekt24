@@ -83,12 +83,13 @@ export class ButtonStateService {
 ---
 
 
-### Feature modules
+### Feature modules og Standalone
 
 Features modules er samligner av components, directives og services som er tett koblet sammen og kan grupperes for å systematisk strukturere applikasjonen i følge modulært design.
 
+Ett skifte mot å bruke standalone framfor feature modules som har mer overhead og er større ved mindre moduler.
 
-
+Men for Cesium som er en stor modul med mye egen konfigurasjon og state så vil det være naturlig og separere det som en feature module. 
 
 ## Detaljert
 
