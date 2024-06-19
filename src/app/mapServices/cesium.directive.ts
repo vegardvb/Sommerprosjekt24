@@ -18,6 +18,15 @@ export class CesiumDirective implements OnInit {
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
   async ngOnInit(): Promise<void> {
+
+    this.initializeMap(); 
+  }
+
+
+
+
+
+    private async initializeMap(): Promise<void> {
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     const viewer = new Viewer(this.el.nativeElement, {
       terrainProvider: new EllipsoidTerrainProvider() // Use flat ellipsoid surface
@@ -39,12 +48,7 @@ export class CesiumDirective implements OnInit {
       1.0
     );
 
-    // Initialize the toolbar and bind the viewModel
-    const toolbar = this.renderer.createElement('div');
-    toolbar.id = 'toolbar';
-    this.el.nativeElement.appendChild(toolbar);
-
-    this.createAlphaSlider(toolbar);
+   
 
     // Fly the camera to the given longitude, latitude, and height.
     viewer.camera.flyTo({
@@ -92,4 +96,8 @@ export class CesiumDirective implements OnInit {
       });
     }
   }
+  
+  
 }
+
+
