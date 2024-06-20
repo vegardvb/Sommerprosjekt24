@@ -40,13 +40,14 @@ testem.log
 Thumbs.db
 
 # Misc
-./docs/notes.md
-/docs/notes.md
+# ./docs/notes.md
+# /docs/notes.md
 /docs
 ./backend/_pycache_
 
-
 # Local environment variables
 ./backend/.env
+/backend/.env
+
 
 
