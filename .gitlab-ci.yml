@@ -1,0 +1,51 @@
+stages:
+  - build
+  - test
+
+variables:
+  NODE_ENV: 'development'
+
+before_script:
+  - echo "Running before_script"
+  - apt-get update -qy
+  - apt-get install -y python3 python3-pip
+  - pip3 install pipenv
+
+build_frontend:
+  stage: build
+  image: node:14
+  script:
+    - cd frontend
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist
+
+test_backend:
+  stage: test
+  image: python:3.8
+  services:
+    - name: postgres:latest
+      alias: postgres
+  variables:
+    POSTGRES_DB: $DB_NAME
+    POSTGRES_USER: $DB_USER
+    POSTGRES_PASSWORD: $DB_PASSWORD
+    POSTGRES_HOST: $DB_HOST
+    POSTGRES_PORT: $DB_PORT
+  before_script:
+    - pip3 install pipenv
+    - cd backend
+    - pipenv install --dev
+    - export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+  script:
+    - pipenv run pytest
+
+test_frontend:
+  stage: test
+  image: node:14
+  script:
+    - cd frontend
+    - npm install
+    - npm run test
