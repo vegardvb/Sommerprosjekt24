@@ -1,15 +1,7 @@
-<<<<<<< HEAD
-=======
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
->>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
 {
   "compileOnSave": false,
   "compilerOptions": {
     "outDir": "./dist/out-tsc",
-<<<<<<< HEAD
-=======
-    "forceConsistentCasingInFileNames": true,
->>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -20,23 +12,12 @@
     "sourceMap": true,
     "declaration": false,
     "experimentalDecorators": true,
-<<<<<<< HEAD
     "moduleResolution": "bundler",
-=======
-    "moduleResolution": "node",
->>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,
-<<<<<<< HEAD
     "lib": ["ES2022", "dom"]
-=======
-    "lib": [
-      "ES2022",
-      "dom"
-    ]
->>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
