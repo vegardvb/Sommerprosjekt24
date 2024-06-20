@@ -8,8 +8,7 @@ variables:
 before_script:
   - echo "Running before_script"
   - apt-get update -qy
-  - apt-get install -y python3 python3-pip
-  - pip3 install pipenv
+  - apt-get install -y python3 python3-pip python3-venv
 
 build_frontend:
   stage: build
@@ -45,18 +44,22 @@ test_backend:
     POSTGRES_HOST: $DB_HOST
     POSTGRES_PORT: $DB_PORT
   before_script:
-    - pip3 install pipenv
+    - python3 -m venv venv
+    - source venv/bin/activate
+    - pip install --upgrade pip
+    - pip install pipenv
     - cd backend
     - pipenv install --dev
     - export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
   script:
+    - source ../venv/bin/activate
     - pipenv run pytest
 
 test_frontend:
   stage: test
   image: node:20
   tags:
-    - docker
+    - vegard
   script:
     - cd frontend
     - npm install
