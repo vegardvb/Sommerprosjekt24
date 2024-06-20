@@ -1,45 +1,83 @@
 import { Directive, ElementRef, OnInit, Renderer2 } from '@angular/core';
-import { Viewer, EllipsoidTerrainProvider, Color, Cesium3DTileset, Cesium3DTileStyle, NearFarScalar, Math, Cartesian3 } from 'cesium';
+import { Viewer, Cartographic, ClippingPlane, ClippingPlaneCollection, Rectangle, EllipsoidTerrainProvider, Color, Cesium3DTileset, Cesium3DTileStyle, NearFarScalar, Math as csmath, Cartesian3, Transforms, Terrain, CesiumTerrainProvider } from 'cesium';
+
 
 @Directive({
-  selector: '[appCesium]',
+  selector: '[appCesium]', 
   standalone: true
 })
 export class CesiumDirective implements OnInit {
-  viewModel = {
-    translucencyEnabled: true,
-    fadeByDistance: true,
-    showVectorData: false,
-    alpha: 0.5,
-  };
-
+  private viewer: any;
   private tileset: any;
 
   constructor(private el: ElementRef, private renderer: Renderer2) {}
 
+
   async ngOnInit(): Promise<void> {
-
-    this.initializeMap(); 
-  }
-
-
-
-
-
-    private async initializeMap(): Promise<void> {
+      
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
-    const viewer = new Viewer(this.el.nativeElement, {
-      terrainProvider: new EllipsoidTerrainProvider() // Use flat ellipsoid surface
+    this.viewer = new Viewer(this.el.nativeElement, {
+   // Use flat ellipsoid surface
     });
 
-    const scene = viewer.scene;
+const scene = this.viewer.scene;
     const globe = scene.globe;
-    globe.baseColor = Color.BLACK;
+    const position = [10.436117, 63.421477, 4000]
+    var position2 = Cartographic.toCartesian(Cartographic.fromDegrees(position[0], position[1], position[2]));
+   var distance = 200.0;
 
-    this.tileset = await Cesium3DTileset.fromIonAssetId(2275207);
-    viewer.scene.primitives.add(this.tileset);
+    const buildingTileset = Cesium3DTileset.fromIonAssetId(96188);
 
-    globe.tileCacheSize = 100;
+    const tileset = this.viewer.scene.primitives.add(
+      await Cesium3DTileset.fromIonAssetId(96188),
+    );
+    
+
+    tileset.clippingPlanes = new ClippingPlaneCollection({
+      modelMatrix : Transforms.eastNorthUpToFixedFrame(position2),
+      planes : [
+          new ClippingPlane(new Cartesian3( 1.0,  0.0, 0.0), distance),
+          new ClippingPlane(new Cartesian3(-1.0,  0.0, 0.0), distance),
+          new ClippingPlane(new Cartesian3( 0.0,  1.0, 0.0), distance),
+          new ClippingPlane(new Cartesian3( 0.0, -1.0, 0.0), distance)
+      ],
+      unionClippingRegions : true,
+              edgeWidth:3,
+      edgeColor: Color.RED,
+      enabled : true
+  });
+    
+
+    this.viewer.scene.setTerrain(
+      new Terrain(
+        CesiumTerrainProvider.fromIonAssetId(1),
+      ),
+    );
+
+    
+
+
+    
+
+
+globe.clippingPlanes = new ClippingPlaneCollection({
+    modelMatrix : Transforms.eastNorthUpToFixedFrame(position2),
+    planes : [
+        new ClippingPlane(new Cartesian3( 1.0,  0.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3(-1.0,  0.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3( 0.0,  1.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3( 0.0, -1.0, 0.0), distance)
+    ],
+    unionClippingRegions : true,
+            edgeWidth:3,
+    edgeColor: Color.RED,
+    enabled : true
+});
+  
+
+  
+
+    globe.tileCacheSize = 1000;
     scene.screenSpaceCameraController.enableCollisionDetection = false;
     globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
       400.0,
@@ -48,56 +86,16 @@ export class CesiumDirective implements OnInit {
       1.0
     );
 
-   
-
-    // Fly the camera to the given longitude, latitude, and height.
-    viewer.camera.flyTo({
-      destination: Cartesian3.fromDegrees(10.436527, 63.421646, 4000),
+     // Fly the camera to the given longitude, latitude, and height.
+     this.viewer.camera.flyTo({
+      destination: Cartesian3.fromDegrees(position[0], position[1], position[2]),
       orientation: {
-        heading: Math.toRadians(0.0),
-        pitch: Math.toRadians(-85.0),
+        heading: csmath.toRadians(2.0),
+        pitch: csmath.toRadians(-80.0),
       }
     });
-  }
-
-  createAlphaSlider(toolbar: HTMLElement) {
-    const label = this.renderer.createElement('label');
-    const text = this.renderer.createText('Alpha:');
-    this.renderer.appendChild(label, text);
-
-    const input = this.renderer.createElement('input');
-    this.renderer.setAttribute(input, 'type', 'range');
-    this.renderer.setAttribute(input, 'min', '0');
-    this.renderer.setAttribute(input, 'max', '1');
-    this.renderer.setAttribute(input, 'step', '0.01');
-    this.renderer.setProperty(input, 'value', this.viewModel.alpha);
-
-    this.renderer.listen(input, 'input', (event) => {
-      this.viewModel.alpha = event.target.value;
-      this.updateAlpha(this.viewModel.alpha);
-    });
-
-    this.renderer.appendChild(label, input);
-    this.renderer.appendChild(toolbar, label);
-  }
-
-  updateAlpha(alpha: number) {
-    let adjustedAlpha = 1 - Number(alpha);
-    adjustedAlpha = !isNaN(adjustedAlpha) ? adjustedAlpha : 1.0;
-    adjustedAlpha = Math.clamp(adjustedAlpha, 0.0, 1.0);
-
-    if (this.tileset) {
-      this.tileset.style = new Cesium3DTileStyle({
-        color: {
-          conditions: [
-            ['true', `color('white', ${adjustedAlpha})`]
-          ]
-        }
-      });
-    }
-  }
-  
-  
+   
+    
 }
-
+}
 

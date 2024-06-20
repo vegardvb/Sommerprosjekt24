@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { HomeComponent} from './home/home.component'
 
-import { CesiumDirective } from './mapServices/cesium.directive';
+import { MapComponent } from './mapServices/map.component';
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, CesiumDirective, HomeComponent],
+  imports: [CommonModule, RouterOutlet, HomeComponent, MapComponent],
   templateUrl: './app.component.html',
 })
 export class AppComponent {}
