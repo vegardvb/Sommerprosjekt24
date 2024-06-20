@@ -13,7 +13,12 @@ before_script:
 
 build_frontend:
   stage: build
-  image: node:14
+  image: node:20
+  tags:
+    - docker
+  only:
+    - merge_requests
+    - main
   script:
     - cd frontend
     - npm install
@@ -25,6 +30,11 @@ build_frontend:
 test_backend:
   stage: test
   image: python:3.8
+  tags:
+    - docker
+  only:
+    - merge_requests
+    - main
   services:
     - name: postgres:latest
       alias: postgres
@@ -44,7 +54,9 @@ test_backend:
 
 test_frontend:
   stage: test
-  image: node:14
+  image: node:20
+  tags:
+    - docker
   script:
     - cd frontend
     - npm install
