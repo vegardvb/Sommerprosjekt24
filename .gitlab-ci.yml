@@ -15,7 +15,7 @@ build_frontend:
   stage: build
   image: node:20
   tags:
-    - docker
+    - vegard
   only:
     - merge_requests
     - main
@@ -31,7 +31,7 @@ test_backend:
   stage: test
   image: python:3.8
   tags:
-    - docker
+    - vegard
   only:
     - merge_requests
     - main
