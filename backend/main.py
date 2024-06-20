@@ -1,6 +1,5 @@
 from fastapi import Depends, FastAPI
 from sqlalchemy.orm import Session
-
 from crud import get_cable_measurement
 import models
 
