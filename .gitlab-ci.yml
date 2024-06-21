@@ -2,7 +2,7 @@ stages:
   - build
 
 variables:
-  NODE_ENV: 'development'
+  NODE_ENV: "development"
 
 build_application:
   stage: build
@@ -14,13 +14,18 @@ build_application:
   only:
     - merge_requests
     - main
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm
+      - node_modules/
+    policy: pull-push
   before_script:
     - echo "Running before_script"
-    - npm install
-    - npm update
+    - npm ci --cache .npm --no-optional --prefer-offline
   script:
     - npm run build
   artifacts:
     paths:
       - dist
-    expire_in: 1 week  # Adjust as needed
+    expire_in: 1 week # Adjust as needed
