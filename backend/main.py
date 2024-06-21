@@ -1,23 +1,9 @@
-from fastapi import Depends, FastAPI
-from sqlalchemy.orm import Session
-from crud import get_cable_measurement
-import models
+from fastapi import FastAPI
+from database import db
+from queries import *
 
-from database import SessionLocal, engine
-
-models.Base.metadata.create_all(bind=engine)
-
+# FastAPI instance
 app = FastAPI()
-
-db = SessionLocal()
-
-# # Dependency
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
 
 
 @app.get("/")
@@ -27,5 +13,25 @@ def read_root():
 
 @app.get("/cable_measurements/{cable_measurement_id}")
 def get_measurement(cable_measurement_id: int):
-    cables = get_cable_measurement(db, cable_measurement_id)
-    return cables
+    result = query_cable_measurements(db, cable_measurement_id)
+
+    for row in result:
+        print(f"{row} | Type: {type(row)} ")
+
+    return result
+
+
+@app.get("/inqueries/")
+def get_inquieries():
+
+    attributes = [
+        "id, navn, gateadresse, status, kommune_id , post_sted_id, organiasjons_id, behandlingsfrist"
+    ]
+
+    result = query_inquieries(db)
+    result = {k: result[k] for k in attributes}
+
+    for row in result:
+        print(f"{row} | Type: {type(row)} ")
+
+    return result
