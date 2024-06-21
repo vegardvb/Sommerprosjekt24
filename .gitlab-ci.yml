@@ -1,35 +1,38 @@
-stages:
-  - build
-
 variables:
   NODE_ENV: 'development'
   DATABASE_URL: 'postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}'
 
-before_script:
-  - echo "Running before_script"
-  - apt-get update -qy
-  - apt-get install -y python3 python3-pip
-  - pip3 install pipenv
+stages:
+  - build
 
 build_application:
-  stage: build
-  image: docker:20.10.9-dind
+  image: gitlab.geomatikk.no:5050/geomelding/docker-ci-images/node-linux-cordova:latest
   tags:
-    - docker
-    - konsulent
     - linux
-  services:
-    - docker:20.10.9-dind
+    - konsulent
+    - docker
+  only:
+    - merge_requests
+    - main
+  cache:
+    paths:
+      - .npm/
+      - node_modules/
+      - backend/.pipenv/
+      - cache/
+    policy: pull-push
+  before_script:
+    - echo "Running before_script"
+    - npm ci --cache .npm --no-optional --prefer-offline
   script:
     # Frontend build
-    # - cd frontend
     - npm install
     - npm run build
-    - cd ..
     # Backend build
     - cd backend
+    - pip install pipenv
     - pipenv install --dev
     - cd ..
   artifacts:
     paths:
-      - frontend/dist
+      - dist
