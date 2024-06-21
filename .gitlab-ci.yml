@@ -44,7 +44,6 @@ test_backend:
     - main
   before_script:
     - echo "Setting up the environment"
-    - cd backend
     - pip install pipenv
     - pipenv install --dev
   script:
