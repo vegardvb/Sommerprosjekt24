@@ -22,8 +22,7 @@ db = SessionLocal()
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
-
+    return {"message": "Hello World"}
 
 @app.get("/cable_measurements/{cable_measurement_id}")
 def get_measurement(cable_measurement_id: int):
