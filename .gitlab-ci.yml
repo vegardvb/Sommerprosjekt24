@@ -19,7 +19,6 @@ build_application:
     - linux
   script:
     # Frontend build
-    - cd frontend
     - npm install
     - npm run build
     - cd ..
