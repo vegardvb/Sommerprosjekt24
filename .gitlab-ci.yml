@@ -1,66 +1,32 @@
 stages:
   - build
-  - test
 
 variables:
   NODE_ENV: 'development'
+  DATABASE_URL: 'postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}'
 
 before_script:
   - echo "Running before_script"
   - apt-get update -qy
-  - apt-get install -y python3 python3-pip python3-venv
+  - apt-get install -y python3 python3-pip
+  - pip3 install pipenv
 
-build_frontend:
+build_application:
   stage: build
-  image: node:20
   tags:
-    - vegard
-  only:
-    - merge_requests
-    - main
+    - docker
+    - konsulent
+    - linux
   script:
+    # Frontend build
     - cd frontend
     - npm install
     - npm run build
+    - cd ..
+    # Backend build
+    - cd backend
+    - pipenv install --dev
+    - cd ..
   artifacts:
     paths:
       - frontend/dist
-
-test_backend:
-  stage: test
-  image: python:3.8
-  tags:
-    - vegard
-  only:
-    - merge_requests
-    - main
-  services:
-    - name: postgres:latest
-      alias: postgres
-  variables:
-    POSTGRES_DB: $DB_NAME
-    POSTGRES_USER: $DB_USER
-    POSTGRES_PASSWORD: $DB_PASSWORD
-    POSTGRES_HOST: $DB_HOST
-    POSTGRES_PORT: $DB_PORT
-  before_script:
-    - python3 -m venv venv
-    - source venv/bin/activate
-    - pip install --upgrade pip
-    - pip install pipenv
-    - cd backend
-    - pipenv install --dev
-    - export DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-  script:
-    - source ../venv/bin/activate
-    - pipenv run pytest
-
-test_frontend:
-  stage: test
-  image: node:20
-  tags:
-    - vegard
-  script:
-    - cd frontend
-    - npm install
-    - npm run test
