@@ -1,11 +1,12 @@
+stages:
+  - build
+
 variables:
   NODE_ENV: 'development'
   DATABASE_URL: 'postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}'
 
-stages:
-  - build
-
 build_application:
+  stage: build
   image: gitlab.geomatikk.no:5050/geomelding/docker-ci-images/node-linux-cordova:latest
   tags:
     - linux
