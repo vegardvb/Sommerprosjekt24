@@ -13,12 +13,16 @@ before_script:
 
 build_application:
   stage: build
+  image: docker:20.10.9-dind
   tags:
     - docker
     - konsulent
     - linux
+  services:
+    - docker:20.10.9-dind
   script:
     # Frontend build
+    # - cd frontend
     - npm install
     - npm run build
     - cd ..
