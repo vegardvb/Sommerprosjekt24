@@ -1,0 +1,24 @@
+variables:
+  DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
+test_backend:
+  stage: test
+  image: python:latest
+  tags:
+    - linux
+    - konsulent
+    - docker
+  only:
+    - merge_requests
+    - main
+  before_script:
+    - echo "Setting up the environment"
+    - pip install pipenv
+    - pipenv install --dev
+  script:
+    - pipenv run pytest backend/tests
+  artifacts:
+    when: always
+    paths:
+      - backend/tests
+    expire_in: 1 week
