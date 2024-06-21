@@ -1,0 +1,34 @@
+<div class="table">
+  <label for="searchbar" class="sr-only">Search</label>
+    <span class="p-input-icon-left ml-auto">
+     
+      <input id = "searchbar" pInputText type="text" [(ngModel)]="searchValue" placeholder="Search" (input)="onSearch($event)" />
+    </span>
+    <p-table 
+    #dt1 [value]="products" 
+    [scrollable]="true" 
+    scrollHeight="900px" 
+    [(selection)]="selectedProduct" 
+    dataKey="id" 
+    [globalFilterFields]="globalFilterFields">
+    
+      <ng-template pTemplate="header">
+        
+        <tr>
+          <th >Id</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Category</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-product>
+        <tr [pSelectableRow]="product">
+          <td>{{ product.id }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.price }}</td>
+          <td>{{ product.category }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  
