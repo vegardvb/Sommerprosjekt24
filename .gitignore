@@ -70,3 +70,6 @@ logs/
 
 # CI/CD
 .cache
+
+.nx/cache
+.nx/workspace-data
