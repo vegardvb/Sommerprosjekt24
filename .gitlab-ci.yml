@@ -6,7 +6,7 @@ variables:
 
 build_application:
   stage: build
-  image: node:14
+  image: node:20
   tags:
     - linux
     - konsulent
@@ -14,18 +14,13 @@ build_application:
   only:
     - merge_requests
     - main
-  cache:
-    paths:
-      - .npm/
-      - node_modules/
-      - cache/
-    policy: pull-push
   before_script:
     - echo "Running before_script"
-    - npm ci --cache .npm --no-optional --prefer-offline
-  script:
     - npm install
+    - npm update
+  script:
     - npm run build
   artifacts:
     paths:
       - dist
+    expire_in: 1 week  # Adjust as needed
