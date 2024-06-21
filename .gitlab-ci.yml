@@ -3,11 +3,10 @@ stages:
 
 variables:
   NODE_ENV: 'development'
-  DATABASE_URL: 'postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}'
 
 build_application:
   stage: build
-  image: gitlab.geomatikk.no:5050/geomelding/docker-ci-images/node-linux-cordova:latest
+  image: node:14
   tags:
     - linux
     - konsulent
@@ -19,21 +18,14 @@ build_application:
     paths:
       - .npm/
       - node_modules/
-      - backend/.pipenv/
       - cache/
     policy: pull-push
   before_script:
     - echo "Running before_script"
     - npm ci --cache .npm --no-optional --prefer-offline
   script:
-    # Frontend build
     - npm install
     - npm run build
-    # Backend build
-    - cd backend
-    - pip install pipenv
-    - pipenv install --dev
-    - cd ..
   artifacts:
     paths:
       - dist
