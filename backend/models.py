@@ -20,7 +20,7 @@ class CableMeasurement(Base):
     navn = Column(String)
     henvendelse_ledningsmaaling_id = Column(Integer)
     opprettet_dato = Column(DateTime)
-    metadata = Column(JSON)
+    meta_data = Column(JSON)
     geojson = Column(JSON)
 
 
