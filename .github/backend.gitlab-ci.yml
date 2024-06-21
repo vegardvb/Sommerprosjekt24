@@ -1,4 +1,3 @@
-# .github/backend.gitlab-ci.yml
 stages:
   - test
 
