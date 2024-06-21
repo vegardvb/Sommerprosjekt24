@@ -3,12 +3,12 @@ stages:
   - test
 
 variables:
-  NODE_ENV: "development"
-  DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+  NODE_ENV: 'development'
+  DATABASE_URL: 'postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}'
 
 build_application:
   stage: build
-  image: node:20
+  image: node:latest
   tags:
     - linux
     - konsulent
@@ -30,19 +30,22 @@ build_application:
   artifacts:
     paths:
       - dist
-    expire_in: 1 week # Adjust as needed
+    expire_in: 1 week  # Adjust as needed
 
 test_backend:
   stage: test
-  image: python:3.8
+  image: python:latest
   tags:
     - linux
     - konsulent
     - docker
+  only:
+    - merge_requests
+    - main
   before_script:
     - echo "Setting up the environment"
-    - pip install pipenv
     - cd backend
+    - pip install pipenv
     - pipenv install --dev
   script:
     - pipenv run pytest
