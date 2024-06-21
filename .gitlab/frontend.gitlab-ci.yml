@@ -2,7 +2,7 @@ variables:
   NODE_ENV: 'development'
 build_application:
   stage: build
-  image: node:latest
+  image: node:18
   tags:
     - linux
     - konsulent
@@ -18,6 +18,8 @@ build_application:
     policy: pull-push
   before_script:
     - echo "Running before_script"
+    - npm cache clean --force
+    - rm -rf node_modules/
     - npm ci --cache .npm --no-optional --prefer-offline
   script:
     - npm run lint
