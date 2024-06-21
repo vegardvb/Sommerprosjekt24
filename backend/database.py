@@ -1,12 +1,11 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base  
 
-# Enviroment varaibles
+# Environment variables
 from dotenv import load_dotenv, dotenv_values
 import os
 
-# Load the enviroment variables
+# Load the environment variables
 load_dotenv()
 
 # Database credentials
