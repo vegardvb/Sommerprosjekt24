@@ -28,7 +28,12 @@
             "style": "kebab-case"
           }
         ],
-        "prettier/prettier": "error",
+        "prettier/prettier": [
+          "error",
+          {
+            "endOfLine": "crlf"
+          }
+        ],
         "tailwindcss/classnames-order": "warn",
         "tailwindcss/no-custom-classname": "off"
       }

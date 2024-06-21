@@ -3,11 +3,17 @@ stages:
 
 lint_application:
   stage: lint
-  image: node:latest
+  image: node:18.16.1 # Specify a stable Node.js version
   tags:
     - linux
     - konsulent
     - docker
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .npm
+      - node_modules/
+    policy: pull-push
   script:
     - npm ci --cache .npm --no-optional --prefer-offline
     - npm run lint
