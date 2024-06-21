@@ -1,6 +1,5 @@
 variables:
   NODE_ENV: 'development'
-
 build_application:
   stage: build
   image: node:latest
@@ -21,8 +20,9 @@ build_application:
     - echo "Running before_script"
     - npm ci --cache .npm --no-optional --prefer-offline
   script:
+    - npm run lint
     - npm run build
   artifacts:
     paths:
       - dist
-    expire_in: 1 week # Adjust as needed
+    expire_in: 1 week
