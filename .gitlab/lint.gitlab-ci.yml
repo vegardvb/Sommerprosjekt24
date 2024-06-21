@@ -3,7 +3,7 @@ stages:
 
 lint_application:
   stage: lint
-  image: node:18.16.1 # Specify a stable Node.js version
+  image: node:latest
   tags:
     - linux
     - konsulent
