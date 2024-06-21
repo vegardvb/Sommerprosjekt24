@@ -1,12 +1,9 @@
-stages:
-  - test
-
 variables:
-  DATABASE_URL: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+  NODE_ENV: "development"
 
-test_backend:
-  stage: test
-  image: python:latest
+build_application:
+  stage: build
+  image: node:latest
   tags:
     - linux
     - konsulent
@@ -14,14 +11,18 @@ test_backend:
   only:
     - merge_requests
     - main
-  before_script:
-    - echo "Setting up the environment"
-    - pip install pipenv
-    - pipenv install --dev
-  script:
-    - pipenv run pytest backend/tests
-  artifacts:
-    when: always
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
     paths:
-      - backend/tests
-    expire_in: 1 week
+      - .npm
+      - node_modules/
+    policy: pull-push
+  before_script:
+    - echo "Running before_script"
+    - npm ci --cache .npm --no-optional --prefer-offline
+  script:
+    - npm run build
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 week # Adjust as needed

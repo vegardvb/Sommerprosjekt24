@@ -1,7 +1,3 @@
-# .github/frontend.gitlab-ci.yml
-stages:
-  - build
-
 variables:
   NODE_ENV: "development"
 
