@@ -10,20 +10,24 @@ export const routes: Routes = [
   },
 
   {
-    path: 'showCable',
+    path: 'project-data/:name',
     loadComponent: () =>
-      import('./show-cable/show-cable.component').then((m) => m.ShowCableComponent),
+      import('./project-data/project-data.component').then((m) => m.ProjectDataComponent),
   },
   {
     path: 'project-list',
     loadComponent: () =>
       import('./project-list/project-list.component').then((m) => m.ProjectListComponent),
   },
+  
 
   {
     path: 'home-page',
     loadComponent: () =>
       import('./home-page/home-page.component').then((m) => m.HomePageComponent),
   },
+
+  
+
   
 ];

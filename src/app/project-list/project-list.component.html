@@ -8,9 +8,9 @@
     [scrollable]="true" 
     scrollHeight="900px" 
     [(selection)]="selectedProduct" 
-    dataKey="id" 
+    dataKey="name" 
     selectionMode="single" 
-
+    (onRowSelect)="onRowSelect($event)"
     [(selection)]="selectedProduct" 
 
     [globalFilterFields]="globalFilterFields">

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ShowCableComponent } from './show-cable.component';
+import { ProjectDataComponent } from './project-data.component';
 
-describe('ShowCableComponent', () => {
-  let component: ShowCableComponent;
-  let fixture: ComponentFixture<ShowCableComponent>;
+describe('ProjectDataComponent', () => {
+  let component: ProjectDataComponent;
+  let fixture: ComponentFixture<ProjectDataComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ShowCableComponent]
+      imports: [ProjectDataComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(ShowCableComponent);
+    fixture = TestBed.createComponent(ProjectDataComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

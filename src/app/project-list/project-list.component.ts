@@ -5,7 +5,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common'; // Import this for Angular common directives
 import { ToastModule } from 'primeng/toast';
-
+import { Router } from '@angular/router';
 
 
 export interface Product {
@@ -35,11 +35,11 @@ export class ProjectListComponent {
   selectedProduct!: Product;
 
 
-  @ViewChild('dt1') dt1!: Table; // ViewChild reference to access p-table component
+  @ViewChild('dt1') dt1!: Table; 
 
-  constructor() {
+  constructor(private router:Router) {
     this.products = [
-      { name: '1000', adress: 'Product 1', description: "blabla", status: 'Category 1', municipality: "trondheim", post:"hei", organization: "geomatikk", deadline: "2015-03-25",email: "thea" },
+      { name: '1000', adress: 'Product 1', description: "blabla", status: 'Category 1', municipality: "trondheim", post:"hei", organization: "geomatikkerkult", deadline: "2015-03-25",email: "thea" },
       { name: '1001', adress: 'Product 2', description: "blabla", status: 'Category 2' },
       { name: '1002', adress: 'Product 3',description: "blabla", status: 'Category 3' },
     
@@ -55,12 +55,14 @@ export class ProjectListComponent {
 
   onSearch(event: Event) {
     const input = event.target as HTMLInputElement;
-    const value = input.value.trim().toLowerCase(); // Get search value
-    this.dt1.filter(value, 'global', 'contains'); // Apply global filter
+    const value = input.value.trim().toLowerCase(); 
+    this.dt1.filter(value, 'global', 'contains'); 
   }
 
   onRowSelect(event: any) {
-    console.log("Row selected:", event.data); // Legg til den faktiske funksjonaliteten her
+    console.log("Row selected:", event.data.name);
+    
+    this.router.navigate(['/project-data', event.data.name]); // Navigate to the product details page with the selected product's name as a parameter
   }
 
 
