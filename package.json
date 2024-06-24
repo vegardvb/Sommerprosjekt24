@@ -62,6 +62,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "npm-check-updates": "^16.14.20",
     "postcss": "^8.4.38",
     "prettier": "^3.3.2",
     "tailwindcss": "^3.4.4",
@@ -69,9 +70,9 @@
     "typescript-eslint": "^7.13.1"
   },
   "optionalDependencies": {
-    "@nx/nx-darwin-arm64": "18.0.4",
-    "@nx/nx-darwin-x64": "18.0.4",
-    "@nx/nx-linux-x64-gnu": "18.0.4",
-    "@nx/nx-win32-x64-msvc": "18.0.4"
+    "@nx/nx-darwin-arm64": "^18.0.4",
+    "@nx/nx-darwin-x64": "^18.0.4",
+    "@nx/nx-linux-x64-gnu": "^18.0.4",
+    "@nx/nx-win32-x64-msvc": "^18.0.4"
   }
 }
