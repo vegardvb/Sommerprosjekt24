@@ -7,7 +7,6 @@ import { CommonModule } from '@angular/common'; // Import this for Angular commo
 import { ToastModule } from 'primeng/toast';
 import { Router } from '@angular/router';
 
-
 export interface Product {
   name?: string;
   adress?: string;
@@ -18,52 +17,79 @@ export interface Product {
   organization?: string;
   deadline?: string;
   email?: string;
-
 }
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, ButtonModule, InputTextModule, ToastModule], 
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    InputTextModule,
+    ToastModule,
+  ],
   templateUrl: './project-list.component.html',
-  styleUrls: ['./project-list.component.css']
+  styleUrls: ['./project-list.component.css'],
 })
 export class ProjectListComponent {
   products: Product[];
   searchValue: string | undefined;
-  globalFilterFields: string[] = [ "name", "adress", "description", "status", "municipality", "post", "organization", "deadline" ,"email"];
+  globalFilterFields: string[] = [
+    'name',
+    'adress',
+    'description',
+    'status',
+    'municipality',
+    'post',
+    'organization',
+    'deadline',
+    'email',
+  ];
   selectedProduct!: Product;
 
+  @ViewChild('dt1') dt1!: Table;
 
-  @ViewChild('dt1') dt1!: Table; 
-
-  constructor(private router:Router) {
+  constructor(private router: Router) {
     this.products = [
-      { name: '1000', adress: 'Product 1', description: "blabla", status: 'Category 1', municipality: "trondheim", post:"hei", organization: "geomatikkerkult", deadline: "2015-03-25",email: "thea" },
-      { name: '1001', adress: 'Product 2', description: "blabla", status: 'Category 2' },
-      { name: '1002', adress: 'Product 3',description: "blabla", status: 'Category 3' },
-    
+      {
+        name: '1000',
+        adress: 'Product 1',
+        description: 'blabla',
+        status: 'Category 1',
+        municipality: 'trondheim',
+        post: 'hei',
+        organization: 'geomatikkerkult',
+        deadline: '2015-03-25',
+        email: 'thea',
+      },
+      {
+        name: '1001',
+        adress: 'Product 2',
+        description: 'blabla',
+        status: 'Category 2',
+      },
+      {
+        name: '1002',
+        adress: 'Product 3',
+        description: 'blabla',
+        status: 'Category 3',
+      },
     ];
   }
- 
 
-  ngOnInit() {
-  
-
-    
-}
+  ngOnInit() {}
 
   onSearch(event: Event) {
     const input = event.target as HTMLInputElement;
-    const value = input.value.trim().toLowerCase(); 
-    this.dt1.filter(value, 'global', 'contains'); 
+    const value = input.value.trim().toLowerCase();
+    this.dt1.filter(value, 'global', 'contains');
   }
 
   onRowSelect(event: any) {
-    console.log("Row selected:", event.data.name);
-    
+    console.log('Row selected:', event.data.name);
+
     this.router.navigate(['/project-data', event.data.name]); // Navigate to the product details page with the selected product's name as a parameter
   }
-
-
 }

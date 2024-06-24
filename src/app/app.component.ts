@@ -10,13 +10,16 @@ import { DataService } from './data.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, CesiumDirective, ProjectListComponent, HomePageComponent, NavbarComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    CesiumDirective,
+    ProjectListComponent,
+    HomePageComponent,
+    NavbarComponent,
+  ],
   templateUrl: './app.component.html',
-
 })
 export class AppComponent implements OnInit {
- 
-
-  ngOnInit() {
-  }
+  ngOnInit() {}
 }

@@ -8,7 +8,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { DataService } from './data.service';
 import { CommonModule } from '@angular/common';
 
-
 @NgModule({
   imports: [
     TableModule,
@@ -19,10 +18,8 @@ import { CommonModule } from '@angular/common';
     CommonModule,
     HttpClientModule,
   ],
-  declarations: [
-  ],
-  providers: [DataService
-  ],
-  bootstrap: []
+  declarations: [],
+  providers: [DataService],
+  bootstrap: [],
 })
-export class AppModule { }
+export class AppModule {}

@@ -10,15 +10,17 @@ import { HttpClientModule } from '@angular/common/http';
   imports: [CommonModule, HttpClientModule],
   templateUrl: './project-data.component.html',
   styleUrl: './project-data.component.css',
-  providers: [DataService]
+  providers: [DataService],
 })
 export class ProjectDataComponent {
-
-  details:any;
+  details: any;
 
   projectName: string | null = '';
-  
-  constructor(private route: ActivatedRoute, private dataService: DataService) { }
+
+  constructor(
+    private route: ActivatedRoute,
+    private dataService: DataService,
+  ) {}
 
   ngOnInit(): void {
     this.projectName = this.route.snapshot.paramMap.get('name');
@@ -31,8 +33,7 @@ export class ProjectDataComponent {
       (error) => {
         console.error('Error:', error);
         // Handle error as needed
-      }
+      },
     );
-
   }
 }
