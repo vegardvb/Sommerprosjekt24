@@ -19,7 +19,7 @@ build_application:
     policy: pull-push
   before_script:
     - echo "Running before_script"
-    - npm ci --cache .npm --include-optional --prefer-offline
+    - npm ci --include=optional --cache .npm --prefer-offline
   script:
     - npm run build
   artifacts:
