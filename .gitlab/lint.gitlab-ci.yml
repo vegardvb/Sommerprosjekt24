@@ -21,8 +21,8 @@ lint_application:
     - echo "Running before_script"
     - npm ci --include=optional --cache .npm --prefer-offline
   script:
-    - npm run lint
     - npx prettier . --write
+    - npm run lint
   artifacts:
     paths:
       - src/**/*.{js,ts,html,css,scss}
