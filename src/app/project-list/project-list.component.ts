@@ -6,8 +6,6 @@ import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common'; // Import this for Angular common directives
 import { ToastModule } from 'primeng/toast';
 
-
-
 export interface Product {
   name?: string;
   adress?: string;
@@ -18,40 +16,69 @@ export interface Product {
   organization?: string;
   deadline?: string;
   email?: string;
-
 }
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, TableModule, ButtonModule, InputTextModule, ToastModule], 
+  imports: [
+    CommonModule,
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    InputTextModule,
+    ToastModule,
+  ],
   templateUrl: './project-list.component.html',
-  styleUrls: ['./project-list.component.css']
+  styleUrls: ['./project-list.component.css'],
 })
 export class ProjectListComponent {
   products: Product[];
   searchValue: string | undefined;
-  globalFilterFields: string[] = [ "name", "adress", "description", "status", "municipality", "post", "organization", "deadline" ,"email"];
+  globalFilterFields: string[] = [
+    'name',
+    'adress',
+    'description',
+    'status',
+    'municipality',
+    'post',
+    'organization',
+    'deadline',
+    'email',
+  ];
   selectedProduct!: Product;
-
 
   @ViewChild('dt1') dt1!: Table; // ViewChild reference to access p-table component
 
   constructor() {
     this.products = [
-      { name: '1000', adress: 'Product 1', description: "blabla", status: 'Category 1', municipality: "trondheim", post:"hei", organization: "geomatikk", deadline: "2015-03-25",email: "thea" },
-      { name: '1001', adress: 'Product 2', description: "blabla", status: 'Category 2' },
-      { name: '1002', adress: 'Product 3',description: "blabla", status: 'Category 3' },
-    
+      {
+        name: '1000',
+        adress: 'Product 1',
+        description: 'blabla',
+        status: 'Category 1',
+        municipality: 'trondheim',
+        post: 'hei',
+        organization: 'geomatikk',
+        deadline: '2015-03-25',
+        email: 'thea',
+      },
+      {
+        name: '1001',
+        adress: 'Product 2',
+        description: 'blabla',
+        status: 'Category 2',
+      },
+      {
+        name: '1002',
+        adress: 'Product 3',
+        description: 'blabla',
+        status: 'Category 3',
+      },
     ];
   }
- 
 
-  ngOnInit() {
-  
-
-    
-}
+  //  ngOnInit() {}
 
   onSearch(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -59,9 +86,7 @@ export class ProjectListComponent {
     this.dt1.filter(value, 'global', 'contains'); // Apply global filter
   }
 
-  onRowSelect(event: any) {
-    console.log("Row selected:", event.data); // Legg til den faktiske funksjonaliteten her
+  onRowSelect() {
+    console.log('Row selected:'); // Legg til den faktiske funksjonaliteten her
   }
-
-
 }

@@ -1,9 +1,18 @@
 import { Directive, ElementRef, OnInit, Renderer2 } from '@angular/core';
-import { Viewer, EllipsoidTerrainProvider, Color, Cesium3DTileset, Cesium3DTileStyle, NearFarScalar, Math, Cartesian3 } from 'cesium';
+import {
+  Viewer,
+  EllipsoidTerrainProvider,
+  Color,
+  Cesium3DTileset,
+  Cesium3DTileStyle,
+  NearFarScalar,
+  Math,
+  Cartesian3,
+} from 'cesium';
 
 @Directive({
   selector: '[appCesium]',
-  standalone: true
+  standalone: true,
 })
 export class CesiumDirective implements OnInit {
   viewModel = {
@@ -14,14 +23,17 @@ export class CesiumDirective implements OnInit {
     viewer: Viewer,
   };
 
-  private tileset: any;
+  tileset?: Cesium3DTileset;
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+  constructor(
+    private el: ElementRef,
+    private renderer: Renderer2
+  ) {}
 
   async ngOnInit(): Promise<void> {
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
-     const viewer = new Viewer(this.el.nativeElement, {
-      terrainProvider: new EllipsoidTerrainProvider() // Use flat ellipsoid surface
+    const viewer = new Viewer(this.el.nativeElement, {
+      terrainProvider: new EllipsoidTerrainProvider(), // Use flat ellipsoid surface
     });
 
     const scene = viewer.scene;
@@ -53,7 +65,7 @@ export class CesiumDirective implements OnInit {
       orientation: {
         heading: Math.toRadians(0.0),
         pitch: Math.toRadians(-85.0),
-      }
+      },
     });
   }
 
@@ -69,7 +81,7 @@ export class CesiumDirective implements OnInit {
     this.renderer.setAttribute(input, 'step', '0.01');
     this.renderer.setProperty(input, 'value', this.viewModel.alpha);
 
-    this.renderer.listen(input, 'input', (event) => {
+    this.renderer.listen(input, 'input', event => {
       this.viewModel.alpha = event.target.value;
       this.updateAlpha(this.viewModel.alpha);
     });
@@ -86,10 +98,8 @@ export class CesiumDirective implements OnInit {
     if (this.tileset) {
       this.tileset.style = new Cesium3DTileStyle({
         color: {
-          conditions: [
-            ['true', `color('white', ${adjustedAlpha})`]
-          ]
-        }
+          conditions: [['true', `color('white', ${adjustedAlpha})`]],
+        },
       });
     }
   }

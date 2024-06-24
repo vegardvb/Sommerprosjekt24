@@ -16,9 +16,7 @@
             "outputPath": "dist/cesium-angular-example",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfills": [
-              "zone.js"
-            ],
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "./src/assets",
@@ -42,7 +40,6 @@
                 "input": "node_modules/cesium/Build/Cesium/Widgets",
                 "output": "/assets/cesium/Widgets"
               }
-            
             ],
             "styles": [
               "node_modules/cesium/Build/Cesium/Widgets/widgets.css",
@@ -64,7 +61,7 @@
               "grapheme-splitter",
               "nosleep.js",
               "bitmap-sdf"
-           ]
+            ]
           },
           "configurations": {
             "production": {
@@ -114,10 +111,7 @@
         "test": {
           "builder": "@angular-builders/custom-webpack:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
               "src/favicon.ico",
@@ -152,8 +146,17 @@
               "path": "./extra-webpack.config.js"
             }
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
         }
       }
     }
+  },
+  "cli": {
+    "schematicCollections": ["@angular-eslint/schematics"]
   }
 }

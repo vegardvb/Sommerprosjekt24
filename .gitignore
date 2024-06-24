@@ -70,3 +70,7 @@ logs/
 
 # CI/CD
 .cache
+
+# ESLint
+.nx/cache
+.nx/workspace-data
