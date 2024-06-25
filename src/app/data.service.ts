@@ -23,7 +23,7 @@ export class DataService {
   private handleError(error: any): Observable<never> {
     console.error('An error occurred:', error.message);
     return throwError(
-      () => new Error('Something bad happened; please try again later.'),
+      () => new Error('Something bad happened; please try again later.')
     );
   }
   /*

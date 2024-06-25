@@ -32,7 +32,7 @@ export interface Product {
     InputTextModule,
     ToastModule,
   ],
- 
+
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.css'],
   providers: [DataService],
@@ -59,13 +59,13 @@ export class ProjectListComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private dataService: DataService,
+    private dataService: DataService
   ) {
     this.products = [];
   }
   ngOnInit(): void {
     this.dataService.getData().subscribe(
-      (response) => {
+      response => {
         this.data = response;
         this.products = [];
 
@@ -86,9 +86,9 @@ export class ProjectListComponent implements OnInit {
           this.products.push(product);
         }
       },
-      (error) => {
+      error => {
         console.error('Error fetching data:', error);
-      },
+      }
     );
   }
 

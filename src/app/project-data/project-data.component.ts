@@ -18,9 +18,7 @@ export class ProjectDataComponent implements OnInit {
 
   projectName: string | null = '';
 
-  constructor(
-    private route: ActivatedRoute,
-  ) {}
+  constructor(private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.projectName = this.route.snapshot.paramMap.get('name');
