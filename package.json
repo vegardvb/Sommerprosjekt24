@@ -20,9 +20,11 @@
     "@angular/router": "^17.0.8",
     "ag-grid-angular": "^31.3.2",
     "cesium": "^1.113.0",
+    "cors": "^2.8.5",
     "primeng": "^17.18.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "prettier": "^2.3.2",
     "zone.js": "~0.14.2"
   },
   "devDependencies": {

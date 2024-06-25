@@ -13,7 +13,6 @@ import { CommonModule } from '@angular/common';
     TableModule,
     BrowserModule,
     ProjectListComponent,
-    AppComponent,
     ProjectDataComponent,
     CommonModule,
     HttpClientModule,

@@ -5,7 +5,7 @@ import { CesiumDirective } from './cesium.directive';
 import { ProjectListComponent } from './project-list/project-list.component';
 import { HomePageComponent } from './home-page/home-page.component';
 import { NavbarComponent } from './navbar/navbar.component';
-import { DataService } from './data.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -17,9 +17,9 @@ import { DataService } from './data.service';
     ProjectListComponent,
     HomePageComponent,
     NavbarComponent,
+    HttpClientModule,
   ],
   templateUrl: './app.component.html',
+  providers: [],
 })
-export class AppComponent implements OnInit {
-  ngOnInit() {}
-}
+export class AppComponent {}
