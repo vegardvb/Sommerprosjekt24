@@ -18,6 +18,7 @@ class Table(Enum):
     INQUIERY = "henvendelse"
     MUNICIPALITY = "kommune"
     ORGANIZATION = "organisasjon"
+    GEOMETRY = "geometri"
 
 
 """
@@ -36,7 +37,10 @@ def query_cable_measurements(cursor, cable_measurement_id: int, limit: int = 3):
     Returns:
         Dictonary : A dictonary containing the inquieries from the database.
     """
-    query = f"SELECT * FROM {Table.CABLE_MEASUREMENT.value} WHERE id = {cable_measurement_id} LIMIT {limit}"
+    query = f"SELECT * FROM {Table.CABLE_MEASUREMENT.value} 
+    
+    
+    WHERE id = {cable_measurement_id} LIMIT {limit}"
 
     cursor.execute(query)
     return cursor.fetchall()
@@ -72,8 +76,9 @@ def query_cable_measurements_by_inquiery(cursor, inquiery_id, limit: int = 3):
     """
 
     query = f"""
-select navn, opprettet_dato, sist_endret_dato, metadata, geojson
+select navn, opprettet_dato, sist_endret_dato, metadata, geojson, g.geom
 from {Table.CABLE_MEASUREMENT.value} li
+inner join {Table.GEOMETRY.value} g ON li.henvendelse_id = g.henvendelse_id
 where henvendelse_ledningsmaaling_id = {inquiery_id}
 limit {limit}
 """

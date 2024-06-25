@@ -11,7 +11,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/build-angular:application",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "dist/cable_network_visualization",
             "index": "src/index.html",
@@ -132,6 +132,7 @@
     }
   },
   "cli": {
-    "schematicCollections": ["@angular-eslint/schematics"]
+    "schematicCollections": ["@angular-eslint/schematics"],
+    "analytics": "9c69a1d3-1719-4bf7-9a43-b609ab71d87f"
   }
 }
