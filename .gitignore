@@ -75,3 +75,4 @@ logs/
 
 # Misc
 /docs
+./backend/__pycache__

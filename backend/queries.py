@@ -28,7 +28,8 @@ A collection of queries that retrieve data from the database.
 
 
 def query_cable_measurements(cursor, cable_measurement_id: int, limit: int = 3):
-    """A method for querying the cable measurements table with the specified attribuites.
+    """
+    A method for querying the cable measurements table with the specified attribuites.
 
     Args:
         cursor (A Cursor object which allows Python code to execute PostgreSQL command in a database session.):
@@ -41,6 +42,7 @@ def query_cable_measurements(cursor, cable_measurement_id: int, limit: int = 3):
     query = f"SELECT * FROM {Table.CABLE_MEASUREMENT.value} WHERE id = {cable_measurement_id} LIMIT {limit}"
 
     cursor.execute(query)
+
     return cursor.fetchall()
 
 
