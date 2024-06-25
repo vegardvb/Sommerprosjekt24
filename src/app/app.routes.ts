@@ -9,5 +9,24 @@ export const routes: Routes = [
 ];
 =======
 
-export const routes: Routes = [];
->>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
+export const routes: Routes = [
+  {
+    path: '',
+    redirectTo: 'home-page',
+    pathMatch: 'full',
+  },
+
+  {
+    path: 'project-list',
+    loadComponent: () =>
+      import('./project-list/project-list.component').then(
+        m => m.ProjectListComponent
+      ),
+  },
+
+  {
+    path: 'home-page',
+    loadComponent: () =>
+      import('./home-page/home-page.component').then(m => m.HomePageComponent),
+  },
+];

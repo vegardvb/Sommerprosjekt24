@@ -8,18 +8,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-<<<<<<< HEAD
     "types": ["jasmine"]
   },
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
-=======
-    "types": [
-      "jasmine"
-    ]
-  },
-  "include": [
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ]
->>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
 }

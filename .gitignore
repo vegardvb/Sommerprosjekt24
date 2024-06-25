@@ -9,6 +9,25 @@
 npm-debug.log
 yarn-error.log
 
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv
+env/
+venv/
+ENV/
+VENV/
+pip-log.txt
+pip-delete-this-directory.txt
+*.pytest_cache/
+.coverage
+
+# Pipenv
+Pipfile.lock
+
 # IDEs and editors
 .idea/
 .project
@@ -39,15 +58,17 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# Misc
-# ./docs/notes.md
-# /docs/notes.md
-/docs
-./backend/_pycache_
+# Environment variables
+.env
 
-# Local environment variables
-./backend/.env
-/backend/.env
+# Logs
+*.log
+logs/
+*.log.*
 
+# CI/CD
+.cache
 
-
+# ESLint
+.nx/cache
+.nx/workspace-data

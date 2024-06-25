@@ -12,6 +12,5 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes)]
->>>>>>> 1522c904441b8f486fcfa9cedced5fe4012567b0
+  providers: [provideRouter(routes)],
 };

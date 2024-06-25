@@ -17,8 +17,9 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": ["zone.js"],
-            "tsConfig": "./tsconfig.app.json",
+            "tsConfig": "tsconfig.app.json",
             "assets": [
+              "./src/assets",
               {
                 "glob": "**/*",
                 "input": "public",
@@ -46,8 +47,25 @@
               }
             ],
             "styles": [
+              "node_modules/cesium/Build/Cesium/Widgets/widgets.css",
               "src/styles.css",
-              "node_modules/@cesium/widgets/Source/widgets.css"
+              "node_modules/primeng/resources/themes/saga-blue/theme.css",
+              "node_modules/primeng/resources/primeng.min.css"
+            ],
+            "scripts": [],
+            "customWebpackConfig": {
+              "path": "./extra-webpack.config.js"
+            },
+            "allowedCommonJsDependencies": [
+              "dompurify",
+              "protobufjs",
+              "mersenne-twister",
+              "earcut",
+              "rbush",
+              "urijs",
+              "grapheme-splitter",
+              "nosleep.js",
+              "bitmap-sdf"
             ]
           },
           "configurations": {
@@ -93,7 +111,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": ["zone.js", "zone.js/testing"],
-            "tsConfig": "./config/tsconfig.spec.json",
+            "tsConfig": "tsconfig.spec.json",
             "assets": [
               {
                 "glob": "**/*",
@@ -103,11 +121,17 @@
             "styles": ["src/styles.css"],
             "scripts": []
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          }
         }
       }
     }
   },
   "cli": {
-    "analytics": false
+    "schematicCollections": ["@angular-eslint/schematics"]
   }
 }
