@@ -1,0 +1,25 @@
+{
+  "editor.formatOnSave": true,
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+
+  "files.eol": "\r\n",
+
+  "eslint.options": {
+    "extensions": [".js", ".jsx", ".ts", ".tsx"]
+  },
+
+  "eslint.validate": [
+    "javascript",
+
+    "javascriptreact",
+
+    "typescript",
+
+    "typescriptreact"
+  ],
+
+  "prettier.requireConfig": true
+}

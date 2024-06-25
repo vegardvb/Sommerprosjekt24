@@ -1,5 +1,5 @@
 from psycopg2 import connect
-from psycopg2.extras import DictCursor
+from psycopg2.extras import RealDictCursor
 
 # Enviroment varaibles
 from dotenv import load_dotenv
@@ -23,5 +23,5 @@ except:
     print("Failed to connect to the database")
 
 # Cursor for executing queries as dictionaries
-db = connenction.cursor(cursor_factory=DictCursor)
+db = connenction.cursor(cursor_factory=RealDictCursor)
 # e.g: "print(row['id'], row['name'])"
