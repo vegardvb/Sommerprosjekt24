@@ -1,4 +1,5 @@
-<div class="m-10 w-5/6 flex flex-col min-h-screen">
+<div class="m-12 w-5/6 flex flex-col min-h-screen">
+  <h1 class ="text-3xl mb-5">Projects</h1>
   <span>
     <input
       class="border p-2 my-5"
@@ -8,6 +9,8 @@
       [(ngModel)]="searchValue"
       placeholder="Search"
       (input)="onSearch($event)"
+      
+
     />
   </span>
   <p-table
@@ -21,6 +24,7 @@
     (onRowSelect)="onRowSelect($event)"
     [(selection)]="selectedProduct"
     [globalFilterFields]="globalFilterFields"
+
   >
     <ng-template pTemplate="header">
       <tr>
