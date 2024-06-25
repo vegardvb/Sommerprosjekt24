@@ -1,6 +1,7 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+import { Ion } from 'cesium';
 
 // Set the Environmental Variable for Cesiums static file required 
 // For the initialization of Cesium on the window object
@@ -10,9 +11,6 @@ bootstrapApplication(AppComponent, appConfig)
   .catch((err) => console.error(err));
 
 
-import { Ion } from 'cesium';
-import { appConfig } from './app/app.config';
-import { AppComponent } from './app/app.component';
 
 declare global {
   interface Window {
