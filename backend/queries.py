@@ -28,19 +28,22 @@ A collection of queries that retrieve data from the database.
 
 
 def query_cable_measurements(cursor, cable_measurement_id: int, limit: int = 3):
-    """A method for querying the cable measurements table with the specified attribuites.
+    """
+    TODO Implement dictonary output
+     A method for querying the cable measurements table with the specified attribuites.
 
-    Args:
-        cursor (A Cursor object which allows Python code to execute PostgreSQL command in a database session.):
-        limit (int, optional): A limit to limit the amount of returned values.Defaults to 50.
-        cable_measurement_id (int): The id of the cable measurement to query.
+     Args:
+         cursor (A Cursor object which allows Python code to execute PostgreSQL command in a database session.):
+         limit (int, optional): A limit to limit the amount of returned values.Defaults to 50.
+         cable_measurement_id (int): The id of the cable measurement to query.
 
-    Returns:
-        Dictonary : A dictonary containing the inquieries from the database.
+     Returns:
+         Dictonary : A dictonary containing the inquieries from the database.
     """
     query = f"SELECT * FROM {Table.CABLE_MEASUREMENT.value} WHERE id = {cable_measurement_id} LIMIT {limit}"
 
     cursor.execute(query)
+
     return cursor.fetchall()
 
 
