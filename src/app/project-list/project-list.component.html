@@ -1,16 +1,13 @@
-<div class="m-12 w-5/6 flex flex-col min-h-screen">
-  <h1 class ="text-3xl mb-5">Projects</h1>
+<div class="m-10 w-5/6">
   <span>
     <input
-      class="border p-2 my-5"
+      class="my-5 border p-2"
       id="searchbar"
       pInputText
       type="text"
       [(ngModel)]="searchValue"
       placeholder="Search"
       (input)="onSearch($event)"
-      
-
     />
   </span>
   <p-table
@@ -19,12 +16,10 @@
     [scrollable]="true"
     scrollHeight="900px"
     [(selection)]="selectedProduct"
-    dataKey="name"
+    dataKey="id"
     selectionMode="single"
-    (onRowSelect)="onRowSelect($event)"
     [(selection)]="selectedProduct"
     [globalFilterFields]="globalFilterFields"
-
   >
     <ng-template pTemplate="header">
       <tr>
@@ -37,7 +32,6 @@
         <th>Organization</th>
         <th>Processing deadline</th>
         <th>Email</th>
-        <th>Vet ikke</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-product>
@@ -51,7 +45,6 @@
         <td>{{ product.organization }}</td>
         <td>{{ product.deadline }}</td>
         <td>{{ product.email }}</td>
-        <td>{{ product.vet_ikke }}</td>
       </tr>
     </ng-template>
   </p-table>

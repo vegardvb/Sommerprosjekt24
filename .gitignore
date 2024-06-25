@@ -1,5 +1,3 @@
-# See http://help.github.com/ignore-files/ for more about ignoring files.
-
 # Compiled output
 /dist
 /tmp
@@ -10,6 +8,25 @@
 /node_modules
 npm-debug.log
 yarn-error.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+*.venv
+env/
+venv/
+ENV/
+VENV/
+pip-log.txt
+pip-delete-this-directory.txt
+*.pytest_cache/
+.coverage
+
+# Pipenv
+Pipfile.lock
 
 # IDEs and editors
 .idea/
@@ -40,3 +57,21 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment variables
+.env
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# CI/CD
+.cache
+
+# ESLint
+.nx/cache
+.nx/workspace-data
+
+# Misc
+/docs

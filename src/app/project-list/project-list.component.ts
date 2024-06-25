@@ -32,6 +32,7 @@ export interface Product {
     InputTextModule,
     ToastModule,
   ],
+ 
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.css'],
   providers: [DataService],
