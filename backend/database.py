@@ -1,11 +1,11 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base  
+from psycopg2 import connect
+from psycopg2.extras import DictCursor
 
-# Environment variables
-from dotenv import load_dotenv, dotenv_values
+# Enviroment varaibles
+from dotenv import load_dotenv
 import os
 
-# Load the environment variables
+# Load the enviroment variables
 load_dotenv()
 
 # Database credentials
@@ -15,10 +15,13 @@ db_password = os.getenv("DB_PASSWORD")
 db_host = os.getenv("DB_HOST")
 db_port = os.getenv("DB_PORT")
 
-SQLALCHEMY_DATABASE_URL = (
-    f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-)
+# Create connection to database
+DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+try:
+    connenction = connect(DATABASE_URL)
+except:
+    print("Failed to connect to the database")
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+# Cursor for executing queries as dictionaries
+db = connenction.cursor(cursor_factory=DictCursor)
+# e.g: "print(row['id'], row['name'])"
