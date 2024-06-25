@@ -11,9 +11,14 @@ import { NavbarComponent } from './navbar/navbar.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, CesiumDirective, ProjectListComponent, HomePageComponent, NavbarComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    CesiumDirective,
+    ProjectListComponent,
+    HomePageComponent,
+    NavbarComponent,
+  ],
   templateUrl: './app.component.html',
-
 })
-export class AppComponent {
-}
+export class AppComponent {}
