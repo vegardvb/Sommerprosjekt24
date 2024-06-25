@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from database import db
 from queries import *
 
+DEBUG = False
+
 # FastAPI instance
 app = FastAPI()
 
@@ -17,7 +19,7 @@ def read_root():
 
 
 @app.get("/cable_measurements/{cable_measurement_id}")
-def get_measurement(cable_measurement_id: int, DEBUG: bool = False):
+def get_measurement_by_cable_measurement_id(cable_measurement_id: int):
     """Endpoint for querying the cable measurements table.
 
     Args:
@@ -36,17 +38,37 @@ def get_measurement(cable_measurement_id: int, DEBUG: bool = False):
     return result
 
 
-@app.get("/inqueries/")
+@app.get("/inquiery")
 def get_inquieries():
     """Endpoint for querying the inquieries table.
 
     Returns:
         Dictonary: A dictornary containing the inquieries and its attribuites from the database.
     """
+    result = query_inquieries_with_details(db)
 
-    result = query_inquieries(db)
+    if DEBUG:
+        for row in result:
+            print(f"{row} | Type: {type(row)} ")
 
-    for row in result:
-        print(f"{row} | Type: {type(row)} ")
+    return result
+
+
+@app.get("/cable_measurement/inquiery/{inquery_id}")
+def get_cable_measurements_by_inquiery(inquery_id: int):
+    """Endpoint for querying cable measurements by inquiery id.
+
+    Args:
+        inquery_id (int): The id of the inquiery to sort by.
+
+    Returns:
+        Dictonary: A dictornary containing the cable measurements and its attribuites from the database.
+    """
+
+    result = query_cable_measurements_by_inquiery(db, inquery_id)
+
+    if DEBUG:
+        for row in result:
+            print(f"{row} | Type: {type(row)} ")
 
     return result
