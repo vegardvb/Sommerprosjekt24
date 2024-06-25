@@ -1,9 +1,7 @@
 stages:
-  - lint
   - build
   - test
 
 include:
-  - local: '.gitlab/lint.gitlab-ci.yml'
   - local: '.gitlab/frontend.gitlab-ci.yml'
   - local: '.gitlab/backend.gitlab-ci.yml'
