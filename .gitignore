@@ -72,3 +72,6 @@ logs/
 # ESLint
 .nx/cache
 .nx/workspace-data
+
+# Misc
+/docs
