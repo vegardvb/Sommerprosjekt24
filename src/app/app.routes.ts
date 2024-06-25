@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { CesiumWindowComponent } from './cesium-window/cesium-window.component';
 
 export const routes: Routes = [
   {

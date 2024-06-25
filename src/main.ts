@@ -3,14 +3,7 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { Ion } from 'cesium';
 
-// Set the Environmental Variable for Cesiums static file required 
-// For the initialization of Cesium on the window object
-(window as any).CESIUM_BASE_URL = '/assets/cesium/';
-
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
-
-
+bootstrapApplication(AppComponent, appConfig).catch(err => console.error(err));
 
 declare global {
   interface Window {
@@ -18,6 +11,8 @@ declare global {
   }
 }
 
+// Set the Environmental Variable for Cesiums static file required
+// For the initialization of Cesium on the window object
 window.CESIUM_BASE_URL = '/assets/cesium/';
 
 Ion.defaultAccessToken =
