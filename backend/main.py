@@ -43,7 +43,8 @@ def get_inquieries():
     """Endpoint for querying the inquieries table.
 
     Returns:
-        Dictonary: A dictornary containing the inquieries and its attribuites from the database.
+        Retunrs a list of inquieries attribuites in the following format:
+        i.e [ID, name, description,organization ,e-mail, municipality, adress, status, processing deadline, start_date, end_date]
     """
     result = query_inquieries_with_details(db)
 
@@ -54,15 +55,16 @@ def get_inquieries():
     return result
 
 
-@app.get("/cable_measurement/inquiery/{inquery_id}")
+@app.get("/cable_measurements/inquieries/{inquery_id}")
 def get_cable_measurements_by_inquiery(inquery_id: int):
     """Endpoint for querying cable measurements by inquiery id.
-
     Args:
         inquery_id (int): The id of the inquiery to sort by.
 
     Returns:
-        Dictonary: A dictornary containing the cable measurements and its attribuites from the database.
+        Returns a list of cable measurements attribuites in the following format:
+        i.e [ID, Job_name, metadata, geojson, geometry]
+
     """
 
     result = query_cable_measurements_by_inquiery(db, inquery_id)

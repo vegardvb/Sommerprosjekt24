@@ -18,6 +18,7 @@ class Table(Enum):
     INQUIERY = "henvendelse"
     MUNICIPALITY = "kommune"
     ORGANIZATION = "organisasjon"
+    GEOMETRY = "geometri"
 
 
 """
@@ -30,7 +31,7 @@ def query_cable_measurements(cursor, cable_measurement_id: int, limit: int = 3):
 
     Args:
         cursor (A Cursor object which allows Python code to execute PostgreSQL command in a database session.):
-        limit (int, optional): A limit to limit the amount of returned values.Defaults to 3.
+        limit (int, optional): A limit to limit the amount of returned values.Defaults to 50.
         cable_measurement_id (int): The id of the cable measurement to query.
 
     Returns:
@@ -42,16 +43,16 @@ def query_cable_measurements(cursor, cable_measurement_id: int, limit: int = 3):
     return cursor.fetchall()
 
 
-def query_inquieries_with_details(cursor, limit: int = 3):
+def query_inquieries_with_details(cursor, limit: int = 50):
     """A method for querying inqueries.
 
     Args:
         cursor (A Cursor object which allows Python code to execute PostgreSQL command in a database session.):
-        limit (int, optional): A limit to limit the amount of returned values.Defaults to 3.
+        limit (int, optional): A limit to limit the amount of returned values.Defaults to 50.
     """
 
     query = f"""
-select h.navn , h.beskrivelse ,  o.navn , h.kunde_epost , k.navn , h.gateadresse , h.status , h.behandlingsfrist , h.fra_dato, h.til_dato  
+select h.id, h.navn , h.beskrivelse ,  o.navn , h.kunde_epost , k.navn , h.gateadresse , h.status , h.behandlingsfrist , h.fra_dato, h.til_dato  
 from {Table.INQUIERY.value} h
 inner join {Table.ORGANIZATION.value} o ON o.id = h.organisasjon_id
 inner join {Table.MUNICIPALITY.value} k ON k.id = h.kommune_id
@@ -62,19 +63,21 @@ limit {limit}
     return cursor.fetchall()
 
 
-def query_cable_measurements_by_inquiery(cursor, inquiery_id, limit: int = 3):
+def query_cable_measurements_by_inquiery(cursor, inquiery_id, limit: int = 50):
     """A method for querying the cable measurements table with a corresponding inquiery id.
 
     Args:
         cursor (A Cursor object which allows Python code to execute PostgreSQL command in a database session.):
-        limit (int, optional): A limit to limit the amount of returned values. Defaults to 3.
+        limit (int, optional): A limit to limit the amount of returned values. Defaults to 50.
         inquiery_id (int): The id of the cable measurement to query.
     """
 
     query = f"""
-select navn, opprettet_dato, sist_endret_dato, metadata, geojson
+select li.id, li.navn, li.metadata, li.geojson,  st_asgeojson(geom)
 from {Table.CABLE_MEASUREMENT.value} li
-where henvendelse_ledningsmaaling_id = {inquiery_id}
+inner join henvendelse_ledningsmaaling hl ON hl.id = li.henvendelse_ledningsmaaling_id
+inner join {Table.GEOMETRY.value} g ON g.henvendelse_id = hl.henvendelse_id
+where hl.henvendelse_id = {inquiery_id}
 limit {limit}
 """
 
