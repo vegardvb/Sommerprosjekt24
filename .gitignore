@@ -40,8 +40,8 @@ testem.log
 Thumbs.db
 
 # Misc
-# ./docs/notes.md
-# /docs/notes.md
+./docs/notes.md
+/docs/notes.md
 /docs
 ./backend/_pycache_
 
