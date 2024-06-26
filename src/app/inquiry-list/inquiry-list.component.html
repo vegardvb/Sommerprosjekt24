@@ -8,7 +8,6 @@
       [(ngModel)]="searchValue"
       placeholder="Search"
       (input)="onSearch($event)"
-      aria-label="Search Projects"
     />
   </span>
   <p-table
@@ -20,7 +19,7 @@
     dataKey="id"
     selectionMode="single"
     [globalFilterFields]="globalFilterFields"
-    responsiveLayout="scroll"
+    (onRowSelect)="onInquiryClick(selectedProduct.id)"
   >
     <ng-template pTemplate="header">
       <tr>

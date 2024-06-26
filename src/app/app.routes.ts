@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { MapViewComponent } from './map-view/map-view.component';
 
 export const routes: Routes = [
   {
@@ -8,12 +9,14 @@ export const routes: Routes = [
   },
 
   {
-    path: 'project-list',
+    path: 'inquiry-list',
     loadComponent: () =>
-      import('./project-list/project-list.component').then(
-        m => m.ProjectListComponent
+      import('./inquiry-list/inquiry-list.component').then(
+        m => m.InquiryListComponent
       ),
   },
+
+  { path: 'map-view', component: MapViewComponent },
 
   {
     path: 'home-page',

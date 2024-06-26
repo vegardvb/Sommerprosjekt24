@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -7,9 +7,10 @@ import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { DataService } from '../data.service';
 import { Inquiry } from '../../models/inquiry-interface';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-project-list',
+  selector: 'app-inquiry-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -19,34 +20,32 @@ import { Inquiry } from '../../models/inquiry-interface';
     InputTextModule,
     ToastModule,
   ],
-
-  templateUrl: './project-list.component.html',
-  styleUrls: ['./project-list.component.css'],
-  providers: [DataService],
+  templateUrl: './inquiry-list.component.html',
+  styleUrls: ['./inquiry-list.component.css'],
 })
-export class ProjectListComponent implements OnInit {
+export class InquiryListComponent implements OnInit {
   products: Inquiry[] = [];
   searchValue: string | undefined;
   globalFilterFields: string[] = [
     'id',
-    'name',
-    'description',
-    'organization',
-    'email',
-    'municipality',
-    'address',
+    'navn',
+    'beskrivelse',
+    'kunde_epost',
+    'kommune',
+    'gateadresse',
     'status',
-    'processing',
-    'deadline',
-    'start date',
-    'end date',
+    'behandlingsfrist',
+    'fra_dato',
+    'til_dato',
   ];
-
   selectedProduct!: Inquiry;
 
   @ViewChild('dt1') dt1!: Table;
 
-  constructor(private dataService: DataService) {}
+  constructor(
+    private dataService: DataService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.dataService.getData().subscribe({
@@ -78,6 +77,14 @@ export class ProjectListComponent implements OnInit {
     const value = input.value.trim().toLowerCase();
     if (this.dt1) {
       this.dt1.filter(value, 'global', 'contains');
+    }
+  }
+
+  onInquiryClick(inquiryId: number | undefined): void {
+    if (inquiryId) {
+      this.router.navigate(['/map-view'], {
+        queryParams: { inquiryId: inquiryId.toString() },
+      });
     }
   }
 }

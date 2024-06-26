@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from database import db
-from queries import *
+from queries import query_cable_measurements, query_cable_measurements_by_inquiery, query_inquieries_with_details  
 
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,11 +30,6 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    """Home endpoint for the FastAPI application.
-
-    Returns:
-        String : A greeting.
-    """
     """Home endpoint for the FastAPI application.
 
     Returns:
@@ -80,12 +75,12 @@ def get_inquieries():
     return result
 
 
-@app.get("/cable_measurements/inquieries/{inquery_id}")
-def get_cable_measurements_by_inquiery(inquery_id: int):
+@app.get("/cable_measurements/inquieries/{inquiry_id}")
+def get_cable_measurements_by_inquiery(inquiry_id: int):
     """
     Endpoint for querying cable measurements by given inquiery id. \n
     **Args**:
-        inquery_id (int): The id of the inquiery to sort by.
+        inquiry_id (int): The id of the inquiery to sort by.
 
     **Returns**:
         Returns a list of cable measurements attribuites in the following format: \n
@@ -93,7 +88,7 @@ def get_cable_measurements_by_inquiery(inquery_id: int):
 
     """
 
-    result = query_cable_measurements_by_inquiery(db, inquery_id)
+    result = query_cable_measurements_by_inquiery(db, inquiry_id)
 
     if DEBUG:
         for row in result:
