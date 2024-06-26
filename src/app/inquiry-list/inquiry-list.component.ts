@@ -37,15 +37,16 @@ export class InquiryListComponent {
   products: Product[];
   searchValue: string | undefined;
   globalFilterFields: string[] = [
-    'hendvendelseId',
-    'adress',
-    'description',
+    'id',
+    'navn',
+    'beskrivelse',
+    'kunde_epost',
+    'kommune',
+    'gateadresse',
     'status',
-    'municipality',
-    'post',
-    'organization',
-    'deadline',
-    'email',
+    'behandlingsfrist',
+    'fra_dato',
+    'til_dato',
   ];
   selectedProduct!: Product;
 
