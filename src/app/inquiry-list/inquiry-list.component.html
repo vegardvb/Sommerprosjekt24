@@ -18,7 +18,6 @@
     [(selection)]="selectedProduct"
     dataKey="id"
     selectionMode="single"
-    [(selection)]="selectedProduct"
     [globalFilterFields]="globalFilterFields"
   >
     <ng-template pTemplate="header">
@@ -35,7 +34,7 @@
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-product>
-      <tr [pSelectableRow]="product">
+      <tr [pSelectableRow]="product" (click)="onInquiryClick(product.hendvendelseId)">
         <td>{{ product.name }}</td>
         <td>{{ product.adress }}</td>
         <td>{{ product.description }}</td>

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
+from backend.queries import query_cable_measurements, query_cable_measurements_by_inquiery, query_inquieries_with_details
 from database import db
-from queries import *
 
 DEBUG = False
 
