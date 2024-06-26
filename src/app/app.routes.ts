@@ -8,13 +8,6 @@ export const routes: Routes = [
   },
 
   {
-    path: 'project-data/:name',
-    loadComponent: () =>
-      import('./project-data/project-data.component').then(
-        m => m.ProjectDataComponent
-      ),
-  },
-  {
     path: 'project-list',
     loadComponent: () =>
       import('./project-list/project-list.component').then(
