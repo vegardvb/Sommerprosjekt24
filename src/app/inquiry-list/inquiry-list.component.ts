@@ -19,7 +19,7 @@ export interface Product {
 }
 
 @Component({
-  selector: 'app-project-list',
+  selector: 'app-inquiry-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -29,10 +29,10 @@ export interface Product {
     InputTextModule,
     ToastModule,
   ],
-  templateUrl: './project-list.component.html',
-  styleUrls: ['./project-list.component.css'],
+  templateUrl: './inquiry-list.component.html',
+  styleUrls: ['./inquiry-list.component.css'],
 })
-export class ProjectListComponent {
+export class InquiryListComponent {
   products: Product[];
   searchValue: string | undefined;
   globalFilterFields: string[] = [

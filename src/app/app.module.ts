@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { TableModule } from 'primeng/table';
-import { ProjectListComponent } from './project-list/project-list.component';
+import { InquiryListComponent } from './inquiry-list/inquiry-list.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { AppComponent } from './app.component';
 
 @NgModule({
-  imports: [TableModule, BrowserModule, ProjectListComponent, AppComponent],
+  imports: [TableModule, BrowserModule, InquiryListComponent, AppComponent],
   declarations: [],
   providers: [],
   bootstrap: [],

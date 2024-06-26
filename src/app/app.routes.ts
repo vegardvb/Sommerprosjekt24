@@ -8,10 +8,10 @@ export const routes: Routes = [
   },
 
   {
-    path: 'project-list',
+    path: 'inquiry-list',
     loadComponent: () =>
-      import('./project-list/project-list.component').then(
-        m => m.ProjectListComponent
+      import('./inquiry-list/inquiry-list.component').then(
+        m => m.InquiryListComponent
       ),
   },
 
