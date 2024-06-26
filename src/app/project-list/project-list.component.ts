@@ -34,7 +34,7 @@ export class ProjectListComponent implements OnInit {
     'organization',
     'email',
     'municipality',
-    'adress',
+    'address',
     'status',
     'processing',
     'deadline',
@@ -45,51 +45,39 @@ export class ProjectListComponent implements OnInit {
   selectedProduct!: Inquiry;
 
   @ViewChild('dt1') dt1!: Table;
-  inquiries: Array<Inquiry> = [];
 
   constructor(private dataService: DataService) {}
+
   ngOnInit(): void {
-    this.dataService.getData().subscribe(
-      response => {
-        this.inquiries = response;
-
-        this.products = [];
-
-        for (const inquiry of this.inquiries) {
-          inquiry.id = inquiry['id'] || 0;
-          inquiry.navn = inquiry['navn'] || '';
-          inquiry.beskrivelse = inquiry['beskrivelse'] || '';
-          inquiry.kunde_epost = inquiry['kunde_epost'] || '';
-          inquiry.kommune = inquiry['kommune'] || '';
-          inquiry.gateadresse = inquiry['gateadresse'] || '';
-          inquiry.status = inquiry['status'] || '';
-          inquiry.behandlingsfrist = inquiry['behandlingsfrist'] || '';
-          inquiry.fra_dato = inquiry['fra_dato'] || '';
-          inquiry.til_dato = inquiry['til_dato'] || '';
-
-          this.products.push({
-            id: inquiry.id,
-            navn: inquiry.navn,
-            beskrivelse: inquiry.beskrivelse,
-            kunde_epost: inquiry.kunde_epost,
-            kommune: inquiry.kommune,
-            gateadresse: inquiry.gateadresse,
-            status: inquiry.status,
-            behandlingsfrist: inquiry.behandlingsfrist,
-            fra_dato: inquiry.fra_dato,
-            til_dato: inquiry.til_dato,
-          });
-        }
+    this.dataService.getData().subscribe({
+      next: (response: Inquiry[]) => {
+        this.products = response.map(inquiry => ({
+          id: inquiry.id,
+          navn: inquiry.navn,
+          beskrivelse: inquiry.beskrivelse,
+          kunde_epost: inquiry.kunde_epost,
+          kommune: inquiry.kommune,
+          gateadresse: inquiry.gateadresse,
+          status: inquiry.status,
+          behandlingsfrist: inquiry.behandlingsfrist,
+          fra_dato: inquiry.fra_dato,
+          til_dato: inquiry.til_dato,
+        }));
       },
-      error => {
+      error: error => {
         console.error('Error fetching data:', error);
-      }
-    );
+      },
+      complete: () => {
+        console.log('Data fetching completed.');
+      },
+    });
   }
 
-  onSearch(event: Event) {
+  onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     const value = input.value.trim().toLowerCase();
-    this.dt1.filter(value, 'global', 'contains');
+    if (this.dt1) {
+      this.dt1.filter(value, 'global', 'contains');
+    }
   }
 }
