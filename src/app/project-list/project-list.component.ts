@@ -3,23 +3,25 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { Table, TableModule } from 'primeng/table';
-import { CommonModule } from '@angular/common'; // Import this for Angular common directives
+import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
-import { Router } from '@angular/router';
 import { DataService } from '../data.service';
+import { Inquiry } from '../../models/inquiry-interface';
 
-export interface Product {
-  name?: string;
-  adress?: string;
-  description?: string;
-  status?: string;
-  municipality?: string;
-  post?: string;
-  organization?: string;
-  deadline?: string;
-  email?: string;
-  vet_ikke?: string;
-}
+/*interface Inquiry {
+  id: number;
+  name: string;
+  description: string;
+  organization: string;
+  email: string;
+  municipality: string;
+  adress: string;
+  status: string;
+  processing: string;
+  deadline: string;
+  start_date: string;
+  end_date: string;
+}*/
 
 @Component({
   selector: 'app-project-list',
@@ -38,52 +40,60 @@ export interface Product {
   providers: [DataService],
 })
 export class ProjectListComponent implements OnInit {
-  products: Product[];
+  products: Inquiry[] = [];
   searchValue: string | undefined;
   globalFilterFields: string[] = [
+    'id',
     'name',
-    'adress',
     'description',
-    'status',
-    'municipality',
-    'post',
     'organization',
-    'deadline',
     'email',
-    'vet ikke',
+    'municipality',
+    'adress',
+    'status',
+    'processing',
+    'deadline',
+    'start date',
+    'end date',
   ];
-  selectedProduct!: Product;
-  data: any;
+
+  selectedProduct!: Inquiry;
 
   @ViewChild('dt1') dt1!: Table;
+  inquiries: Array<Inquiry> = [];
 
-  constructor(
-    private router: Router,
-    private dataService: DataService
-  ) {
-    this.products = [];
-  }
+  constructor(private dataService: DataService) {}
   ngOnInit(): void {
     this.dataService.getData().subscribe(
       response => {
-        this.data = response;
+        this.inquiries = response;
+
         this.products = [];
 
-        for (let sublist of this.data) {
-          let product: Product = {
-            name: sublist[0] || '',
-            adress: sublist[1] || '',
-            description: sublist[2] || '',
-            status: sublist[3] || '',
-            municipality: sublist[4] || '',
-            post: sublist[5] || '',
-            organization: sublist[6] || '',
-            deadline: sublist[7] || '',
-            email: sublist[8] || '',
-            vet_ikke: sublist[9] || '',
-          };
+        for (const inquiry of this.inquiries) {
+          inquiry.id = inquiry['id'] || 0;
+          inquiry.navn = inquiry['navn'] || '';
+          inquiry.beskrivelse = inquiry['beskrivelse'] || '';
+          inquiry.kunde_epost = inquiry['kunde_epost'] || '';
+          inquiry.kommune = inquiry['kommune'] || '';
+          inquiry.gateadresse = inquiry['gateadresse'] || '';
+          inquiry.status = inquiry['status'] || '';
+          inquiry.behandlingsfrist = inquiry['behandlingsfrist'] || '';
+          inquiry.fra_dato = inquiry['fra_dato'] || '';
+          inquiry.til_dato = inquiry['til_dato'] || '';
 
-          this.products.push(product);
+          this.products.push({
+            id: inquiry.id,
+            navn: inquiry.navn,
+            beskrivelse: inquiry.beskrivelse,
+            kunde_epost: inquiry.kunde_epost,
+            kommune: inquiry.kommune,
+            gateadresse: inquiry.gateadresse,
+            status: inquiry.status,
+            behandlingsfrist: inquiry.behandlingsfrist,
+            fra_dato: inquiry.fra_dato,
+            til_dato: inquiry.til_dato,
+          });
         }
       },
       error => {
@@ -96,11 +106,5 @@ export class ProjectListComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const value = input.value.trim().toLowerCase();
     this.dt1.filter(value, 'global', 'contains');
-  }
-
-  onRowSelect(event: any) {
-    console.log('Row selected:', event.data.name);
-
-    this.router.navigate(['/project-data', event.data.name]);
   }
 }

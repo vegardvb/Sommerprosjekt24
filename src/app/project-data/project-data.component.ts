@@ -13,9 +13,6 @@ import { HttpClientModule } from '@angular/common/http';
   providers: [DataService],
 })
 export class ProjectDataComponent implements OnInit {
-  details: any;
-  sharedData: any[] = [];
-
   projectName: string | null = '';
 
   constructor(private route: ActivatedRoute) {}

@@ -9,20 +9,9 @@ import {
   Math,
   Cartesian3,
 } from 'cesium';
-import {
-  Viewer,
-  EllipsoidTerrainProvider,
-  Color,
-  Cesium3DTileset,
-  Cesium3DTileStyle,
-  NearFarScalar,
-  Math,
-  Cartesian3,
-} from 'cesium';
 
 @Directive({
   selector: '[appCesium]',
-  standalone: true,
   standalone: true,
 })
 export class CesiumDirective implements OnInit {
@@ -38,14 +27,12 @@ export class CesiumDirective implements OnInit {
 
   constructor(
     private el: ElementRef,
-    private renderer: Renderer2,
+    private renderer: Renderer2
   ) {}
 
   async ngOnInit(): Promise<void> {
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
-    const viewer = new Viewer(this.el.nativeElement, {
-      terrainProvider: new EllipsoidTerrainProvider(), // Use flat ellipsoid surface
-    const viewer = new Viewer(this.el.nativeElement, {
+    const viewer: Viewer = new Viewer(this.el.nativeElement, {
       terrainProvider: new EllipsoidTerrainProvider(), // Use flat ellipsoid surface
     });
 
@@ -62,7 +49,7 @@ export class CesiumDirective implements OnInit {
       400.0,
       0.0,
       800.0,
-      1.0,
+      1.0
     );
 
     // Initialize the toolbar and bind the viewModel
@@ -78,7 +65,6 @@ export class CesiumDirective implements OnInit {
       orientation: {
         heading: Math.toRadians(0.0),
         pitch: Math.toRadians(-85.0),
-      },
       },
     });
   }
@@ -112,8 +98,6 @@ export class CesiumDirective implements OnInit {
     if (this.tileset) {
       this.tileset.style = new Cesium3DTileStyle({
         color: {
-          conditions: [['true', `color('white', ${adjustedAlpha})`]],
-        },
           conditions: [['true', `color('white', ${adjustedAlpha})`]],
         },
       });
