@@ -2,12 +2,12 @@ import { NgModule } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { ProjectListComponent } from './project-list/project-list.component';
 import { BrowserModule } from '@angular/platform-browser';
-import { AppComponent } from './app.component';
+import { DataService } from './data.service';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
-  imports: [TableModule, BrowserModule, ProjectListComponent, AppComponent],
+  imports: [TableModule, BrowserModule, ProjectListComponent, CommonModule],
   declarations: [],
-  providers: [],
-  bootstrap: [],
+  providers: [DataService],
 })
 export class AppModule {}

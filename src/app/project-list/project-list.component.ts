@@ -1,22 +1,12 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { Table, TableModule } from 'primeng/table';
-import { CommonModule } from '@angular/common'; // Import this for Angular common directives
+import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
-
-export interface Product {
-  name?: string;
-  adress?: string;
-  description?: string;
-  status?: string;
-  municipality?: string;
-  post?: string;
-  organization?: string;
-  deadline?: string;
-  email?: string;
-}
+import { DataService } from '../data.service';
+import { Inquiry } from '../../models/inquiry-interface';
 
 @Component({
   selector: 'app-project-list',
@@ -29,64 +19,65 @@ export interface Product {
     InputTextModule,
     ToastModule,
   ],
+
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.css'],
+  providers: [DataService],
 })
-export class ProjectListComponent {
-  products: Product[];
+export class ProjectListComponent implements OnInit {
+  products: Inquiry[] = [];
   searchValue: string | undefined;
   globalFilterFields: string[] = [
+    'id',
     'name',
-    'adress',
     'description',
-    'status',
-    'municipality',
-    'post',
     'organization',
-    'deadline',
     'email',
+    'municipality',
+    'address',
+    'status',
+    'processing',
+    'deadline',
+    'start date',
+    'end date',
   ];
-  selectedProduct!: Product;
 
-  @ViewChild('dt1') dt1!: Table; // ViewChild reference to access p-table component
+  selectedProduct!: Inquiry;
 
-  constructor() {
-    this.products = [
-      {
-        name: '1000',
-        adress: 'Product 1',
-        description: 'blabla',
-        status: 'Category 1',
-        municipality: 'trondheim',
-        post: 'hei',
-        organization: 'geomatikk',
-        deadline: '2015-03-25',
-        email: 'thea',
+  @ViewChild('dt1') dt1!: Table;
+
+  constructor(private dataService: DataService) {}
+
+  ngOnInit(): void {
+    this.dataService.getData().subscribe({
+      next: (response: Inquiry[]) => {
+        this.products = response.map(inquiry => ({
+          id: inquiry.id,
+          navn: inquiry.navn,
+          beskrivelse: inquiry.beskrivelse,
+          kunde_epost: inquiry.kunde_epost,
+          kommune: inquiry.kommune,
+          gateadresse: inquiry.gateadresse,
+          status: inquiry.status,
+          behandlingsfrist: inquiry.behandlingsfrist,
+          fra_dato: inquiry.fra_dato,
+          til_dato: inquiry.til_dato,
+        }));
       },
-      {
-        name: '1001',
-        adress: 'Product 2',
-        description: 'blabla',
-        status: 'Category 2',
+      error: error => {
+        console.error('Error fetching data:', error);
       },
-      {
-        name: '1002',
-        adress: 'Product 3',
-        description: 'blabla',
-        status: 'Category 3',
+      complete: () => {
+        console.log('Data fetching completed.');
       },
-    ];
+    });
   }
 
-  //  ngOnInit() {}
-
-  onSearch(event: Event) {
+  onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const value = input.value.trim().toLowerCase(); // Get search value
-    this.dt1.filter(value, 'global', 'contains'); // Apply global filter
-  }
-
-  onRowSelect() {
-    console.log('Row selected:'); // Legg til den faktiske funksjonaliteten her
+    const value = input.value.trim().toLowerCase();
+    if (this.dt1) {
+      this.dt1.filter(value, 'global', 'contains');
+    }
   }
 }
