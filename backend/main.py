@@ -2,10 +2,30 @@ from fastapi import FastAPI
 from database import db
 from queries import query_cable_measurements, query_cable_measurements_by_inquiery, query_inquieries_with_details  
 
+
+from fastapi.middleware.cors import CORSMiddleware
+
+
 DEBUG = False
 
 # FastAPI instance
 app = FastAPI()
+
+
+
+origins = [
+    "http://localhost:4200",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 
 @app.get("/")

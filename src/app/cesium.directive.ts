@@ -32,7 +32,7 @@ export class CesiumDirective implements OnInit {
 
   async ngOnInit(): Promise<void> {
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
-    const viewer = new Viewer(this.el.nativeElement, {
+    const viewer: Viewer = new Viewer(this.el.nativeElement, {
       terrainProvider: new EllipsoidTerrainProvider(), // Use flat ellipsoid surface
     });
 

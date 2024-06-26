@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-
 import { CesiumDirective } from './cesium.directive';
 
 import { InquiryListComponent } from './inquiry-list/inquiry-list.component';
@@ -20,5 +19,6 @@ import { NavbarComponent } from './navbar/navbar.component';
     NavbarComponent,
   ],
   templateUrl: './app.component.html',
+  providers: [],
 })
 export class AppComponent {}

@@ -1,23 +1,13 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { Table, TableModule } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
+import { DataService } from '../data.service';
+import { Inquiry } from '../../models/inquiry-interface';
 import { Router } from '@angular/router';
-
-export interface Product {
-  hendvendelseId?: string;
-  adress?: string;
-  description?: string;
-  status?: string;
-  municipality?: string;
-  post?: string;
-  organization?: string;
-  deadline?: string;
-  email?: string;
-}
 
 @Component({
   selector: 'app-inquiry-list',
@@ -33,8 +23,8 @@ export interface Product {
   templateUrl: './inquiry-list.component.html',
   styleUrls: ['./inquiry-list.component.css'],
 })
-export class InquiryListComponent {
-  products: Product[];
+export class InquiryListComponent implements OnInit {
+  products: Inquiry[] = [];
   searchValue: string | undefined;
   globalFilterFields: string[] = [
     'id',
@@ -48,53 +38,53 @@ export class InquiryListComponent {
     'fra_dato',
     'til_dato',
   ];
-  selectedProduct!: Product;
+  selectedProduct!: Inquiry;
 
-  @ViewChild('dt1') dt1!: Table; // ViewChild reference to access p-table component
+  @ViewChild('dt1') dt1!: Table;
 
-  constructor(private router: Router) {
-    this.products = [
-      {
-        hendvendelseId: '1000',
-        adress: 'Product 1',
-        description: 'blabla',
-        status: 'Category 1',
-        municipality: 'trondheim',
-        post: 'hei',
-        organization: 'geomatikk',
-        deadline: '2015-03-25',
-        email: 'thea',
+  constructor(
+    private dataService: DataService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.dataService.getData().subscribe({
+      next: (response: Inquiry[]) => {
+        this.products = response.map(inquiry => ({
+          id: inquiry.id,
+          navn: inquiry.navn,
+          beskrivelse: inquiry.beskrivelse,
+          kunde_epost: inquiry.kunde_epost,
+          kommune: inquiry.kommune,
+          gateadresse: inquiry.gateadresse,
+          status: inquiry.status,
+          behandlingsfrist: inquiry.behandlingsfrist,
+          fra_dato: inquiry.fra_dato,
+          til_dato: inquiry.til_dato,
+        }));
       },
-      {
-        hendvendelseId: '1001',
-        adress: 'Product 2',
-        description: 'blabla',
-        status: 'Category 2',
+      error: error => {
+        console.error('Error fetching data:', error);
       },
-      {
-        hendvendelseId: '1002',
-        adress: 'Product 3',
-        description: 'blabla',
-        status: 'Category 3',
+      complete: () => {
+        console.log('Data fetching completed.');
       },
-    ];
+    });
   }
 
-  onSearch(event: Event) {
+  onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const value = input.value.trim().toLowerCase(); // Get search value
-    this.dt1.filter(value, 'global', 'contains'); // Apply global filter
-  }
-
-  onInquiryClick(inquiryId: string | undefined): void {
-    if (inquiryId) {
-      this.router.navigate(['/map-view'], {
-        queryParams: { inquiryId: inquiryId },
-      });
+    const value = input.value.trim().toLowerCase();
+    if (this.dt1) {
+      this.dt1.filter(value, 'global', 'contains');
     }
   }
 
-  onRowSelect() {
-    console.log('Row selected:'); // Legg til den faktiske funksjonaliteten her
+  onInquiryClick(inquiryId: number | undefined): void {
+    if (inquiryId) {
+      this.router.navigate(['/map-view'], {
+        queryParams: { inquiryId: inquiryId.toString() },
+      });
+    }
   }
 }
