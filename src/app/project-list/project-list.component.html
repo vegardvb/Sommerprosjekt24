@@ -8,6 +8,7 @@
       [(ngModel)]="searchValue"
       placeholder="Search"
       (input)="onSearch($event)"
+      aria-label="Search Projects"
     />
   </span>
   <p-table
@@ -18,8 +19,8 @@
     [(selection)]="selectedProduct"
     dataKey="id"
     selectionMode="single"
-    [(selection)]="selectedProduct"
     [globalFilterFields]="globalFilterFields"
+    responsiveLayout="scroll"
   >
     <ng-template pTemplate="header">
       <tr>
@@ -28,11 +29,11 @@
         <th>Description</th>
         <th>Email</th>
         <th>Municipality</th>
-        <th>Adress</th>
+        <th>Address</th>
         <th>Status</th>
         <th>Deadline</th>
-        <th>Start date</th>
-        <th>End date</th>
+        <th>Start Date</th>
+        <th>End Date</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-product>

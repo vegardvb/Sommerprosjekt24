@@ -8,21 +8,6 @@ import { ToastModule } from 'primeng/toast';
 import { DataService } from '../data.service';
 import { Inquiry } from '../../models/inquiry-interface';
 
-/*interface Inquiry {
-  id: number;
-  name: string;
-  description: string;
-  organization: string;
-  email: string;
-  municipality: string;
-  adress: string;
-  status: string;
-  processing: string;
-  deadline: string;
-  start_date: string;
-  end_date: string;
-}*/
-
 @Component({
   selector: 'app-project-list',
   standalone: true,
