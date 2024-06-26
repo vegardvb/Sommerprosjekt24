@@ -27,7 +27,7 @@ def get_measurement_by_cable_measurement_id(cable_measurement_id: int):
         DEBUG (bool, optional): Boolean to apply debugging statements. Defaults to False.
 
     **Returns**:
-        Array: An array containing the cable measurements and its attribuites from the database.
+        Dictonary: A dictonary containing the cable measurements and its attribuites from the database.
     """
     result = query_cable_measurements(db, cable_measurement_id)
 
@@ -43,8 +43,7 @@ def get_inquieries():
     """Endpoint which returns a portion of all inquieries from the database.
 
     **Returns**:
-        A list of inquieries attribuites in the following format: \n
-        [id, name, description,organization ,e-mail, municipality, adress, status, processing deadline, start_date, end_date]
+        Dictonary: A Dictonary of inquieries attribuites in the following format: \n
     """
     result = query_inquieries_with_details(db)
 
@@ -63,8 +62,7 @@ def get_cable_measurements_by_inquiery(inquery_id: int):
         inquery_id (int): The id of the inquiery to sort by.
 
     **Returns**:
-        Returns a list of cable measurements attribuites in the following format: \n
-        [id, name , metadata, geojson, geometry]
+        Dictonary: A Dictonary of cable measurements attribuites in the following format: \n
 
     """
 
