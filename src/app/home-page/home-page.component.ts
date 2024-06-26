@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ProjectListComponent } from '../project-list/project-list.component';
+import { InquiryListComponent } from '../inquiry-list/inquiry-list.component';
 import { NavbarComponent } from '../navbar/navbar.component';
 import { FooterComponent } from '../footer/footer.component';
 
@@ -8,6 +8,6 @@ import { FooterComponent } from '../footer/footer.component';
   standalone: true,
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css',
-  imports: [ProjectListComponent, NavbarComponent, FooterComponent],
+  imports: [InquiryListComponent, NavbarComponent, FooterComponent],
 })
 export class HomePageComponent {}
