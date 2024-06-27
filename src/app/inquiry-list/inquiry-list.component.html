@@ -19,7 +19,7 @@
     dataKey="id"
     selectionMode="single"
     [globalFilterFields]="globalFilterFields"
-    (onRowSelect)="onInquiryClick(selectedProduct.id)"
+    (onRowSelect)="onInquiryClick(selectedProduct.inquiry_id)"
   >
     <ng-template pTemplate="header">
       <tr>
@@ -37,16 +37,16 @@
     </ng-template>
     <ng-template pTemplate="body" let-product>
       <tr [pSelectableRow]="product">
-        <td>{{ product.id }}</td>
-        <td>{{ product.navn }}</td>
-        <td>{{ product.beskrivelse }}</td>
-        <td>{{ product.kunde_epost }}</td>
-        <td>{{ product.kommune }}</td>
-        <td>{{ product.gateadresse }}</td>
+        <td>{{ product.inquiry_id }}</td>
+        <td>{{ product.name }}</td>
+        <td>{{ product.description }}</td>
+        <td>{{ product.mail }}</td>
+        <td>{{ product.municipality }}</td>
+        <td>{{ product.adress }}</td>
         <td>{{ product.status }}</td>
-        <td>{{ product.behandlingsfrist }}</td>
-        <td>{{ product.fra_dato }}</td>
-        <td>{{ product.til_dato }}</td>
+        <td>{{ product.processing_deadline }}</td>
+        <td>{{ product.start_date }}</td>
+        <td>{{ product.end_date }}</td>
       </tr>
     </ng-template>
   </p-table>

@@ -1,12 +1,13 @@
 export interface Inquiry {
-  id: number;
-  navn: string;
-  beskrivelse: string | null;
-  kunde_epost: string;
-  kommune: string | null;
-  gateadresse: string;
-  status?: string;
-  behandlingsfrist?: string;
-  fra_dato?: string | null;
-  til_dato?: string | null;
+  inquiry_id: number;
+  name?: string;
+  description: string;
+  mail: string;
+  municipality: string;
+  adress: string;
+  status?: string | null;
+  processing_deadline?: string;
+  start_date?: string;
+  end_date?: string;
+  status_name?: string;
 }

@@ -1,88 +1,104 @@
-import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { TestBed, ComponentFixture, waitForAsync } from '@angular/core/testing';
 import { InquiryListComponent } from './inquiry-list.component';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { DataService } from '../data.service';
 import { Inquiry } from '../../models/inquiry-interface';
-import { of } from 'rxjs';
 import { Router } from '@angular/router';
+import { MapViewComponent } from '../map-view/map-view.component';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('InquiryListComponent', () => {
   let component: InquiryListComponent;
   let fixture: ComponentFixture<InquiryListComponent>;
-  let dataService: DataService;
-  let router: Router;
+  let dataService: jasmine.SpyObj<DataService>;
 
-  const mockInquiries: Inquiry[] = [
+  const mockData: Inquiry[] = [
     {
-      id: 1,
-      navn: 'Inquiry 1',
-      beskrivelse: 'Description 1',
-      kunde_epost: 'email1@example.com',
-      kommune: 'Kommune 1',
-      gateadresse: 'Address 1',
-      status: 'Status 1',
-      behandlingsfrist: '2022-01-01',
-      fra_dato: '2022-01-01',
-      til_dato: '2022-01-01',
+      inquiry_id: 1,
+      name: 'Inquiry 1',
+      description: 'Description 1',
+      mail: 'email1@example.com',
+      municipality: 'Municipality 1',
+      adress: 'Address 1',
+      status: 'Open',
+      processing_deadline: '2024-07-01',
+      start_date: '2024-06-01',
+      end_date: '2024-06-30',
+      status_name: 'Open',
     },
     {
-      id: 2,
-      navn: 'Inquiry 2',
-      beskrivelse: 'Description 2',
-      kunde_epost: 'email2@example.com',
-      kommune: 'Kommune 2',
-      gateadresse: 'Address 2',
-      status: 'Status 2',
-      behandlingsfrist: '2022-02-01',
-      fra_dato: '2022-02-01',
-      til_dato: '2022-02-01',
+      inquiry_id: 2,
+      name: 'Inquiry 2',
+      description: 'Description 2',
+      mail: 'email2@example.com',
+      municipality: 'Municipality 2',
+      adress: 'Address 2',
+      status: 'Closed',
+      processing_deadline: '2024-07-02',
+      start_date: '2024-06-02',
+      end_date: '2024-06-29',
+      status_name: 'Closed',
     },
   ];
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      providers: [provideHttpClientTesting(), provideRouter([]), DataService],
-      declarations: [InquiryListComponent],
-    }).compileComponents();
-  });
+  beforeEach(waitForAsync(() => {
+    const dataServiceSpy = jasmine.createSpyObj('DataService', ['getData']);
 
-  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        InquiryListComponent,
+        NoopAnimationsModule, // Import this for testing without animations
+      ],
+      providers: [
+        { provide: DataService, useValue: dataServiceSpy },
+        provideHttpClientTesting(),
+        provideRouter([
+          { path: 'map-view', component: MapViewComponent },
+          { path: 'inquiry-list', component: InquiryListComponent },
+        ]),
+      ],
+    }).compileComponents();
+
     fixture = TestBed.createComponent(InquiryListComponent);
     component = fixture.componentInstance;
-    dataService = TestBed.inject(DataService);
-    router = TestBed.inject(Router);
+    dataService = TestBed.inject(DataService) as jasmine.SpyObj<DataService>;
+    dataService.getData.and.returnValue(of(mockData));
+  }));
+
+  it('should create the component', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('should fetch and display inquiries', () => {
-    spyOn(dataService, 'getData').and.returnValue(of(mockInquiries));
+  it('should fetch data on initialization', () => {
     fixture.detectChanges();
-
     expect(component.products.length).toBe(2);
-    expect(component.products).toEqual(mockInquiries);
+    expect(component.products).toEqual(mockData);
   });
 
-  it('should filter inquiries based on search input', () => {
-    spyOn(dataService, 'getData').and.returnValue(of(mockInquiries));
+  it('should filter data based on search input', waitForAsync(() => {
+    fixture.detectChanges();
+    const searchInput: HTMLInputElement =
+      fixture.nativeElement.querySelector('#searchbar');
+    searchInput.value = 'Inquiry 1';
+    searchInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    component.searchValue = 'Inquiry 1';
-    component.onSearch({ target: { value: 'Inquiry 1' } } as unknown as Event);
-    fixture.detectChanges();
-
-    const filteredInquiries = component.products.filter(inquiry =>
-      inquiry.navn.toLowerCase().includes('inquiry 1'.toLowerCase())
-    );
-
-    expect(filteredInquiries.length).toBe(1);
-    expect(filteredInquiries[0].navn).toBe('Inquiry 1');
-  });
+    // Add a small delay to ensure the filter operation completes
+    setTimeout(() => {
+      expect(component.dt1.filteredValue?.length).toBe(1);
+      expect(component.dt1.filteredValue?.[0].name).toBe('Inquiry 1');
+    }, 500); // Adjust the delay time as needed
+  }));
 
   it('should navigate to map view on inquiry click', () => {
-    const navigateSpy = spyOn(router, 'navigate');
+    const router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
+
     component.onInquiryClick(1);
 
-    expect(navigateSpy).toHaveBeenCalledWith(['/map-view'], {
+    expect(router.navigate).toHaveBeenCalledWith(['/map-view'], {
       queryParams: { inquiryId: '1' },
     });
   });
