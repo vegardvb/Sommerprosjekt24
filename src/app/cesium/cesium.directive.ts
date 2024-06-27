@@ -7,27 +7,26 @@ import { Viewer, Cartographic, ClippingPlane, ClippingPlaneCollection, Rectangle
   standalone: true
 })
 export class CesiumDirective implements OnInit {
-  private viewer: any;
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+
+  constructor(private el: ElementRef, private renderer: Renderer2, private  viewer: Viewer
+  ) {}
 
 
   async ngOnInit(): Promise<void> {
-    
       
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.viewer = new Viewer(this.el.nativeElement, {
-      timeline: false,
-      animation:false,
    // Use flat ellipsoid surface
     });
 
-      const scene = this.viewer.scene;
-      const globe = scene.globe;
-      const position = [10.436117, 63.421477, 4000]
-      var position2 = Cartographic.toCartesian(Cartographic.fromDegrees(position[0], position[1], position[2]));
-      var distance = 200.0;
+const scene = this.viewer.scene;
+    const globe = scene.globe;
+    const position = [10.436117, 63.421477, 4000]
+    var position2 = Cartographic.toCartesian(Cartographic.fromDegrees(position[0], position[1], position[2]));
+    var distance = 200.0;
 
+    const buildingTileset = Cesium3DTileset.fromIonAssetId(96188);
 
     const tileset = this.viewer.scene.primitives.add(
       await Cesium3DTileset.fromIonAssetId(96188),
