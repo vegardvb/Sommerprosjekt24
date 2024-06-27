@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-
 import { CesiumDirective } from './cesium.directive';
 
-import { ProjectListComponent } from './project-list/project-list.component';
+import { InquiryListComponent } from './inquiry-list/inquiry-list.component';
 import { HomePageComponent } from './home-page/home-page.component';
 import { NavbarComponent } from './navbar/navbar.component';
 
@@ -15,10 +14,11 @@ import { NavbarComponent } from './navbar/navbar.component';
     CommonModule,
     RouterOutlet,
     CesiumDirective,
-    ProjectListComponent,
+    InquiryListComponent,
     HomePageComponent,
     NavbarComponent,
   ],
   templateUrl: './app.component.html',
+  providers: [],
 })
 export class AppComponent {}

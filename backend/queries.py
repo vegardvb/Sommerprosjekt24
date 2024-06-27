@@ -9,8 +9,28 @@ This script serves as a collection of frequently used queries that extracts data
 QUERY_PATH = "./sql/queries/"
 
 
+<<<<<<< HEAD
 def load_query(path, subqueries=None):
     """Loads a query from a file.
+=======
+class Table(Enum):
+    CABLE_MEASUREMENT = "ledningsmaaling_innmaaling"
+    CABLE_MEASUREMENT_INQUIERY = "henvendelse_ledningsmaaling"
+    INQUIERY = "henvendelse"
+    MUNICIPALITY = "kommune"
+    ORGANIZATION = "organisasjon"
+    GEOMETRY = "geometri"
+
+
+"""
+A collection of queries that retrieve data from the database.
+"""
+
+
+def query_cable_measurements(cursor, cable_measurement_id: int, limit: int = 3):
+    """
+    A method for querying the cable measurements table with the specified attribuites.
+>>>>>>> 8d470b7577a04fb179b19c702f43030dd18a0175
 
     Args:
         path (String): The path to the file
@@ -21,7 +41,13 @@ def load_query(path, subqueries=None):
     with open(path, "r") as file:
         query = file.read()
 
+<<<<<<< HEAD
     return query
+=======
+    cursor.execute(query)
+
+    return cursor.fetchall()
+>>>>>>> 8d470b7577a04fb179b19c702f43030dd18a0175
 
 
 def execute_query(connection, main_file_path, subquery_files=None, params=None):

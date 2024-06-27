@@ -1,13 +1,26 @@
 from fastapi import FastAPI
 from fastapi.params import Depends
+from fastapi.middleware.cors import CORSMiddleware
 from database import get_db
 from queries import *
+
 
 DEBUG = False
 
 # FastAPI instance
 app = FastAPI()
 
+origins = [
+    "http://localhost:4200",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 def read_root():
@@ -51,18 +64,28 @@ def get_geometry_by_inquiry(inquiry_id, connection=Depends(get_db)):
     return result
 
 
+<<<<<<< HEAD
 @app.get("/cable_measurements/inquiry/{inquery_id}")
 def get_cable_measurements_by_inquiery(inquery_id: int, connection=Depends(get_db)):
+=======
+@app.get("/cable_measurements/inquieries/{inquiry_id}")
+def get_cable_measurements_by_inquiery(inquiry_id: int):
+>>>>>>> 8d470b7577a04fb179b19c702f43030dd18a0175
     """
     Endpoint for querying cable measurements by given inquiery id. \n
     **Args**:
-        inquery_id (int): The id of the inquiery to sort by.
+        inquiry_id (int): The id of the inquiery to sort by.
 
     **Returns**:
         Dictonary: A Dictonary of cable measurements attribuites in the following format: \n
 
     """
+<<<<<<< HEAD
     result = query_cable_measurements_by_inquiry(inquery_id, connection)
+=======
+
+    result = query_cable_measurements_by_inquiery(db, inquiry_id)
+>>>>>>> 8d470b7577a04fb179b19c702f43030dd18a0175
 
     if DEBUG:
         for row in result:
