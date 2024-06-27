@@ -1,5 +1,4 @@
-from psycopg2 import connect
-from psycopg2.extras import RealDictCursor
+from sqlalchemy import ResultProxy, create_engine
 
 # Enviroment varaibles
 from dotenv import load_dotenv
@@ -17,11 +16,18 @@ db_port = os.getenv("DB_PORT")
 
 # Create connection to database
 DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-try:
-    connenction = connect(DATABASE_URL)
-except:
-    print("Failed to connect to the database")
 
-# Cursor for executing queries as dictionaries
-db = connenction.cursor(cursor_factory=RealDictCursor)
-# e.g: "print(row['id'], row['name'])"
+# Engine for executing queries
+engine = create_engine(DATABASE_URL, echo=True, future=True)
+
+
+def get_db():
+    """Establishes a connection to the database.
+
+    Yields:
+        Connection : High-level API for interacting with the database.
+    """
+    with engine.connect() as connection:
+        # Set the default options for results
+        connection = connection.execution_options(mapper=ResultProxy.mappings)
+        yield connection
