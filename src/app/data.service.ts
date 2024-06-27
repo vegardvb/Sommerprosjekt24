@@ -8,7 +8,7 @@ import { Inquiry } from '../models/inquiry-interface';
   providedIn: 'root',
 })
 export class DataService {
-  private apiUrl = 'http://127.0.0.1:8000/inquiery';
+  private apiUrl = 'http://127.0.0.1:8000/inquiries';
 
   constructor(private http: HttpClient) {}
 
