@@ -2,11 +2,7 @@
   "editor.formatOnSave": true,
 
   "editor.codeActionsOnSave": {
-<<<<<<< HEAD
-    "source.fixAll.eslint": "explicit"
-=======
     "source.fixAll.eslint": "always"
->>>>>>> 8d470b7577a04fb179b19c702f43030dd18a0175
   },
 
   "files.eol": "\r\n",
