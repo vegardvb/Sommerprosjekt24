@@ -26,3 +26,26 @@ build_application:
     paths:
       - dist
     expire_in: 1 week # Adjust as needed
+
+test_frontend:
+  stage: test
+  image: node:latest
+  tags:
+    - linux
+    - konsulent
+    - docker
+  only:
+    - merge_requests
+    - main
+  before_script:
+    - echo "Running before_script"
+    - npm ci --include=optional --cache .npm --prefer-offline
+  script:
+    - npm run test -- --watch=false --browsers=ChromeHeadlessCI
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+    expire_in: 1 week
+  dependencies:
+    - build_application
