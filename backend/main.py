@@ -3,7 +3,7 @@ from fastapi.params import Depends
 from database import get_db
 from queries import *
 
-DEBUG = True
+DEBUG = False
 
 # FastAPI instance
 app = FastAPI()

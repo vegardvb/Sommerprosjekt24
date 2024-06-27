@@ -1,4 +1,5 @@
 from sqlalchemy import text
+from status_codes import HenvendelseStatus_dict, PaavisningstatusLedningsmaaling_dict
 
 """
 This script serves as a collection of frequently used queries that extracts data from the database.
@@ -48,10 +49,10 @@ def execute_query(connection, main_file_path, subquery_files=None, params=None):
 
 
 def query_inquiries(connection):
-    """A method for querying inquiries.
+    """A method for querying inquiriesS.
 
     Args:
-        Connection:  A connection to the database to execute the query.
+        Connection: A connection to the database to execute the query.
     Returns:
         Dictonary : A dictonary containing the inquiries and its attributes.
     """
@@ -60,7 +61,17 @@ def query_inquiries(connection):
         main_file_path=f"{QUERY_PATH}/fetch_inquiries.sql",
     )
 
-    return [dict(row) for row in result.mappings()]
+    # Transform the result to a list of dictionaries
+    result = [dict(row) for row in result.mappings()]
+
+    # Maps status code to status name
+    try:
+        for row in result:
+            row["status_name"] = HenvendelseStatus_dict[row["status"]]
+    except KeyError as e:
+        row["status_name"] = "Unknown"
+
+    return result
 
 
 def query_geometry_by_inquiry(inquiry_id, connection):
