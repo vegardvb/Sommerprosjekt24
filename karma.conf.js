@@ -25,8 +25,8 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false,
+    browsers: ['ChromeHeadlessCI'],
+    singleRun: true, // set to true for CI
     restartOnFileChange: true,
     customLaunchers: {
       ChromeHeadlessCI: {
@@ -36,6 +36,7 @@ module.exports = function (config) {
           '--disable-gpu',
           '--disable-translate',
           '--disable-extensions',
+          '--remote-debugging-port=9222', // Add this flag for debugging purposes
         ],
       },
     },
