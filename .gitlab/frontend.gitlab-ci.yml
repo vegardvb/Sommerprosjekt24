@@ -41,7 +41,7 @@ test_frontend:
     - echo "Running before_script"
     - npm ci --include=optional --cache .npm --prefer-offline
   script:
-    - npm run test -- --watch=false --browsers=ChromeHeadlessCI
+    - npm run test --no-watch --no-progress --browsers=ChromeHeadless
   artifacts:
     when: always
     paths:
