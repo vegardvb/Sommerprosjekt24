@@ -25,7 +25,7 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['ChromeHeadlessCI'],
+    browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessCI'],
     singleRun: true, // set to true for CI
     restartOnFileChange: true,
     customLaunchers: {
