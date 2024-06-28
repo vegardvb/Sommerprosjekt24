@@ -14,6 +14,8 @@ test_frontend:
   script:
     - echo "Running tests with coverage"
     - npm run test:ci
+    - echo "Killing any leftover processes"
+    - pkill -f karma || true
   artifacts:
     when: always
     paths:
