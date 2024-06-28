@@ -14,6 +14,8 @@ test_frontend:
   script:
     - echo "Running tests with coverage"
     - npm run test:ci
+    - echo "Waiting for tests to complete"
+    - sleep 120 # Wait for 2 minutes to allow tests to complete
     - echo "Killing any leftover processes"
     - pkill -f karma || true
   artifacts:
