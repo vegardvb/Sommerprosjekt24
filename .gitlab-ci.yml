@@ -1,8 +1,8 @@
 stages:
-  #- build
+  - build
   - test
 
 include:
-  # - local: '.gitlab/frontend.gitlab-ci.yml'
-  - local: '.gitlab/frontend-test.gitlab-ci.yml'
+  - local: '.gitlab/frontend.gitlab-ci.yml'
+  # - local: '.gitlab/frontend-test.gitlab-ci.yml'
   - local: '.gitlab/backend.gitlab-ci.yml'
