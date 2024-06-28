@@ -13,7 +13,7 @@ test_frontend:
     - npm ci --include=optional --cache .npm --prefer-offline
   script:
     - echo "Running tests with coverage"
-    - ng test:ci
+    - npm run test:ci
   artifacts:
     when: always
     paths:
