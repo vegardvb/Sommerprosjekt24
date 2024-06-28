@@ -30,16 +30,31 @@ module.exports = function (config) {
         './coverage/cable_network_visualization'
       ),
       subdir: '.',
-      reporters: [{ type: 'html' }, { type: 'text-summary' }],
+      reporters: [
+        { type: 'html' },
+        { type: 'lcovonly' },
+        { type: 'text-summary' },
+      ],
+      fixWebpackSourcePaths: true,
+      thresholds: {
+        emitWarning: true,
+        global: {
+          statements: 80,
+          lines: 80,
+          branches: 80,
+          functions: 80,
+        },
+      },
     },
-    reporters: ['progress', 'kjhtml'],
-    browsers: ['Chrome'],
+    reporters: ['progress', 'kjhtml', 'coverage'],
+    browsers: ['ChromeHeadless'],
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox', '--disable-setuid-sandbox'],
+        flags: ['--no-sandbox', '--disable-gpu'],
       },
     },
+    singleRun: true,
     restartOnFileChange: true,
   });
 };
