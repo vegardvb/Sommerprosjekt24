@@ -18,7 +18,6 @@ test_frontend:
     when: always
     paths:
       - coverage/
+      - coverage/gitlab-junit/report.xml
+      - coverage/sonar-junit/report.xml
     expire_in: 1 week
-
-  #dependencies:
-  #  - build_frontend
