@@ -22,5 +22,5 @@ test_backend:
     paths:
       - backend/tests
     expire_in: 1 week
-  dependencies:
-    - build_frontend
+  #dependencies:
+  #  - build_frontend
