@@ -23,4 +23,4 @@ test_backend:
       - backend/tests
     expire_in: 1 week
   dependencies:
-    - build_application
+    - build_frontend
