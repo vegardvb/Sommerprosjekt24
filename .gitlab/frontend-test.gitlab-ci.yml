@@ -15,8 +15,8 @@ test_frontend:
     paths:
       - coverage/
     expire_in: 1 week
-  dependencies:
-    - build_frontend
+  #dependencies:
+   # - build_frontend
   after_script:
     - echo "Checking coverage"
     - COVERAGE=$(jq '.total.statements.pct' coverage/cable_network_visualization/lcov-report/index.html | sed -n 's/.*<span class="strong"> \([0-9]*\).*/\1/p')
