@@ -1,6 +1,6 @@
 variables:
   NODE_ENV: 'development'
-  CHROME_BIN: "/usr/bin/google-chrome"
+  CHROME_BIN: '/usr/bin/google-chrome'
 
 stages:
   - build
@@ -24,17 +24,13 @@ build_application:
     policy: pull-push
   before_script:
     - echo "Running before_script"
-    - apt-get update && apt-get install -y wget gnupg
-    - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-    - echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
-    - apt-get update && apt-get install -y google-chrome-stable
     - npm ci --include=optional --cache .npm --prefer-offline
   script:
     - npm run build
   artifacts:
     paths:
       - dist
-    expire_in: 1 week # Adjust as needed
+    expire_in: 1 week
 
 test_frontend:
   stage: test
@@ -43,12 +39,15 @@ test_frontend:
     - linux
     - konsulent
     - docker
+  only:
+    - merge_requests
+    - main
   before_script:
     - echo "Running before_script"
-    - apt-get update && apt-get install -y wget gnupg
-    - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-    - echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
-    - apt-get update && apt-get install -y google-chrome-stable
+    - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+    - echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
+    - apt-get update
+    - apt-get install -y google-chrome-stable xvfb
     - npm ci --include=optional --cache .npm --prefer-offline
   script:
     - echo "Running tests with coverage"
