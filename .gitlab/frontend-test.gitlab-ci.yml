@@ -1,6 +1,6 @@
 test_frontend:
   stage: test
-  image: node:18-alpine
+  image: trion/ng-cli-karma
   tags:
     - linux
     - konsulent
@@ -14,14 +14,11 @@ test_frontend:
   script:
     - echo "Running tests with coverage"
     - npm run test:ci
-    - echo "Waiting for tests to complete"
-    - sleep 120 # Wait for 2 minutes to allow tests to complete
-    - echo "Killing any leftover processes"
-    - pkill -f karma || true
   artifacts:
     when: always
     paths:
       - coverage/
     expire_in: 1 week
+
   #dependencies:
   #  - build_frontend
