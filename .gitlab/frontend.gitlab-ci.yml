@@ -46,4 +46,4 @@ test_frontend:
       - coverage/
     expire_in: 1 week
   dependencies:
-    - build_frontend
+    - build_application
