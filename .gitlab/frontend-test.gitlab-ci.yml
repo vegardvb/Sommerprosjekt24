@@ -8,6 +8,8 @@ test_frontend:
   only:
     - merge_requests
     - main
+  variables:
+    CHROME_BIN: '/usr/bin/google-chrome'
   before_script:
     - echo "Running before_script. Installing dependencies"
     - npm ci --include=optional --cache .npm --prefer-offline
