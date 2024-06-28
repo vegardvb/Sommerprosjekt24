@@ -32,26 +32,3 @@ build_frontend:
       - dist
     expire_in: 1 week
 
-# Job for running the frontend tests
-test_frontend:
-  stage: test
-  image: node:18-alpine
-  tags:
-    - linux
-    - konsulent
-    - docker
-  only:
-    - merge_requests
-    - main
-  script:
-    - echo "Installing dependencies"
-    - npm ci --include=optional
-    - echo "Running tests"
-    - npm run test -- --watch=false --browsers=ChromeHeadlessCI
-  artifacts:
-    when: always
-    paths:
-      - coverage/
-    expire_in: 1 week
-  dependencies:
-    - build_frontend

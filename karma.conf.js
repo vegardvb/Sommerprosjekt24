@@ -1,3 +1,6 @@
+// Karma configuration file, see link for more information
+// https://karma-runner.github.io/1.0/config/configuration-file.html
+
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -11,7 +14,10 @@ module.exports = function (config) {
     ],
     client: {
       jasmine: {
-        // Add your jasmine configuration here
+        // you can add configuration options for Jasmine here
+        // the possible options are listed at https://jasmine.github.io/api/edge/Configuration.html
+        // for example, you can disable the random execution with `random: false`
+        // or set a specific seed with `seed: 4321`
       },
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
     },
@@ -19,32 +25,21 @@ module.exports = function (config) {
       suppressAll: true, // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, './coverage'),
+      dir: require('path').join(
+        __dirname,
+        './coverage/cable_network_visualization'
+      ),
       subdir: '.',
-      reporters: [
-        { type: 'html' },
-        { type: 'lcovonly' },
-        { type: 'text-summary' },
-      ],
-      check: {
-        emitWarning: true, // Emit a warning rather than failing the build
-        global: {
-          statements: 80,
-          lines: 80,
-          branches: 80,
-          functions: 80,
-        },
-      },
+      reporters: [{ type: 'html' }, { type: 'text-summary' }],
     },
-    reporters: ['progress', 'kjhtml', 'coverage'],
-    browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessCI'],
+    reporters: ['progress', 'kjhtml'],
+    browsers: ['Chrome'],
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox'],
+        flags: ['--no-sandbox', '--disable-setuid-sandbox'],
       },
     },
-    singleRun: true, // Ensure Karma runs tests once and exits
-    restartOnFileChange: false,
+    restartOnFileChange: true,
   });
 };

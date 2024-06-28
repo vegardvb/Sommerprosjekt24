@@ -1,0 +1,23 @@
+test_frontend:
+  stage: test
+  image: trion/ng-cli-karma
+  tags:
+    - linux
+    - konsulent
+    - docker
+  only:
+    - merge_requests
+    - main
+  before_script:
+    - echo "Running before_script"
+    - npm ci --include=optional --cache .npm --prefer-offline
+  script:
+    - echo "Running tests with coverage"
+    - ng test:ci
+  artifacts:
+    when: always
+    paths:
+      - coverage/
+    expire_in: 1 week
+  dependencies:
+    - build_application
