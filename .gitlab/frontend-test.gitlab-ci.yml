@@ -1,6 +1,6 @@
 test_frontend:
   stage: test
-  image: trion/ng-cli-karma
+  image: gitlab.geomatikk.no:5050/geomelding/docker-ci-images/node-linux-cordova:latest
   tags:
     - linux
     - konsulent
