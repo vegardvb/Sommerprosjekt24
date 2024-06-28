@@ -6,7 +6,7 @@ stages:
   - build
   - test
 
-build_application:
+build_frontend:
   stage: build
   image: node:latest
   tags:
@@ -32,9 +32,10 @@ build_application:
       - dist
     expire_in: 1 week
 
+# Job for running the frontend tests
 test_frontend:
   stage: test
-  image: node:latest
+  image: node:18-alpine
   tags:
     - linux
     - konsulent
@@ -42,20 +43,15 @@ test_frontend:
   only:
     - merge_requests
     - main
-  before_script:
-    - echo "Running before_script"
-    - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-    - echo "deb http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
-    - apt-get update
-    - apt-get install -y google-chrome-stable xvfb
-    - npm ci --include=optional --cache .npm --prefer-offline
   script:
-    - echo "Running tests with coverage"
-    - npm run test:ci
+    - echo "Installing dependencies"
+    - npm ci --include=optional
+    - echo "Running tests"
+    - npm run test -- --watch=false --browsers=ChromeHeadlessCI
   artifacts:
     when: always
     paths:
       - coverage/
     expire_in: 1 week
   dependencies:
-    - build_application
+    - build_frontend

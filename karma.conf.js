@@ -37,11 +37,11 @@ module.exports = function (config) {
       },
     },
     reporters: ['progress', 'kjhtml', 'coverage'],
-    browsers: ['Chrome', 'ChromeHeadless'],
+    browsers: ['Chrome', 'ChromeHeadless', 'ChromeHeadlessCI'],
     customLaunchers: {
       ChromeHeadlessCI: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox', '--disable-gpu'],
+        flags: ['--no-sandbox'],
       },
     },
     singleRun: true, // Ensure Karma runs tests once and exits
