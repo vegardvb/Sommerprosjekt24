@@ -9,7 +9,7 @@ test_frontend:
     - merge_requests
     - main
   before_script:
-    - echo "Running before_script"
+    - echo "Running before_script. Installing dependencies"
     - npm ci --include=optional --cache .npm --prefer-offline
   script:
     - echo "Running tests with coverage"

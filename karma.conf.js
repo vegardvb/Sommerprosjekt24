@@ -36,8 +36,7 @@ module.exports = function (config) {
         { type: 'text-summary' },
       ],
       fixWebpackSourcePaths: true,
-      thresholds: {
-        emitWarning: true,
+      check: {
         global: {
           statements: 80,
           lines: 80,
@@ -54,7 +53,7 @@ module.exports = function (config) {
         flags: ['--no-sandbox', '--disable-gpu'],
       },
     },
-    singleRun: true,
+    singleRun: true, // Ensures Karma exits after running tests
     restartOnFileChange: true,
   });
 };
