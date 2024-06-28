@@ -27,7 +27,7 @@ module.exports = function (config) {
       reporters: [{ type: 'lcovonly' }, { type: 'text-summary' }],
       fixWebpackSourcePaths: true,
       thresholds: {
-        emitWarning: true, // set to `true` to not fail the test command when thresholds are not met
+        emitWarning: false,
         global: {
           statements: 10,
           lines: 10,
@@ -45,6 +45,6 @@ module.exports = function (config) {
       },
     },
     singleRun: true,
-    restartOnFileChange: true, 
+    restartOnFileChange: true,
   });
 };
