@@ -1,3 +1,4 @@
+# Job for running the frontend tests with coverage
 test_frontend:
   stage: test
   image: trion/ng-cli-karma
@@ -5,13 +6,9 @@ test_frontend:
     - linux
     - konsulent
     - docker
-  only:
-    - merge_requests
-    - main
-  before_script:
-    - echo "Running before_script. Installing dependencies"
-    - npm ci --include=optional --cache .npm --prefer-offline
   script:
+    - echo "Installing dependencies"
+    - npm ci --include=optional
     - echo "Running tests with coverage"
     - npm run test:ci
   artifacts:
@@ -19,3 +16,8 @@ test_frontend:
     paths:
       - coverage/
     expire_in: 1 week
+  dependencies:
+    - build_frontend
+  after_script:
+    - echo "Checking coverage"
+    - if [ $(jq '.total.lines.pct' coverage/cable_network_visualization/lcov-report/index.html | sed -n 's/.*<span class="strong"> \([0-9]*\).*/\1/p') -lt 80 ]; then echo "Coverage below threshold"; exit 1; fi
