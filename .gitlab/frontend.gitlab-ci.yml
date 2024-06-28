@@ -34,22 +34,16 @@ test_frontend:
     - linux
     - konsulent
     - docker
-  only:
-    - merge_requests
-    - main
   before_script:
     - echo "Running before_script"
     - npm ci --include=optional --cache .npm --prefer-offline
-    - echo "Installing Chromium"
-    - apk add --no-cache chromium
-    - export CHROME_BIN=/usr/bin/chromium-browser
   script:
-    - echo "Running tests"
-    - npm run test --no-watch --no-progress --browsers=ChromeHeadless
+    - echo "Running tests with coverage"
+    - npm run test:ci
   artifacts:
     when: always
     paths:
       - coverage/
     expire_in: 1 week
   dependencies:
-    - build_application
+    - build_frontend
