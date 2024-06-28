@@ -1,6 +1,6 @@
 test_frontend:
   stage: test
-  image: trion/ng-cli-karma
+  image: node:18-alpine
   tags:
     - linux
     - konsulent
