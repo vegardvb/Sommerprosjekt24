@@ -1,6 +1,6 @@
 test_frontend:
   stage: test
-  image: gitlab.geomatikk.no:5050/geomelding/docker-ci-images/node-linux-cordova:latest
+  image: trion/ng-cli-karma
   tags:
     - linux
     - konsulent
@@ -8,8 +8,6 @@ test_frontend:
   only:
     - merge_requests
     - main
-  variables:
-    CHROME_BIN: '/usr/bin/google-chrome'
   before_script:
     - echo "Running before_script. Installing dependencies"
     - npm ci --include=optional --cache .npm --prefer-offline
@@ -20,6 +18,4 @@ test_frontend:
     when: always
     paths:
       - coverage/
-      - coverage/gitlab-junit/report.xml
-      - coverage/sonar-junit/report.xml
     expire_in: 1 week
