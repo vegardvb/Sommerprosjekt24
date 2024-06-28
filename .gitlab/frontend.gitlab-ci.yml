@@ -40,7 +40,11 @@ test_frontend:
   before_script:
     - echo "Running before_script"
     - npm ci --include=optional --cache .npm --prefer-offline
+    - echo "Installing Chromium"
+    - apk add --no-cache chromium
+    - export CHROME_BIN=/usr/bin/chromium-browser
   script:
+    - echo "Running tests"
     - npm run test --no-watch --no-progress --browsers=ChromeHeadless
   artifacts:
     when: always
