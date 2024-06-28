@@ -29,7 +29,6 @@ module.exports = function (config) {
       fixWebpackSourcePaths: true,
       check: {
         global: {
-          // Setting the thresholds for warning
           statements: 80,
           lines: 80,
           branches: 80,
@@ -74,5 +73,9 @@ module.exports = function (config) {
     },
     singleRun: true, // Ensures Karma exits after running tests
     restartOnFileChange: true,
+    browserNoActivityTimeout: 60000, // 1 minute
+    browserDisconnectTimeout: 10000, // 10 seconds
+    browserDisconnectTolerance: 3,
+    captureTimeout: 120000, // 2 minutes
   });
 };
