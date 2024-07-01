@@ -71,7 +71,7 @@ def query_inquiries(connection):
     # Transform the result to a list of dictionaries
     result = [dict(row) for row in result.mappings()]
 
-    # Maps status code to status name
+    # Maps status code to status name in inquiry
     for row in result:
         try:
             row["status_name"] = henvendelse_status_dict[row["status"]]
