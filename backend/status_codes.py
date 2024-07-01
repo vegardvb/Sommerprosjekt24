@@ -1,4 +1,4 @@
-HenvendelseStatus_dict = {
+henvendelse_status_dict = {
     -2: "Avventer system",
     1: "Registrert",
     2: "Under behandling",
@@ -13,14 +13,6 @@ HenvendelseStatus_dict = {
     11: "Fakturert",
     12: "Avventer GIS eksport",
     14: "Venter på svar fra netteier (uten avtale)",
+    15: "Testing",
     22: "Venter på tillatelse fra netteiere",
-}
-
-PaavisningstatusLedningsmaaling_dict = {
-    -2: "LedningsmaalingAnnullert",
-    11: "LedningsmaalingBestilt",
-    13: "LedningsmaalingUtfort",
-    14: "LedningsmaalingGodkjent",
-    15: "LedningsmaalingUtfortMedEndring",
-    16: "LedningsmaalingUnderUtforelse",
 }

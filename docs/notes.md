@@ -81,8 +81,6 @@ export class ButtonStateService {
   }
 }
 ---
-
-
 ### Feature modules og Standalone
 
 Features modules er samligner av components, directives og services som er tett koblet sammen og kan grupperes for å systematisk strukturere applikasjonen i følge modulært design.

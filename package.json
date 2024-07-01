@@ -23,6 +23,8 @@
     "@angular/router": "^18.0.4",
     "@eslint/config-array": "^0.16.0",
     "@eslint/object-schema": "^2.1.4",
+    "@turf/turf": "^7.0.0",
+    "@types/geojson": "^7946.0.14",
     "ag-grid-angular": "^31.3.2",
     "cesium": "^1.118.2",
     "glob": "^10.4.2",
