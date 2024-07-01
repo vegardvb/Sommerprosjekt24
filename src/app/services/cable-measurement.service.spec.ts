@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
-
-import { CableMeasurementService } from '../cable-measurement.service';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { CableMeasurementService } from './cable-measurement.service';
 
 describe('CableMeasurementService', () => {
   let service: CableMeasurementService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+    });
     service = TestBed.inject(CableMeasurementService);
   });
 
