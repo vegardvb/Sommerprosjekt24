@@ -20,8 +20,6 @@ export class GeojsonParserService {
       )
     );
 
-    // console.log(global_feature_collection);
-
     return global_feature_collection;
   }
 }

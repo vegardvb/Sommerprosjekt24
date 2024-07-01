@@ -6,13 +6,12 @@ import { catchError, map } from 'rxjs/operators';
 import { CableMeasurement } from '../../models/cable_measurement';
 import { FeatureCollection, Feature, Polygon } from 'geojson';
 import { GeojsonParserService } from './geojson-parser.service';
-import * as turf from '@turf/turf';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CableMeasurementService {
-  private apiUrl = 'http://127.0.0.1:8000/cable_measurements/inquiry/5001956';
+  private apiUrl = 'http://127.0.0.1:8000/cable_measurements/inquiry/5008686';
   private geojsonParserService = inject(GeojsonParserService);
 
   constructor(private http: HttpClient) {}
@@ -24,11 +23,6 @@ export class CableMeasurementService {
       }),
       catchError(this.handleError)
     );
-  }
-
-  init() {
-    // test = this.getData().subscribe();
-    // console.log(test);
   }
 
   private handleError(error: Error): Observable<never> {

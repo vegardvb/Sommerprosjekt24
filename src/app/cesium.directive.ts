@@ -50,10 +50,6 @@ export class CesiumDirective implements OnInit {
       // Use flat ellipsoid surface
     });
 
-    // const test = this.cableMeasurementService.init();
-
-    // console.log(this.cableMeasurementService.getData().subscribe());
-
     const scene = this.viewer.scene;
     const globe = scene.globe;
     const position = [10.436117, 63.421477, 4000];
@@ -87,16 +83,6 @@ export class CesiumDirective implements OnInit {
         console.error('Error fetching data:', err);
       },
     });
-
-    // GeoJsonDataSource.load(this.cableMeasurementService.getData().subscribe())
-    //   .then((dataSource: GeoJsonDataSource) => {
-    //     console.log(dataSource);
-    //     this.viewer.dataSources.add(dataSource);
-    //     this.viewer.zoomTo(dataSource);
-    //   })
-    //   .catch(error => {
-    //     console.error('Failed to load GeoJSON data: ', error);
-    //   });
 
     //   tileset.clippingPlanes = new ClippingPlaneCollection({
     //     modelMatrix: Transforms.eastNorthUpToFixedFrame(position2),
