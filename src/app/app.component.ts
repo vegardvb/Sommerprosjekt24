@@ -21,4 +21,6 @@ import { NavbarComponent } from './navbar/navbar.component';
   templateUrl: './app.component.html',
   providers: [],
 })
-export class AppComponent {}
+export class AppComponent {
+  title = '3D visualization of cable network';
+}
