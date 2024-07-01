@@ -1,0 +1,35 @@
+{
+  "type": "Feature",
+  "id": "ML_WTQqQF2",
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [14243.8, 6644620.18],
+      [14243.67, 6644619.63],
+      [14243.27, 6644618.89],
+      [14242.73, 6644618.16]
+    ]
+  },
+  "properties": {
+    "condition": "located",
+    "heightOnTop": false,
+    "objectType": { "geomType": "line", "value": "TR", "text": "TraseRør" },
+    "diameter": null,
+    "lon": null,
+    "lat": null,
+    "x": null,
+    "y": null,
+    "height": null,
+    "accuracy": null,
+    "verticalAccuracy": null,
+    "timestamp": null,
+    "fixType": null,
+    "PDOP": null,
+    "numSatellites": null,
+    "numMeasurements": null,
+    "date": null,
+    "avgAccuracy": 0.04,
+    "avgVerticalAccuracy": 0.1,
+    "comment": ""
+  }
+}

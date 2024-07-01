@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
 import { Math as cesiumMath, Cartesian2, Cartesian3 } from 'cesium';
+import { CableMeasurementService } from '../services/cable-measurement.service';
 
 @Component({
   selector: 'app-map-view',
