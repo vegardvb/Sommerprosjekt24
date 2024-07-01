@@ -28,15 +28,16 @@ export class InquiryListComponent implements OnInit {
   searchValue: string | undefined;
   globalFilterFields: string[] = [
     'id',
-    'navn',
-    'beskrivelse',
-    'kunde_epost',
-    'kommune',
-    'gateadresse',
+    'name',
+    'description',
+    'organization',
+    'mail',
+    'municipality',
     'status',
-    'behandlingsfrist',
-    'fra_dato',
-    'til_dato',
+    'processing_deadline',
+    'start_date',
+    'end_date',
+    'status_name',
   ];
   selectedProduct!: Inquiry;
 
@@ -51,16 +52,17 @@ export class InquiryListComponent implements OnInit {
     this.dataService.getData().subscribe({
       next: (response: Inquiry[]) => {
         this.products = response.map(inquiry => ({
-          id: inquiry.id,
-          navn: inquiry.navn,
-          beskrivelse: inquiry.beskrivelse,
-          kunde_epost: inquiry.kunde_epost,
-          kommune: inquiry.kommune,
-          gateadresse: inquiry.gateadresse,
+          inquiry_id: inquiry.inquiry_id,
+          name: inquiry.name,
+          description: inquiry.description,
+          mail: inquiry.mail,
+          municipality: inquiry.municipality,
+          adress: inquiry.adress,
           status: inquiry.status,
-          behandlingsfrist: inquiry.behandlingsfrist,
-          fra_dato: inquiry.fra_dato,
-          til_dato: inquiry.til_dato,
+          processing_deadline: inquiry.processing_deadline,
+          start_date: inquiry.start_date,
+          end_date: inquiry.end_date,
+          status_name: inquiry.status_name,
         }));
       },
       error: error => {
