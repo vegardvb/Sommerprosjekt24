@@ -84,58 +84,58 @@ export class CesiumDirective implements OnInit {
       },
     });
 
-    //   tileset.clippingPlanes = new ClippingPlaneCollection({
-    //     modelMatrix: Transforms.eastNorthUpToFixedFrame(position2),
-    //     planes: [
-    //       new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
-    //       new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), distance),
-    //       new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), distance),
-    //       new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), distance),
-    //     ],
-    //     unionClippingRegions: true,
-    //     edgeWidth: 3,
-    //     edgeColor: Color.RED,
-    //     enabled: true,
-    //   });
+    tileset.clippingPlanes = new ClippingPlaneCollection({
+      modelMatrix: Transforms.eastNorthUpToFixedFrame(position2),
+      planes: [
+        new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), distance),
+      ],
+      unionClippingRegions: true,
+      edgeWidth: 3,
+      edgeColor: Color.RED,
+      enabled: true,
+    });
 
-    //   this.viewer.scene.setTerrain(
-    //     new Terrain(CesiumTerrainProvider.fromIonAssetId(1))
-    //   );
+    this.viewer.scene.setTerrain(
+      new Terrain(CesiumTerrainProvider.fromIonAssetId(1))
+    );
 
-    //   globe.clippingPlanes = new ClippingPlaneCollection({
-    //     modelMatrix: Transforms.eastNorthUpToFixedFrame(position2),
-    //     planes: [
-    //       new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
-    //       new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), distance),
-    //       new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), distance),
-    //       new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), distance),
-    //     ],
-    //     unionClippingRegions: true,
-    //     edgeWidth: 3,
-    //     edgeColor: Color.RED,
-    //     enabled: true,
-    //   });
+    globe.clippingPlanes = new ClippingPlaneCollection({
+      modelMatrix: Transforms.eastNorthUpToFixedFrame(position2),
+      planes: [
+        new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), distance),
+      ],
+      unionClippingRegions: true,
+      edgeWidth: 3,
+      edgeColor: Color.RED,
+      enabled: true,
+    });
 
-    //   globe.tileCacheSize = 1000;
-    //   scene.screenSpaceCameraController.enableCollisionDetection = false;
-    //   globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
-    //     400.0,
-    //     0.0,
-    //     800.0,
-    //     1.0
-    //   );
+    globe.tileCacheSize = 1000;
+    scene.screenSpaceCameraController.enableCollisionDetection = false;
+    globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
+      400.0,
+      0.0,
+      800.0,
+      1.0
+    );
 
-    //   // Fly the camera to the given longitude, latitude, and height.
-    //   this.viewer.camera.flyTo({
-    //     destination: Cartesian3.fromDegrees(
-    //       position[0],
-    //       position[1],
-    //       position[2]
-    //     ),
-    //     orientation: {
-    //       heading: csmath.toRadians(2.0),
-    //       pitch: csmath.toRadians(-80.0),
-    //     },
-    //   });
+    // Fly the camera to the given longitude, latitude, and height.
+    this.viewer.camera.flyTo({
+      destination: Cartesian3.fromDegrees(
+        position[0],
+        position[1],
+        position[2]
+      ),
+      orientation: {
+        heading: csmath.toRadians(2.0),
+        pitch: csmath.toRadians(-80.0),
+      },
+    });
   }
 }
