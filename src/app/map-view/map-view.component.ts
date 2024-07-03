@@ -1,3 +1,5 @@
+// map-view.component.ts
+
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
@@ -27,7 +29,7 @@ export class MapViewComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
-      const bbox = '272669,7037582,273109,7038148';
+      const bbox = '10.4476425,63.3941117,10.4556179,63.3994555'; // New bounding box in WGS 84
       const width = 440;
       const height = 566;
       this.fetchTerrain(bbox, width, height);

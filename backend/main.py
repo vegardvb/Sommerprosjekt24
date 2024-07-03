@@ -81,7 +81,7 @@ def get_cable_measurements_by_inquiery(inquiry_id: int, connection=Depends(get_d
     return result
 
 @app.get("/terrain")
-def get_terrain(bbox: str, width: int, height: int, response_crs: str = "EPSG:25833"):
+def get_terrain(bbox: str, width: int, height: int):
     """
     Endpoint to fetch the terrain model GeoTIFF file from the WCS service based on the provided bounding box and resolution.
 
@@ -102,8 +102,8 @@ def get_terrain(bbox: str, width: int, height: int, response_crs: str = "EPSG:25
         "FORMAT": "GeoTIFF",
         "COVERAGE": "nhm_dtm_topo_25833",
         "BBOX": bbox,
-        "CRS": "EPSG:25833",
-        "RESPONSE_CRS": response_crs,
+        "CRS": "EPSG:4326",
+        "RESPONSE_CRS": "EPSG:4326",
         "WIDTH": width,
         "HEIGHT": height
     }

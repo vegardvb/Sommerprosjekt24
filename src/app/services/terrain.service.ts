@@ -1,3 +1,5 @@
+// terrain-service.ts
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -18,8 +20,8 @@ export class TerrainService {
       FORMAT: 'GeoTIFF',
       COVERAGE: 'nhm_dtm_topo_25833',
       BBOX: bbox,
-      CRS: 'EPSG:25833',
-      RESPONSE_CRS: 'EPSG:25833',
+      CRS: 'EPSG:4326', // Change to EPSG:4326
+      RESPONSE_CRS: 'EPSG:4326', // Change to EPSG:4326
       WIDTH: width.toString(),
       HEIGHT: height.toString(),
     };

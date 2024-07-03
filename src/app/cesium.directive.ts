@@ -8,8 +8,8 @@ import {
   NearFarScalar,
   Cartesian3,
   Transforms,
-  Terrain,
-  CesiumTerrainProvider,
+  // Terrain,
+  // CesiumTerrainProvider,
   PolygonHierarchy,
   BoundingSphere,
 } from 'cesium';
@@ -66,10 +66,10 @@ export class CesiumDirective implements OnInit {
     tileset.clippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
       planes: [
-        new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
-        new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), distance),
-        new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), distance),
-        new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), distance),
+        new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance), // East
+        new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), distance), // West
+        new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), distance), // North
+        new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), distance), // South
       ],
       unionClippingRegions: true,
       edgeWidth: 3,
@@ -77,9 +77,9 @@ export class CesiumDirective implements OnInit {
       enabled: true,
     });
 
-    this.viewer.scene.setTerrain(
-      new Terrain(CesiumTerrainProvider.fromIonAssetId(1))
-    );
+    // this.viewer.scene.setTerrain(
+    //   new Terrain(CesiumTerrainProvider.fromIonAssetId(1))
+    // );
 
     globe.clippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
