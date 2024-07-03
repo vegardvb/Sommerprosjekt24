@@ -17,50 +17,6 @@
 </head>
 <div>
   <div class="h-80%" id="cesiumContainer" appCesium>
-    <div id="toolbar">
-      <table>
-        <tbody>
-          <tr>
-            <td>Translucency enabled</td>
-            <td>
-              <input
-                type="checkbox"
-                [value]="viewModel.translucencyEnabled"
-                (change)="updateCesium()"
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Fade by distance</td>
-            <td>
-              <input
-                type="checkbox"
-                [value]="viewModel.fadeByDistance"
-                (change)="updateCesium()"
-              />
-            </td>
-          </tr>
-          <tr>
-            <td>Alpha</td>
-            <td>
-              <input
-                type="range"
-                min="0.0"
-                max="1.0"
-                step="0.1"
-                [value]="viewModel.alpha"
-                (change)="updateCesium()"
-              />
-              <input
-                type="text"
-                size="5"
-                [value]="viewModel.alpha"
-                (change)="updateCesium()"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
   </div>
+  
 </div>

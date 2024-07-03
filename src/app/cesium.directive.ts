@@ -55,7 +55,8 @@ export class CesiumDirective implements OnInit {
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.viewer = new Viewer(this.el.nativeElement, {
       timeline: false,
-      animation: true,
+      animation: false,
+      sceneModePicker: false,
       // Use flat ellipsoid surface
     });
 
@@ -199,6 +200,7 @@ export class CesiumDirective implements OnInit {
         offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000) // Adjust the range as needed
   
       });
+      this.changeHomeButton(viewer, boundingsphere)
     }
   }
 
@@ -210,6 +212,16 @@ export class CesiumDirective implements OnInit {
         hierarchy: pol,
         material: Color.RED.withAlpha(0.5),
       },
+    });
+  }
+  changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {
+     // Change the home button view
+     viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
+      e.cancel = true; // Cancel the default home view
+      viewer.camera.flyToBoundingSphere(boundingsphere, {
+        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000) // Adjust the range as needed
+  
+      });
     });
   }
 }

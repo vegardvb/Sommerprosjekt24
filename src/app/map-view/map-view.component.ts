@@ -33,29 +33,4 @@ export class MapViewComponent implements OnInit {
       console.log('Filtering map for inquiry ID:', inquiryId);
     }
   }
-
-  viewModel = {
-    translucencyEnabled: true,
-    fadeByDistance: true,
-    showVectorData: false,
-    alpha: 0.8,
-  };
-
-  updateCesium(): void {
-    const event = new CustomEvent('viewModelChange', {
-      detail: this.viewModel,
-    });
-    window.dispatchEvent(event);
-  }
-
-  computeCircle(radius: number) {
-    const positions = [];
-    for (let i = 0; i < 360; i++) {
-      const radians = cesiumMath.toRadians(i);
-      positions.push(
-        new Cartesian2(radius * Math.cos(radians), radius * Math.sin(radians))
-      );
-    }
-    return positions;
-  }
 }
