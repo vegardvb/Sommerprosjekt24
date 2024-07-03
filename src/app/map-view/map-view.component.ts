@@ -3,6 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
 import { Math as cesiumMath, Cartesian2 } from 'cesium';
 
+
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
@@ -11,10 +12,14 @@ import { Math as cesiumMath, Cartesian2 } from 'cesium';
   imports: [CesiumDirective],
 })
 export class MapViewComponent implements OnInit {
+  [x: string]: any;
   inquiryId: number | undefined;
   CesiumDirective!: CesiumDirective;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute ){}
+
+
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
