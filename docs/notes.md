@@ -81,8 +81,6 @@ export class ButtonStateService {
   }
 }
 ---
-
-
 ### Feature modules og Standalone
 
 Features modules er samligner av components, directives og services som er tett koblet sammen og kan grupperes for å systematisk strukturere applikasjonen i følge modulært design.
@@ -96,10 +94,8 @@ Men for Cesium som er en stor modul med mye egen konfigurasjon og state så vil 
 ### Component
 Utgjør hovedblokkene i applikasjonen. Alt er delt opp i components som virker som typescript classes med referanse til ett css script og ett js script som en React component.
 
-- Selector field:
-  - Type selector: HTML Tag e.l
-  - Attribute: eks type, src o.l
-  - Class selector: ".menu-item"
+refereres til i relatert HTML fil som eks.
+<app-cesium-component></app-cesium-component>
 
 Angular lager en instans av hver component hvor HTML inkluderer en referanse til selector field i HTML fil som renderes til DOM.
 

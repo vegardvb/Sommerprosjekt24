@@ -3,8 +3,6 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import { Ion } from 'cesium';
 
-bootstrapApplication(AppComponent, appConfig).catch(err => console.error(err));
-
 declare global {
   interface Window {
     CESIUM_BASE_URL: string;

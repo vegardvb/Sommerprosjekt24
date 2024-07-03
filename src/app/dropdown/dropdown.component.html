@@ -1,0 +1,22 @@
+<!--<p class="bg-customBlue p-2 mb-4 text-white text-xl">Layers</p>-->
+<p-multiSelect
+  [options]="cables"
+  [(ngModel)]="selectedCables"
+  optionLabel="name"
+  placeholder="Select a Cable"
+  display="chip"
+  class="p-2"
+>
+  <ng-template let-cable pTemplate="item">
+    <div [ngClass]="{ 'selected-item': isSelected(cable) }">
+      <span class="symbol" [ngStyle]="getSymbolStyle(cable)">&#11044; </span
+      >{{ cable.name }}
+    </div>
+  </ng-template>
+  <ng-template let-cable pTemplate="selectedItem">
+    <div [ngClass]="{ 'selected-item': isSelected(cable) }">
+      <span class="symbol" [ngStyle]="getSymbolStyle(cable)">&#11044; </span
+      >{{ cable.name }}
+    </div>
+  </ng-template>
+</p-multiSelect>
