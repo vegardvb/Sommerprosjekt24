@@ -10,8 +10,10 @@ import {
   Transforms,
   Terrain,
   CesiumTerrainProvider,
-  PolygonHierarchy,
+  Math as CesiumMath,
   BoundingSphere,
+  HeadingPitchRange,
+  PolygonHierarchy,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
@@ -194,7 +196,8 @@ export class CesiumDirective implements OnInit {
       this.center = boundingsphere.center;
       //fly camera to
       viewer.camera.flyToBoundingSphere(boundingsphere, {
-        duration: 2.0,
+        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000) // Adjust the range as needed
+  
       });
     }
   }
