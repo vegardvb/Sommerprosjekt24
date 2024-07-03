@@ -40,7 +40,6 @@ export class CesiumDirective implements OnInit {
 
   // // Service for fetching data from the backend
 
-
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
