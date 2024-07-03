@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { CableMeasurement } from '../../models/cable_measurement';
-import { FeatureCollection, Feature, Polygon } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import { GeojsonParserService } from './geojson-parser.service';
 
 @Injectable({
