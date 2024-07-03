@@ -53,7 +53,7 @@ export class CesiumDirective implements OnInit {
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.viewer = new Viewer(this.el.nativeElement, {
       timeline: false,
-      animation: true,
+      animation: false,
       // Use flat ellipsoid surface
     });
 
