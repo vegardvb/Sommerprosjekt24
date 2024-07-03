@@ -6,23 +6,26 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class TerrainService {
+  private baseUrl = 'https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833';
+
   constructor(private http: HttpClient) {}
 
-  /**
-   * Fetch the terrain model GeoTIFF data from the backend.
-   * @param bbox - Bounding box coordinates.
-   * @param width - Width of the bounding box.
-   * @param height - Height of the bounding box.
-   * @returns Observable of Blob containing GeoTIFF data.
-   */
   getTerrain(bbox: string, width: number, height: number): Observable<Blob> {
-    return this.http.get(`/api/terrain`, {
-      params: {
-        bbox: bbox,
-        width: width.toString(),
-        height: height.toString(),
-      },
-      responseType: 'blob',
-    });
+    const params = {
+      SERVICE: 'WCS',
+      VERSION: '1.0.0',
+      REQUEST: 'GetCoverage',
+      FORMAT: 'GeoTIFF',
+      COVERAGE: 'nhm_dtm_topo_25833',
+      BBOX: bbox,
+      CRS: 'EPSG:25833',
+      RESPONSE_CRS: 'EPSG:25833',
+      WIDTH: width.toString(),
+      HEIGHT: height.toString(),
+    };
+    const queryParams = new URLSearchParams(params).toString();
+    const url = `${this.baseUrl}?${queryParams}`;
+
+    return this.http.get(url, { responseType: 'blob' });
   }
 }

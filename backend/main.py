@@ -115,4 +115,4 @@ def get_terrain(bbox: str, width: int, height: int, response_crs: str = "EPSG:25
             file.write(response.content)
         return FileResponse(file_path)
     else:
-        raise HTTPException(status_code=500, detail="Failed to fetch terrain model")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch terrain model: {response.text}")
