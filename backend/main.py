@@ -54,8 +54,9 @@ def get_inquiries(connection=Depends(get_db)):
 def get_geometry_by_inquiry(inquiry_id, connection=Depends(get_db)):
     """Endpoint which returns a portion of all inquiries from the database.
 
-    **Returns**:
-        Dictonary: A Dictonary of inquiries attribuites
+    Returns:
+        Retunrs a list of inquieries attribuites in the following format:
+        i.e [ID, name, description,organization ,e-mail, municipality, adress, status, processing deadline, start_date, end_date]
     """
     result = query_geometry_by_inquiry(inquiry_id, connection)
 
@@ -66,15 +67,15 @@ def get_geometry_by_inquiry(inquiry_id, connection=Depends(get_db)):
     return result
 
 
-@app.get("/cable_measurements/inquiry/{inquiry_id}")
-def get_cable_measurements_by_inquiery(inquiry_id: int, connection=Depends(get_db)):
-    """
-    Endpoint for querying cable measurements by given inquiery id. \n
-    **Args**:
-        inquiry_id (int): The id of the inquiery to sort by.
+@app.get("/cable_measurements/inquieries/{inquery_id}")
+def get_cable_measurements_by_inquiery(inquery_id: int):
+    """Endpoint for querying cable measurements by inquiery id.
+    Args:
+        inquery_id (int): The id of the inquiery to sort by.
 
-    **Returns**:
-        Dictonary: A Dictonary of cable measurements attribuites in the following format: \n
+    Returns:
+        Returns a list of cable measurements attribuites in the following format:
+        i.e [ID, Job_name, metadata, geojson, geometry]
 
     """
     result = query_cable_measurements_by_inquiry(inquiry_id, connection)
