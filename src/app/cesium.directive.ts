@@ -67,7 +67,12 @@ export class CesiumDirective implements OnInit {
         if (data) {
           console.log(data);
           // Ensure data is not undefined or null
-          GeoJsonDataSource.load(data)
+          GeoJsonDataSource.load(data, {
+            stroke: Color.RED,
+            fill: Color.RED.withAlpha(0.5),
+            strokeWidth: 3,
+            credit: "Provided by Petter's Cable measurement service",
+          })
             .then((dataSource: GeoJsonDataSource) => {
               this.viewer.dataSources.add(dataSource);
               this.viewer.zoomTo(dataSource);
