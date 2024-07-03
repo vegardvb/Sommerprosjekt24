@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { CableInfoService } from '../cable-info.service';
-import { HttpClientModule } from '@angular/common/http'; 
+import { HttpClientModule } from '@angular/common/http';
 
 describe('CableInfoService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientModule], 
+      imports: [HttpClientModule],
       providers: [CableInfoService],
     });
   });
