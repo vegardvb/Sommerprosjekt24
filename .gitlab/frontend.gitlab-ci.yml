@@ -1,7 +1,12 @@
 variables:
   NODE_ENV: 'development'
+  CHROME_BIN: '/usr/bin/google-chrome'
 
-build_application:
+stages:
+  - build
+  - test
+
+build_frontend:
   stage: build
   image: node:latest
   tags:
@@ -25,4 +30,5 @@ build_application:
   artifacts:
     paths:
       - dist
-    expire_in: 1 week # Adjust as needed
+    expire_in: 1 week
+

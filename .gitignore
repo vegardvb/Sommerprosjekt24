@@ -59,6 +59,7 @@ testem.log
 Thumbs.db
 
 # Environment variables
+backend/.env
 .env
 
 # Logs
@@ -74,4 +75,8 @@ logs/
 .nx/workspace-data
 
 # Misc
+./docs/notes.md
+/docs/notes.md
 /docs
+./backend/sql/docs
+./backend/__pycache__/*
