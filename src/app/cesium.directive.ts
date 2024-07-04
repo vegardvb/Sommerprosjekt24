@@ -14,6 +14,8 @@ import {
   BoundingSphere,
   HeadingPitchRange,
   PolygonHierarchy,
+  Entity,
+  EntityCollection,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
@@ -28,6 +30,8 @@ import { MapViewComponent } from './map-view/map-view.component';
 export class CesiumDirective implements OnInit {
   @Input()
   alpha!: number;
+  tileset!: Cesium3DTileset;
+  polygons: Entity[] = [];
   //constants for data from database
   inquiryId: number | undefined; // Accept inquiry ID as input
   products: Geometry[] = [];
@@ -61,22 +65,23 @@ export class CesiumDirective implements OnInit {
 
     const scene = this.viewer.scene;
     const globe = scene.globe;
-    this.viewer.scene.globe.translucency.enabled = true;
+    
+
     globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
-      400.0,
+      1000.0,
       0.0,
-      800.0,
+      2000.0,
       1.0
     );
-
+    
     //var position2 = Cartographic.toCartesian(this.center);
     const distance = 200.0;
-
-    const tileset = this.viewer.scene.primitives.add(
+    
+    this.tileset = this.viewer.scene.primitives.add(
       await Cesium3DTileset.fromIonAssetId(96188)
     );
 
-    tileset.clippingPlanes = new ClippingPlaneCollection({
+    this.tileset.clippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
       planes: [
         new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
@@ -89,6 +94,8 @@ export class CesiumDirective implements OnInit {
       edgeColor: Color.RED,
       enabled: true,
     });
+
+    
 
     this.viewer.scene.setTerrain(
       new Terrain(CesiumTerrainProvider.fromIonAssetId(1))
@@ -108,6 +115,8 @@ export class CesiumDirective implements OnInit {
       enabled: true,
     });
 
+
+    
     globe.tileCacheSize = 10000;
     scene.screenSpaceCameraController.enableCollisionDetection = false;
     
@@ -208,12 +217,13 @@ export class CesiumDirective implements OnInit {
   private plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
     const pol = new PolygonHierarchy(coordinates);
     console.log('plg', pol);
-    viewer.entities.add({
+    const polygonEntity = viewer.entities.add({
       polygon: {
         hierarchy: pol,
         material: Color.RED.withAlpha(0.5),
       },
     });
+    this.polygons.push(polygonEntity)
   }
   private changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {
      // Change the home button view
@@ -228,8 +238,21 @@ export class CesiumDirective implements OnInit {
 
   public updateGlobeAlpha(alpha: number): void {
     // Adjust globe base color translucency
-    if (this.viewer) {
-      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = alpha;
+      this.viewer.scene.globe.translucency.enabled = true;
+      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = 1-alpha;
+    
+  }
+
+
+  setTilesetVisibility(visible: boolean) {
+    if (this.tileset) {
+      this.tileset.show = visible;
     }
+  }
+  setPolygonsVisibility(visible: boolean) {
+    this.polygons.forEach(polygon => {
+      polygon.show = visible;
+    });
+    
   }
 }

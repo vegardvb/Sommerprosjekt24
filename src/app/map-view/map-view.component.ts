@@ -16,7 +16,11 @@ export class MapViewComponent implements OnInit {
     CesiumDirective, { static: true }
   )
   cesiumDirective!: CesiumDirective;
-  alpha = 1;
+  alpha = 0.5;
+  tilesetVisible: boolean = true;
+  polygonsVisible: boolean = true;
+  Math!: Math;
+  
 
   constructor(
     private route: ActivatedRoute 
@@ -31,6 +35,23 @@ export class MapViewComponent implements OnInit {
   public updateAlpha(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.alpha = inputElement.valueAsNumber;
-    this.cesiumDirective.updateGlobeAlpha(this.alpha)
+    this.cesiumDirective.updateGlobeAlpha(this.alpha/100)
   }
+
+  toggleTileset(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.tilesetVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setTilesetVisibility(this.tilesetVisible);
+    }
+  }
+
+  togglePolygons(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.polygonsVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
+    }
+  }
+  
 }
