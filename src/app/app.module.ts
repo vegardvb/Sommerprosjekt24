@@ -10,16 +10,20 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { CableMeasurementInfoComponent } from './cable-measurement-info/cable-measurement-info.component';
 import { SidenavComponent } from './sidenav/sidenav.component';
 import { TerrainService } from './services/terrain.service';
+import { CesiumDirective } from './cesium.directive';
+import { MapViewComponent } from './map-view/map-view.component';
 
 @NgModule({
   imports: [
-    TableModule,
+    BrowserAnimationsModule,
     BrowserModule,
-    InquiryListComponent,
+    CableMeasurementInfoComponent,
+    CesiumDirective,
     DropdownComponent,
     FormsModule,
-    BrowserAnimationsModule,
-    CableMeasurementInfoComponent,
+    InquiryListComponent,
+    MapViewComponent,
+    TableModule,
     SidenavComponent,
   ],
   providers: [DataService, provideAnimationsAsync(), TerrainService],

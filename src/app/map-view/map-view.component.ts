@@ -1,24 +1,24 @@
-// map-view.component.ts
-
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
-import { Math as cesiumMath, Cartesian2 } from 'cesium';
-import { DropdownComponent } from '../dropdown/dropdown.component';
-import { SidenavComponent } from '../sidenav/sidenav.component';
 import { TerrainService } from '../services/terrain.service';
 import { GeoTiffService } from '../services/geo-tiff.service';
+import { Subscription } from 'rxjs';
+import { SidenavComponent } from '../sidenav/sidenav.component';
 
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
   styleUrls: ['./map-view.component.css'],
   standalone: true,
-  imports: [CesiumDirective, DropdownComponent, SidenavComponent],
+  imports: [CesiumDirective, SidenavComponent],
 })
-export class MapViewComponent implements OnInit {
+export class MapViewComponent implements OnInit, OnDestroy {
+  @ViewChild(CesiumDirective, { static: true })
+  cesiumDirective!: CesiumDirective;
   inquiryId: number | undefined;
-  CesiumDirective!: CesiumDirective;
+  private queryParamsSubscription: Subscription | undefined;
+  private bboxSubscription: Subscription | undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -27,47 +27,52 @@ export class MapViewComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
+      console.log('Query parameters:', params);
       this.inquiryId = params['inquiryId'];
-      const bbox = '10.4476425,63.3941117,10.4556179,63.3994555'; // New bounding box in WGS 84
-      const width = 440;
-      const height = 566;
-      this.fetchTerrain(bbox, width, height);
     });
+
+    this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
+      bbox => {
+        console.log('BBOX extracted from CesiumDirective:', bbox);
+        const { width, height } = this.calculateWidthHeight(bbox);
+        this.fetchTerrain(bbox, width, height);
+      }
+    );
   }
 
-  filterMapById(inquiryId: number | undefined) {
-    if (inquiryId) {
-      console.log('Filtering map for inquiry ID:', inquiryId);
+  ngOnDestroy() {
+    if (this.queryParamsSubscription) {
+      this.queryParamsSubscription.unsubscribe();
+    }
+    if (this.bboxSubscription) {
+      this.bboxSubscription.unsubscribe();
     }
   }
 
-  viewModel = {
-    translucencyEnabled: true,
-    fadeByDistance: true,
-    showVectorData: false,
-    alpha: 0.8,
-  };
-
-  updateCesium(): void {
-    const event = new CustomEvent('viewModelChange', {
-      detail: this.viewModel,
-    });
-    window.dispatchEvent(event);
+  /**
+   * Calculates the width and height based on the bounding box coordinates.
+   */
+  calculateWidthHeight(bbox: string): { width: number; height: number } {
+    const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
+    const width = Math.abs(maxX - minX);
+    const height = Math.abs(maxY - minY);
+    console.log('Calculated width and height:', { width, height });
+    return { width, height };
   }
 
-  computeCircle(radius: number) {
-    const positions = [];
-    for (let i = 0; i < 360; i++) {
-      const radians = cesiumMath.toRadians(i);
-      positions.push(
-        new Cartesian2(radius * Math.cos(radians), radius * Math.sin(radians))
-      );
-    }
-    return positions;
-  }
-
+  /**
+   * Fetches the terrain data based on the provided bounding box, width, and height.
+   */
   fetchTerrain(bbox: string, width: number, height: number) {
+    console.log(
+      'Fetching terrain with BBOX:',
+      bbox,
+      '\nWidth:',
+      width,
+      '\nHeight:',
+      height
+    );
     this.terrainService.getTerrain(bbox, width, height).subscribe(blob => {
       const url = window.URL.createObjectURL(blob);
       console.log('Terrain model URL:', url);

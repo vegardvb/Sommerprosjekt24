@@ -20,7 +20,7 @@ export class TerrainService {
       FORMAT: 'GeoTIFF',
       COVERAGE: 'nhm_dtm_topo_25833',
       BBOX: bbox,
-      CRS: 'EPSG:4326', // Change to EPSG:4326
+      CRS: 'EPSG:25833',
       RESPONSE_CRS: 'EPSG:4326', // Change to EPSG:4326
       WIDTH: width.toString(),
       HEIGHT: height.toString(),
