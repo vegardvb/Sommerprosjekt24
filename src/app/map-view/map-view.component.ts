@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
 import { Math as cesiumMath, Cartesian2 } from 'cesium';
@@ -14,45 +14,46 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 })
 export class MapViewComponent implements OnInit {
   inquiryId: number | undefined;
-  CesiumDirective!: CesiumDirective;
+  @ViewChild(
+    CesiumDirective, { static: true }
+  )
+  cesiumDirective!: CesiumDirective;
+  alpha = 1;
+  tilesetVisible: boolean = true;
+  polygonsVisible: boolean = true;
+  Math!: Math;
+  
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute 
+  ){}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
-      this.filterMapById(this.inquiryId);
     });
   }
 
-  filterMapById(inquiryId: number | undefined) {
-    if (inquiryId) {
-      console.log('Filtering map for inquiry ID:', inquiryId);
+  public updateAlpha(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.alpha = inputElement.valueAsNumber;
+    this.cesiumDirective.updateGlobeAlpha(this.alpha/100)
+  }
+
+  toggleTileset(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.tilesetVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setTilesetVisibility(this.tilesetVisible);
     }
   }
 
-  viewModel = {
-    translucencyEnabled: true,
-    fadeByDistance: true,
-    showVectorData: false,
-    alpha: 0.8,
-  };
-
-  updateCesium(): void {
-    const event = new CustomEvent('viewModelChange', {
-      detail: this.viewModel,
-    });
-    window.dispatchEvent(event);
-  }
-
-  computeCircle(radius: number) {
-    const positions = [];
-    for (let i = 0; i < 360; i++) {
-      const radians = cesiumMath.toRadians(i);
-      positions.push(
-        new Cartesian2(radius * Math.cos(radians), radius * Math.sin(radians))
-      );
+  togglePolygons(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.polygonsVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
     }
-    return positions;
   }
+  
 }
