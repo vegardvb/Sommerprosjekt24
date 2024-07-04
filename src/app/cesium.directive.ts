@@ -1,4 +1,4 @@
-import { Directive, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
 import {
   Viewer,
   ClippingPlane,
@@ -19,12 +19,15 @@ import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
+import { MapViewComponent } from './map-view/map-view.component';
 
 @Directive({
   selector: '[appCesium]',
   standalone: true,
 })
 export class CesiumDirective implements OnInit {
+  @Input()
+  alpha!: number;
   //constants for data from database
   inquiryId: number | undefined; // Accept inquiry ID as input
   products: Geometry[] = [];
@@ -37,13 +40,9 @@ export class CesiumDirective implements OnInit {
   constructor(
     private el: ElementRef,
     private geometryService: GeometryService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private mapview: MapViewComponent
   ) {}
-
-  // // Service for fetching data from the backend
-  // private cableMeasurementService: CableMeasurementService = inject(
-  //   CableMeasurementService
-  // );
 
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(params => {
@@ -52,7 +51,7 @@ export class CesiumDirective implements OnInit {
     console.log('cesiumid', this.inquiryId);
     this.filterMapByInquiryId(this.inquiryId);
 
-    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+       // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.viewer = new Viewer(this.el.nativeElement, {
       timeline: false,
       animation: false,
@@ -62,6 +61,13 @@ export class CesiumDirective implements OnInit {
 
     const scene = this.viewer.scene;
     const globe = scene.globe;
+    this.viewer.scene.globe.translucency.enabled = true;
+    globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
+      400.0,
+      0.0,
+      800.0,
+      1.0
+    );
 
     //var position2 = Cartographic.toCartesian(this.center);
     const distance = 200.0;
@@ -104,12 +110,7 @@ export class CesiumDirective implements OnInit {
 
     globe.tileCacheSize = 10000;
     scene.screenSpaceCameraController.enableCollisionDetection = false;
-    globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
-      400.0,
-      0.0,
-      800.0,
-      1.0
-    );
+    
   }
 
   filterMapByInquiryId(inquiryId: number | undefined): void {
@@ -125,7 +126,6 @@ export class CesiumDirective implements OnInit {
               geometry: parsedGeometry,
             };
           });
-          console.log('products', this.products);
 
           this.extractCoordinates(this.products);
 
@@ -137,16 +137,17 @@ export class CesiumDirective implements OnInit {
               const polygonCoordinates = this.coords[i][0].map(coordPair =>
                 Cartesian3.fromDegrees(coordPair[0], coordPair[1])
               );
-              console.log('stops after pyl');
+              // console.log('stops after pyl');
 
               this.plotPolygon(polygonCoordinates, this.viewer);
-              console.log('polygon', polygonCoordinates);
+              // console.log('polygon', polygonCoordinates);
             }
           }
           this.updatemap(this.viewer);
+          this.updateGlobeAlpha(1)
 
-          console.log('Converted Coordinates:', this.coords);
-          console.log('Centroid:', this.center);
+          // console.log('Converted Coordinates:', this.coords);
+          // console.log('Centroid:', this.center);
         },
         error: error => {
           console.error('Error fetching geometries:', error);
@@ -204,7 +205,7 @@ export class CesiumDirective implements OnInit {
     }
   }
 
-  plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
+  private plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
     const pol = new PolygonHierarchy(coordinates);
     console.log('plg', pol);
     viewer.entities.add({
@@ -214,7 +215,7 @@ export class CesiumDirective implements OnInit {
       },
     });
   }
-  changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {
+  private changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {
      // Change the home button view
      viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
       e.cancel = true; // Cancel the default home view
@@ -223,5 +224,12 @@ export class CesiumDirective implements OnInit {
   
       });
     });
+  }
+
+  public updateGlobeAlpha(alpha: number): void {
+    // Adjust globe base color translucency
+    if (this.viewer) {
+      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = alpha;
+    }
   }
 }

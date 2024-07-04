@@ -1,7 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
-import { Math as cesiumMath, Cartesian2 } from 'cesium';
 
 
 @Component({
@@ -12,25 +11,26 @@ import { Math as cesiumMath, Cartesian2 } from 'cesium';
   imports: [CesiumDirective],
 })
 export class MapViewComponent implements OnInit {
-  [x: string]: any;
   inquiryId: number | undefined;
-  CesiumDirective!: CesiumDirective;
+  @ViewChild(
+    CesiumDirective, { static: true }
+  )
+  cesiumDirective!: CesiumDirective;
+  alpha = 1;
 
   constructor(
-    private route: ActivatedRoute ){}
-
-
+    private route: ActivatedRoute 
+  ){}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
-      this.filterMapById(this.inquiryId);
     });
   }
 
-  filterMapById(inquiryId: number | undefined) {
-    if (inquiryId) {
-      console.log('Filtering map for inquiry ID:', inquiryId);
-    }
+  public updateAlpha(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.alpha = inputElement.valueAsNumber;
+    this.cesiumDirective.updateGlobeAlpha(this.alpha)
   }
 }

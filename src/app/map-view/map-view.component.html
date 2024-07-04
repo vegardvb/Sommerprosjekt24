@@ -1,4 +1,4 @@
-<h1>Hello Map View</h1>
+
 <head>
   <base href="/" />
 
@@ -16,7 +16,12 @@
   />
 </head>
 <div>
+ 
   <div class="h-80%" id="cesiumContainer" appCesium>
-  </div>
-  
+     <div class="controls">
+      <label for="translucencySlider">Adjust Globe Translucency:</label>
+      <input type="range" id="translucencySlider" min="0" max="1" step="0.01" (input)="updateAlpha($event)">
+      <p>alpha: {{ alpha }}</p>
+    </div>
+  </div> 
 </div>
