@@ -16,7 +16,7 @@ export class MapViewComponent implements OnInit {
     CesiumDirective, { static: true }
   )
   cesiumDirective!: CesiumDirective;
-  alpha = 0.5;
+  alpha = 1;
   tilesetVisible: boolean = true;
   polygonsVisible: boolean = true;
   Math!: Math;

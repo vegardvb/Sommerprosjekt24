@@ -239,7 +239,7 @@ export class CesiumDirective implements OnInit {
   public updateGlobeAlpha(alpha: number): void {
     // Adjust globe base color translucency
       this.viewer.scene.globe.translucency.enabled = true;
-      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = 1-alpha;
+      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = alpha;
     
   }
 
