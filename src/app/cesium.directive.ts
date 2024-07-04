@@ -1,4 +1,4 @@
-import { Directive, ElementRef, OnInit, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
 import {
   Viewer,
   ClippingPlane,
@@ -10,19 +10,28 @@ import {
   Transforms,
   Terrain,
   CesiumTerrainProvider,
-  PolygonHierarchy,
+  Math as CesiumMath,
   BoundingSphere,
+  HeadingPitchRange,
+  PolygonHierarchy,
+  Entity,
+  EntityCollection,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
+import { MapViewComponent } from './map-view/map-view.component';
 
 @Directive({
   selector: '[appCesium]',
   standalone: true,
 })
 export class CesiumDirective implements OnInit {
+  @Input()
+  alpha!: number;
+  tileset!: Cesium3DTileset;
+  polygons: Entity[] = [];
   //constants for data from database
   inquiryId: number | undefined; // Accept inquiry ID as input
   products: Geometry[] = [];
@@ -35,13 +44,9 @@ export class CesiumDirective implements OnInit {
   constructor(
     private el: ElementRef,
     private geometryService: GeometryService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private mapview: MapViewComponent
   ) {}
-
-  // // Service for fetching data from the backend
-  // private cableMeasurementService: CableMeasurementService = inject(
-  //   CableMeasurementService
-  // );
 
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(params => {
@@ -50,24 +55,33 @@ export class CesiumDirective implements OnInit {
     console.log('cesiumid', this.inquiryId);
     this.filterMapByInquiryId(this.inquiryId);
 
-    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+       // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.viewer = new Viewer(this.el.nativeElement, {
       timeline: false,
       animation: false,
+      sceneModePicker: false,
       // Use flat ellipsoid surface
     });
 
     const scene = this.viewer.scene;
     const globe = scene.globe;
+    
 
+    globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
+      1000.0,
+      0.0,
+      2000.0,
+      1.0
+    );
+    
     //var position2 = Cartographic.toCartesian(this.center);
     const distance = 200.0;
-
-    const tileset = this.viewer.scene.primitives.add(
+    
+    this.tileset = this.viewer.scene.primitives.add(
       await Cesium3DTileset.fromIonAssetId(96188)
     );
 
-    tileset.clippingPlanes = new ClippingPlaneCollection({
+    this.tileset.clippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
       planes: [
         new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
@@ -80,6 +94,8 @@ export class CesiumDirective implements OnInit {
       edgeColor: Color.RED,
       enabled: true,
     });
+
+    
 
     this.viewer.scene.setTerrain(
       new Terrain(CesiumTerrainProvider.fromIonAssetId(1))
@@ -99,14 +115,11 @@ export class CesiumDirective implements OnInit {
       enabled: true,
     });
 
+
+    
     globe.tileCacheSize = 10000;
     scene.screenSpaceCameraController.enableCollisionDetection = false;
-    globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
-      400.0,
-      0.0,
-      800.0,
-      1.0
-    );
+    
   }
 
   filterMapByInquiryId(inquiryId: number | undefined): void {
@@ -122,7 +135,6 @@ export class CesiumDirective implements OnInit {
               geometry: parsedGeometry,
             };
           });
-          console.log('products', this.products);
 
           this.extractCoordinates(this.products);
 
@@ -134,16 +146,17 @@ export class CesiumDirective implements OnInit {
               const polygonCoordinates = this.coords[i][0].map(coordPair =>
                 Cartesian3.fromDegrees(coordPair[0], coordPair[1])
               );
-              console.log('stops after pyl');
+              // console.log('stops after pyl');
 
               this.plotPolygon(polygonCoordinates, this.viewer);
-              console.log('polygon', polygonCoordinates);
+              // console.log('polygon', polygonCoordinates);
             }
           }
           this.updatemap(this.viewer);
+          this.updateGlobeAlpha(1)
 
-          console.log('Converted Coordinates:', this.coords);
-          console.log('Centroid:', this.center);
+          // console.log('Converted Coordinates:', this.coords);
+          // console.log('Centroid:', this.center);
         },
         error: error => {
           console.error('Error fetching geometries:', error);
@@ -194,19 +207,52 @@ export class CesiumDirective implements OnInit {
       this.center = boundingsphere.center;
       //fly camera to
       viewer.camera.flyToBoundingSphere(boundingsphere, {
-        duration: 2.0,
+        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000) // Adjust the range as needed
+  
       });
+      this.changeHomeButton(viewer, boundingsphere)
     }
   }
 
-  plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
+  private plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
     const pol = new PolygonHierarchy(coordinates);
     console.log('plg', pol);
-    viewer.entities.add({
+    const polygonEntity = viewer.entities.add({
       polygon: {
         hierarchy: pol,
         material: Color.RED.withAlpha(0.5),
       },
     });
+    this.polygons.push(polygonEntity)
+  }
+  private changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {
+     // Change the home button view
+     viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
+      e.cancel = true; // Cancel the default home view
+      viewer.camera.flyToBoundingSphere(boundingsphere, {
+        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000) // Adjust the range as needed
+  
+      });
+    });
+  }
+
+  public updateGlobeAlpha(alpha: number): void {
+    // Adjust globe base color translucency
+      this.viewer.scene.globe.translucency.enabled = true;
+      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = alpha;
+    
+  }
+
+
+  setTilesetVisibility(visible: boolean) {
+    if (this.tileset) {
+      this.tileset.show = visible;
+    }
+  }
+  setPolygonsVisibility(visible: boolean) {
+    this.polygons.forEach(polygon => {
+      polygon.show = visible;
+    });
+    
   }
 }
