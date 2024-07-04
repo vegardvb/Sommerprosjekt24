@@ -1,14 +1,16 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
-
+import { Math as cesiumMath, Cartesian2 } from 'cesium';
+import { DropdownComponent } from '../dropdown/dropdown.component';
+import { SidenavComponent } from '../sidenav/sidenav.component';
 
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
   styleUrls: ['./map-view.component.css'],
   standalone: true,
-  imports: [CesiumDirective],
+  imports: [CesiumDirective, DropdownComponent, SidenavComponent],
 })
 export class MapViewComponent implements OnInit {
   inquiryId: number | undefined;
