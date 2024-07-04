@@ -38,7 +38,6 @@ export class CesiumDirective implements OnInit {
   products: Geometry[] = [];
   coords: number[][][][] = [];
   center!: Cartesian3;
-  private bboxExtractedOnce = false;
 
   private viewer!: Viewer;
 
@@ -56,13 +55,12 @@ export class CesiumDirective implements OnInit {
 
     this.initializeViewer();
 
-    this.viewer.camera.moveEnd.addEventListener(() => {
-      if (!this.bboxExtractedOnce) {
-        console.log('Camera move end event detected');
-        this.extractBbox();
-        this.bboxExtractedOnce = true;
-      }
-    });
+    const cameraMoveEndListener = () => {
+      console.log('Camera move end event detected');
+      this.extractBbox();
+      this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
+    };
+    this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
   }
 
   /**
