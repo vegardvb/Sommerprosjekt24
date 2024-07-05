@@ -32,6 +32,7 @@ import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
 import { MapViewComponent } from './map-view/map-view.component';
+import { ParsedGeometry } from '../models/parsedgeometry-interface';
 
 @Directive({
   selector: '[appCesium]',
