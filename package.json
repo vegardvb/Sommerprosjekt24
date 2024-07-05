@@ -33,6 +33,7 @@
     "karma-junit-reporter": "^2.0.1",
     "karma-sonarqube-unit-reporter": "^0.0.23",
     "karma-spec-reporter": "^0.0.36",
+    "knockout": "^3.5.1",
     "lodash.defaultsdeep": "^4.6.1",
     "primeflex": "^3.3.1",
     "primeicons": "^7.0.0",

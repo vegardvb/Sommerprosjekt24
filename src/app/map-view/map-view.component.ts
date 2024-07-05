@@ -16,6 +16,10 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
+  alpha = 1;
+  tilesetVisible: boolean = true;
+  polygonsVisible: boolean = true;
+  Math!: Math;
   inquiryId: number | undefined;
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
@@ -80,5 +84,27 @@ export class MapViewComponent implements OnInit, OnDestroy {
       };
       reader.readAsArrayBuffer(blob);
     });
+  }
+
+  public updateAlpha(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.alpha = inputElement.valueAsNumber;
+    this.cesiumDirective.updateGlobeAlpha(this.alpha / 100);
+  }
+
+  toggleTileset(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.tilesetVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setTilesetVisibility(this.tilesetVisible);
+    }
+  }
+
+  togglePolygons(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.polygonsVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
+    }
   }
 }

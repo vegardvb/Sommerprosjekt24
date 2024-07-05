@@ -1,9 +1,10 @@
 import {
   Directive,
   ElementRef,
+  EventEmitter,
+  Input,
   OnInit,
   Output,
-  EventEmitter,
 } from '@angular/core';
 import {
   Viewer,
@@ -14,14 +15,17 @@ import {
   NearFarScalar,
   Cartesian3,
   Transforms,
-  PolygonHierarchy,
-  BoundingSphere,
   Math as CesiumMath,
+  BoundingSphere,
+  HeadingPitchRange,
+  PolygonHierarchy,
+  Entity,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
+import { MapViewComponent } from './map-view/map-view.component';
 import proj4 from 'proj4';
 
 // Define the source and target projections
@@ -33,6 +37,10 @@ proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
   standalone: true,
 })
 export class CesiumDirective implements OnInit {
+  @Input()
+  alpha!: number;
+  tileset!: Cesium3DTileset;
+  polygons: Entity[] = [];
   @Output() bboxExtracted = new EventEmitter<string>();
   inquiryId: number | undefined;
   products: Geometry[] = [];
@@ -44,7 +52,8 @@ export class CesiumDirective implements OnInit {
   constructor(
     private el: ElementRef,
     private geometryService: GeometryService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private mapview: MapViewComponent
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -53,6 +62,7 @@ export class CesiumDirective implements OnInit {
     });
     this.filterMapByInquiryId(this.inquiryId);
 
+    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.initializeViewer();
 
     const cameraMoveEndListener = () => {
@@ -69,6 +79,7 @@ export class CesiumDirective implements OnInit {
     this.viewer = new Viewer(this.el.nativeElement, {
       timeline: false,
       animation: false,
+      sceneModePicker: false,
     });
 
     const distance = 200.0;
@@ -136,6 +147,7 @@ export class CesiumDirective implements OnInit {
             });
           }
           this.updateMap(this.viewer);
+          this.updateGlobeAlpha(1);
         },
         error: error => {
           console.error('Error fetching geometries:', error);
@@ -169,7 +181,10 @@ export class CesiumDirective implements OnInit {
       const positions = Cartesian3.fromDegreesArray(flatCoordinates);
       const boundingSphere = BoundingSphere.fromPoints(positions);
       this.center = boundingSphere.center;
-      viewer.camera.flyToBoundingSphere(boundingSphere, { duration: 2.0 });
+      viewer.camera.flyToBoundingSphere(boundingSphere, {
+        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000), // Adjust the range as needed
+      });
+      this.changeHomeButton(viewer, boundingSphere);
     }
   }
 
@@ -198,11 +213,41 @@ export class CesiumDirective implements OnInit {
    * Plots a polygon on the viewer.
    */
   private plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
-    viewer.entities.add({
+    const polygonEntity = viewer.entities.add({
       polygon: {
         hierarchy: new PolygonHierarchy(coordinates),
         material: Color.RED.withAlpha(0.5),
       },
+    });
+    this.polygons.push(polygonEntity);
+  }
+  private changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {
+    // Change the home button view
+    viewer.homeButton.viewModel.command.beforeExecute.addEventListener(
+      function (e) {
+        e.cancel = true; // Cancel the default home view
+        viewer.camera.flyToBoundingSphere(boundingsphere, {
+          offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000), // Adjust the range as needed
+        });
+      }
+    );
+  }
+
+  public updateGlobeAlpha(alpha: number): void {
+    // Adjust globe base color translucency
+    this.viewer.scene.globe.translucency.enabled = true;
+    this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue =
+      alpha;
+  }
+
+  setTilesetVisibility(visible: boolean) {
+    if (this.tileset) {
+      this.tileset.show = visible;
+    }
+  }
+  setPolygonsVisibility(visible: boolean) {
+    this.polygons.forEach(polygon => {
+      polygon.show = visible;
     });
   }
 }
