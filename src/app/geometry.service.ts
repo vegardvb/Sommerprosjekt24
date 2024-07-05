@@ -24,7 +24,6 @@ export class GeometryService {
 
   getGeometry(inquiry_id: number): Observable<Geometry[]> {
     const url = this.apiUrl.replace('{inquiry_id}', inquiry_id.toString());
-    console.log(url);
     return this.http.get<Geometry[]>(url).pipe(
       map(geometries => this.parseAndConvertGeometries(geometries)),
       catchError(this.handleError)
@@ -32,15 +31,12 @@ export class GeometryService {
   }
 
   private parseAndConvertGeometries(geometries: Geometry[]): Geometry[] {
-    console.log('Geometry Object', geometries);
-
     return geometries.map(geometry => {
       this.parseGeoJSON(geometry);
 
       if (this.parsedGeometry) {
         geometry.geometry = this.parsedGeometry; // Replace geometry with parsed geometry
       }
-      console.log('GEOMETRY AFTER', geometry.geometry);
       return geometry;
     });
   }
@@ -60,7 +56,6 @@ export class GeometryService {
   private handleError(error: Error): Observable<never> {
     console.error('An error occurred', error);
     return throwError('Something bad happened; please try again later.');
+    //TODO: Fix depricated error handling
   }
-
-  
 }

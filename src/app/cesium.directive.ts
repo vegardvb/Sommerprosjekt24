@@ -1,4 +1,11 @@
-import { Directive, ElementRef, Input, OnChanges, OnInit, Renderer2, SimpleChanges } from '@angular/core';
+import {
+  Directive,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import {
   Viewer,
   ClippingPlane,
@@ -8,20 +15,22 @@ import {
   NearFarScalar,
   Cartesian3,
   Transforms,
-  Terrain,
-  CesiumTerrainProvider,
   Math as CesiumMath,
   BoundingSphere,
   HeadingPitchRange,
   PolygonHierarchy,
   Entity,
-  EntityCollection,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
 import { MapViewComponent } from './map-view/map-view.component';
+import proj4 from 'proj4';
+
+// Define the source and target projections
+proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
+proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
 @Directive({
   selector: '[appCesium]',
@@ -32,13 +41,12 @@ export class CesiumDirective implements OnInit {
   alpha!: number;
   tileset!: Cesium3DTileset;
   polygons: Entity[] = [];
-  //constants for data from database
-  inquiryId: number | undefined; // Accept inquiry ID as input
+  @Output() bboxExtracted = new EventEmitter<string>();
+  inquiryId: number | undefined;
   products: Geometry[] = [];
-  coords: number[][][][] = []; // List to hold converted coordinates
-  center!: Cartesian3; // To hold the center of the polygon
+  coords: number[][][][] = [];
+  center!: Cartesian3;
 
-  //constants for cesium
   private viewer!: Viewer;
 
   constructor(
@@ -52,36 +60,35 @@ export class CesiumDirective implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
     });
-    console.log('cesiumid', this.inquiryId);
     this.filterMapByInquiryId(this.inquiryId);
 
-       // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    this.initializeViewer();
+
+    const cameraMoveEndListener = () => {
+      this.extractBbox();
+      this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
+    };
+    this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
+  }
+
+  /**
+   * Initializes the Cesium Viewer and adds the tileset and clipping planes.
+   */
+  private async initializeViewer(): Promise<void> {
     this.viewer = new Viewer(this.el.nativeElement, {
       timeline: false,
       animation: false,
       sceneModePicker: false,
-      // Use flat ellipsoid surface
     });
 
-    const scene = this.viewer.scene;
-    const globe = scene.globe;
-    
-
-    globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
-      1000.0,
-      0.0,
-      2000.0,
-      1.0
-    );
-    
-    //var position2 = Cartographic.toCartesian(this.center);
     const distance = 200.0;
-    
-    this.tileset = this.viewer.scene.primitives.add(
-      await Cesium3DTileset.fromIonAssetId(96188)
-    );
 
-    this.tileset.clippingPlanes = new ClippingPlaneCollection({
+    const tileset = await Cesium3DTileset.fromIonAssetId(96188);
+    this.viewer.scene.primitives.add(tileset);
+    this.tileset = tileset;
+
+    const globeClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
       planes: [
         new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
@@ -95,13 +102,7 @@ export class CesiumDirective implements OnInit {
       enabled: true,
     });
 
-    
-
-    this.viewer.scene.setTerrain(
-      new Terrain(CesiumTerrainProvider.fromIonAssetId(1))
-    );
-
-    globe.clippingPlanes = new ClippingPlaneCollection({
+    const tilesetClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
       planes: [
         new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
@@ -115,134 +116,166 @@ export class CesiumDirective implements OnInit {
       enabled: true,
     });
 
+    this.viewer.scene.globe.clippingPlanes = globeClippingPlanes;
+    tileset.clippingPlanes = tilesetClippingPlanes;
 
-    
-    globe.tileCacheSize = 10000;
-    scene.screenSpaceCameraController.enableCollisionDetection = false;
-    
+    this.viewer.scene.globe.tileCacheSize = 10000;
+    this.viewer.scene.screenSpaceCameraController.enableCollisionDetection =
+      false;
+    this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
+      new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
   }
 
-  filterMapByInquiryId(inquiryId: number | undefined): void {
-    console.log(inquiryId);
+  /**
+   * Filters the map by inquiry ID and fetches geometries.
+   */
+  private filterMapByInquiryId(inquiryId: number | undefined): void {
     if (inquiryId) {
-      console.log('Filtering map for inquiry ID in cesium:', inquiryId);
       this.geometryService.getGeometry(inquiryId).subscribe({
         next: (response: Geometry[]) => {
           this.products = response.map(geometry => {
             const parsedGeometry = geometry.geometry as ParsedGeometry;
-            return {
-              id: geometry.id,
-              geometry: parsedGeometry,
-            };
+            return { id: geometry.id, geometry: parsedGeometry };
           });
 
           this.extractCoordinates(this.products);
-
-          //this.updateMap();
-          console.log('stops after update');
-          console.log('insidedsojf', this.coords[0][0][0]);
           if (this.coords.length > 0) {
-            for (let i = 0; i < this.coords.length; i++) {
-              const polygonCoordinates = this.coords[i][0].map(coordPair =>
+            this.coords.forEach(coordSet => {
+              const polygonCoordinates = coordSet[0].map(coordPair =>
                 Cartesian3.fromDegrees(coordPair[0], coordPair[1])
               );
-              // console.log('stops after pyl');
-
               this.plotPolygon(polygonCoordinates, this.viewer);
-              // console.log('polygon', polygonCoordinates);
-            }
+            });
           }
-          this.updatemap(this.viewer);
-          this.updateGlobeAlpha(1)
-
-          // console.log('Converted Coordinates:', this.coords);
-          // console.log('Centroid:', this.center);
+          this.updateMap(this.viewer);
+          this.updateGlobeAlpha(1);
         },
         error: error => {
           console.error('Error fetching geometries:', error);
         },
-        complete: () => {
-          console.log('Fetching geometries completed.');
-        },
       });
     }
   }
 
+  /**
+   * Extracts coordinates from geometries.
+   */
   private extractCoordinates(geometries: Geometry[]): void {
-    this.coords = []; // Clear any existing coordinates
-    geometries.forEach(geometry => {
-      const parsedGeometry = geometry.geometry as ParsedGeometry;
-      if (parsedGeometry && parsedGeometry.coordinates) {
-        this.coords.push(...parsedGeometry.coordinates);
-        console.log('THIS.COORDS', this.coords);
-      }
-    });
-
-    // if (this.coords.length > 0) {
-    //   const firstCoordinatePair = this.coords[0][0];
-    //   const lon = firstCoordinatePair[0]
-    //   const lat = firstCoordinatePair[1]
-    //   console.log('lon', lon)
-
-    //   console.log('First Coordinate Pair:', firstCoordinatePair);
-
-    // }
+    this.coords = geometries.reduce(
+      (acc, geometry) => {
+        const parsedGeometry = geometry.geometry as ParsedGeometry;
+        if (parsedGeometry && parsedGeometry.coordinates) {
+          acc.push(...parsedGeometry.coordinates);
+        }
+        return acc;
+      },
+      [] as number[][][][]
+    );
   }
 
-  private updatemap(viewer: Viewer): void {
+  /**
+   * Updates the map view to fit the extracted coordinates.
+   */
+  private updateMap(viewer: Viewer): void {
     if (this.coords.length > 0) {
-      // create boundingsphere around work area
-      const flatcoordinates = this.coords.flatMap(innerarray =>
-        innerarray.flat()
-      );
-      const flattercoordinates = flatcoordinates.flatMap(innerarray =>
-        innerarray.flat()
-      );
-
-      const positions = Cartesian3.fromDegreesArray(flattercoordinates);
-
-      const boundingsphere = BoundingSphere.fromPoints(positions);
-      console.log('flatcoords', flatcoordinates);
-      //bounding map
-      this.center = boundingsphere.center;
-      //fly camera to
-      viewer.camera.flyToBoundingSphere(boundingsphere, {
-        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000) // Adjust the range as needed
-  
+      const flatCoordinates = this.coords.flat(3);
+      const positions = Cartesian3.fromDegreesArray(flatCoordinates);
+      const boundingSphere = BoundingSphere.fromPoints(positions);
+      this.center = boundingSphere.center;
+      viewer.camera.flyToBoundingSphere(boundingSphere, {
+        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000), // Adjust the range as needed
       });
-      this.changeHomeButton(viewer, boundingsphere)
+      this.changeHomeButton(viewer, boundingSphere);
     }
   }
 
+  /**
+   * Extracts the bounding box of the current view based on clipping planes and emits the coordinates.
+   */
+  private extractBbox(): void {
+    const clippingPlanes = this.viewer.scene.globe.clippingPlanes;
+    if (clippingPlanes) {
+      const eastPlane = clippingPlanes.get(0);
+      const westPlane = clippingPlanes.get(1);
+      const northPlane = clippingPlanes.get(2);
+      const southPlane = clippingPlanes.get(3);
+
+      const distanceEast = eastPlane.distance;
+      const distanceWest = westPlane.distance;
+      const distanceNorth = northPlane.distance;
+      const distanceSouth = southPlane.distance;
+
+      // Calculate the coordinates based on the clipping distances and center
+      const centerCartographic =
+        this.viewer.scene.globe.ellipsoid.cartesianToCartographic(this.center);
+      const centerLongitude = CesiumMath.toDegrees(
+        centerCartographic.longitude
+      );
+      const centerLatitude = CesiumMath.toDegrees(centerCartographic.latitude);
+
+      // Use proj4 to transform distances to geographic coordinates
+      const center = proj4('EPSG:4326', 'EPSG:25833', [
+        centerLongitude,
+        centerLatitude,
+      ]);
+
+      const west = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0] - distanceWest,
+        center[1],
+      ]);
+      const east = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0] + distanceEast,
+        center[1],
+      ]);
+      const south = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0],
+        center[1] - distanceSouth,
+      ]);
+      const north = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0],
+        center[1] + distanceNorth,
+      ]);
+
+      const lowerLeft = proj4('EPSG:4326', 'EPSG:25833', [west[0], south[1]]);
+      const upperRight = proj4('EPSG:4326', 'EPSG:25833', [east[0], north[1]]);
+      const bbox = `${lowerLeft[0]},${lowerLeft[1]},${upperRight[0]},${upperRight[1]}`;
+
+      this.bboxExtracted.emit(bbox);
+    } else {
+      console.error('No clipping planes found.');
+    }
+  }
+
+  /**
+   * Plots a polygon on the viewer.
+   */
   private plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
-    const pol = new PolygonHierarchy(coordinates);
-    console.log('plg', pol);
     const polygonEntity = viewer.entities.add({
       polygon: {
-        hierarchy: pol,
+        hierarchy: new PolygonHierarchy(coordinates),
         material: Color.RED.withAlpha(0.5),
       },
     });
-    this.polygons.push(polygonEntity)
+    this.polygons.push(polygonEntity);
   }
   private changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {
-     // Change the home button view
-     viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e) {
-      e.cancel = true; // Cancel the default home view
-      viewer.camera.flyToBoundingSphere(boundingsphere, {
-        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000) // Adjust the range as needed
-  
-      });
-    });
+    // Change the home button view
+    viewer.homeButton.viewModel.command.beforeExecute.addEventListener(
+      function (e) {
+        e.cancel = true; // Cancel the default home view
+        viewer.camera.flyToBoundingSphere(boundingsphere, {
+          offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000), // Adjust the range as needed
+        });
+      }
+    );
   }
 
   public updateGlobeAlpha(alpha: number): void {
     // Adjust globe base color translucency
-      this.viewer.scene.globe.translucency.enabled = true;
-      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = alpha;
-    
+    this.viewer.scene.globe.translucency.enabled = true;
+    this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue =
+      alpha;
   }
-
 
   setTilesetVisibility(visible: boolean) {
     if (this.tileset) {
@@ -253,6 +286,5 @@ export class CesiumDirective implements OnInit {
     this.polygons.forEach(polygon => {
       polygon.show = visible;
     });
-    
   }
 }
