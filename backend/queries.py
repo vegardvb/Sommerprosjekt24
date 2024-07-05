@@ -12,7 +12,6 @@ QUERY_PATH = "./sql/queries/"
 
 def load_query(path, subqueries=None):
     # TODO Refactor Cohesion
-    # TODO Refactor Cohesion
     """Loads a query from a file.
 
     Args:
@@ -28,7 +27,6 @@ def load_query(path, subqueries=None):
 
 
 def execute_query(connection, main_file_path, subquery_files=None, params=None):
-    # TODO Refactor Cohesion
     # TODO Refactor Cohesion
     """Method for executing a query from a file based upon the specified parameters and
     subqueries.
