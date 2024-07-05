@@ -28,13 +28,11 @@ export class MapViewComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
-      console.log('Query parameters:', params);
       this.inquiryId = params['inquiryId'];
     });
 
     this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
       bbox => {
-        console.log('BBOX extracted from CesiumDirective:', bbox);
         const { width, height } = this.calculateWidthHeight(bbox);
         this.fetchTerrain(bbox, width, height);
       }
@@ -57,7 +55,6 @@ export class MapViewComponent implements OnInit, OnDestroy {
     const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
     const width = Math.abs(maxX - minX);
     const height = Math.abs(maxY - minY);
-    console.log('Calculated width and height:', { width, height });
     return { width, height };
   }
 
@@ -65,18 +62,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
    * Fetches the terrain data based on the provided bounding box, width, and height.
    */
   fetchTerrain(bbox: string, width: number, height: number) {
-    console.log(
-      'Fetching terrain with BBOX:',
-      bbox,
-      '\nWidth:',
-      width,
-      '\nHeight:',
-      height
-    );
     this.terrainService.getTerrain(bbox, width, height).subscribe(blob => {
-      const url = window.URL.createObjectURL(blob);
-      console.log('Terrain model URL:', url);
-      console.log('Blob size:', blob.size);
       const reader = new FileReader();
       reader.onload = async () => {
         if (reader.result instanceof ArrayBuffer) {

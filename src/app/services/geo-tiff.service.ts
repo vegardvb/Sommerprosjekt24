@@ -18,7 +18,6 @@ export class GeoTiffService {
    * @param arrayBuffer - ArrayBuffer containing the GeoTIFF data.
    */
   async decodeGeoTiff(arrayBuffer: ArrayBuffer): Promise<HeightmapData> {
-    console.log('Starting to decode GeoTIFF');
     try {
       const tiff = await GeoTIFF.fromArrayBuffer(arrayBuffer);
       const image = await tiff.getImage();
@@ -37,7 +36,6 @@ export class GeoTiffService {
       }
 
       const heightmapData = rasters as Float32Array;
-      console.log('GeoTIFF decoded:', { width, height, heightmapData });
       return { width, height, heightmapData };
     } catch (error) {
       console.error('Error decoding GeoTIFF file:', error);

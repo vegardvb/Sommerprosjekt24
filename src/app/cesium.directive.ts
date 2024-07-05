@@ -56,7 +56,6 @@ export class CesiumDirective implements OnInit {
     this.initializeViewer();
 
     const cameraMoveEndListener = () => {
-      console.log('Camera move end event detected');
       this.extractBbox();
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
@@ -187,14 +186,9 @@ export class CesiumDirective implements OnInit {
       const east = CesiumMath.toDegrees(rectangle.east);
       const north = CesiumMath.toDegrees(rectangle.north);
 
-      console.log('Extracted BBOX coordinates:', { west, south, east, north });
-
       const lowerLeft = proj4('EPSG:4326', 'EPSG:25833', [west, south]);
       const upperRight = proj4('EPSG:4326', 'EPSG:25833', [east, north]);
-      console.log('Transformed BBOX coordinates:', { lowerLeft, upperRight });
-
       const bbox = `${lowerLeft[0]},${lowerLeft[1]},${upperRight[0]},${upperRight[1]}`;
-      console.log('Projected BBOX in EPSG:25833:', bbox);
 
       this.bboxExtracted.emit(bbox);
     }
