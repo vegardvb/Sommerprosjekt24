@@ -86,7 +86,7 @@ export class CesiumDirective implements OnInit {
 
     const tileset = await Cesium3DTileset.fromIonAssetId(96188);
     this.viewer.scene.primitives.add(tileset);
-    this.tileset= tileset;
+    this.tileset = tileset;
 
     const globeClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
@@ -190,23 +190,59 @@ export class CesiumDirective implements OnInit {
   }
 
   /**
-   * Extracts the bounding box of the current view and emits the coordinates.
+   * Extracts the bounding box of the current view based on clipping planes and emits the coordinates.
    */
   private extractBbox(): void {
-    const rectangle = this.viewer.camera.computeViewRectangle(
-      this.viewer.scene.globe.ellipsoid
-    );
-    if (rectangle) {
-      const west = CesiumMath.toDegrees(rectangle.west);
-      const south = CesiumMath.toDegrees(rectangle.south);
-      const east = CesiumMath.toDegrees(rectangle.east);
-      const north = CesiumMath.toDegrees(rectangle.north);
+    const clippingPlanes = this.viewer.scene.globe.clippingPlanes;
+    if (clippingPlanes) {
+      const eastPlane = clippingPlanes.get(0);
+      const westPlane = clippingPlanes.get(1);
+      const northPlane = clippingPlanes.get(2);
+      const southPlane = clippingPlanes.get(3);
 
-      const lowerLeft = proj4('EPSG:4326', 'EPSG:25833', [west, south]);
-      const upperRight = proj4('EPSG:4326', 'EPSG:25833', [east, north]);
+      const distanceEast = eastPlane.distance;
+      const distanceWest = westPlane.distance;
+      const distanceNorth = northPlane.distance;
+      const distanceSouth = southPlane.distance;
+
+      // Calculate the coordinates based on the clipping distances and center
+      const centerCartographic =
+        this.viewer.scene.globe.ellipsoid.cartesianToCartographic(this.center);
+      const centerLongitude = CesiumMath.toDegrees(
+        centerCartographic.longitude
+      );
+      const centerLatitude = CesiumMath.toDegrees(centerCartographic.latitude);
+
+      // Use proj4 to transform distances to geographic coordinates
+      const center = proj4('EPSG:4326', 'EPSG:25833', [
+        centerLongitude,
+        centerLatitude,
+      ]);
+
+      const west = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0] - distanceWest,
+        center[1],
+      ]);
+      const east = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0] + distanceEast,
+        center[1],
+      ]);
+      const south = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0],
+        center[1] - distanceSouth,
+      ]);
+      const north = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0],
+        center[1] + distanceNorth,
+      ]);
+
+      const lowerLeft = proj4('EPSG:4326', 'EPSG:25833', [west[0], south[1]]);
+      const upperRight = proj4('EPSG:4326', 'EPSG:25833', [east[0], north[1]]);
       const bbox = `${lowerLeft[0]},${lowerLeft[1]},${upperRight[0]},${upperRight[1]}`;
 
       this.bboxExtracted.emit(bbox);
+    } else {
+      console.error('No clipping planes found.');
     }
   }
 
