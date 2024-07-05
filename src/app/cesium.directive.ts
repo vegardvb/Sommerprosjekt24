@@ -1,13 +1,4 @@
-import {
-  Directive,
-  ElementRef,
-  inject,
-  Input,
-  OnChanges,
-  OnInit,
-  Renderer2,
-  SimpleChanges,
-} from '@angular/core';
+import { Directive, ElementRef, inject, Input, OnInit } from '@angular/core';
 import {
   Viewer,
   ClippingPlane,
@@ -82,14 +73,15 @@ export class CesiumDirective implements OnInit {
     const scene = this.viewer.scene;
     const globe = scene.globe;
 
-    this.cableMeasurementService.getData().subscribe({
+    //TODO Refactor to own service
+    this.cableMeasurementService.getData(this.inquiryId).subscribe({
       next: data => {
         if (data) {
           console.log(data);
           // Ensure data is not undefined or null
           GeoJsonDataSource.load(data, {
-            stroke: Color.RED,
-            fill: Color.RED.withAlpha(0.5),
+            stroke: Color.BLUE,
+            fill: Color.BLUE.withAlpha(1),
             strokeWidth: 3,
             credit: "Provided by Petter's Cable measurement service",
           })
@@ -116,7 +108,6 @@ export class CesiumDirective implements OnInit {
       1.0
     );
 
-    //var position2 = Cartographic.toCartesian(this.center);
     const distance = 200.0;
 
     this.tileset = this.viewer.scene.primitives.add(
