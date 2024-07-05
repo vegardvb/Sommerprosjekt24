@@ -1,57 +1,53 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
-import { Math as cesiumMath, Cartesian2, Cartesian3 } from 'cesium';
-import { CableMeasurementService } from '../services/cable-measurement.service';
+import { Math as cesiumMath, Cartesian2 } from 'cesium';
+import { DropdownComponent } from '../dropdown/dropdown.component';
+import { SidenavComponent } from '../sidenav/sidenav.component';
 
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
   styleUrls: ['./map-view.component.css'],
   standalone: true,
-  imports: [CesiumDirective],
+  imports: [CesiumDirective, DropdownComponent, SidenavComponent],
 })
 export class MapViewComponent implements OnInit {
-  inquiryId: string | undefined;
+  inquiryId: number | undefined;
+  @ViewChild(CesiumDirective, { static: true })
+  cesiumDirective!: CesiumDirective;
+  alpha = 1;
+  tilesetVisible: boolean = true;
+  polygonsVisible: boolean = true;
+  Math!: Math;
 
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
-      this.filterMapByInquiryId(this.inquiryId);
     });
   }
 
-  filterMapByInquiryId(inquiryId: string | undefined) {
-    if (inquiryId) {
-      console.log('Filtering map for inquiry ID:', inquiryId);
-      // TODO: Fetch and display the relevant data on the map
+  public updateAlpha(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.alpha = inputElement.valueAsNumber;
+    this.cesiumDirective.updateGlobeAlpha(this.alpha / 100);
+  }
+
+  toggleTileset(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.tilesetVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setTilesetVisibility(this.tilesetVisible);
     }
   }
 
-  viewModel = {
-    translucencyEnabled: true,
-    fadeByDistance: true,
-    showVectorData: false,
-    alpha: 0.8,
-  };
-
-  updateCesium(): void {
-    const event = new CustomEvent('viewModelChange', {
-      detail: this.viewModel,
-    });
-    window.dispatchEvent(event);
-  }
-
-  computeCircle(radius: number) {
-    const positions = [];
-    for (let i = 0; i < 360; i++) {
-      const radians = cesiumMath.toRadians(i);
-      positions.push(
-        new Cartesian2(radius * Math.cos(radians), radius * Math.sin(radians))
-      );
+  togglePolygons(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.polygonsVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
     }
-    return positions;
   }
 }

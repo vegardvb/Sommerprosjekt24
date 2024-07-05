@@ -79,6 +79,8 @@ logs/
 
 
 # Misc
+./docs/notes.md
+/docs/notes.md
 /docs
 ./backend/sql/docs
 ./backend/__pycache__/*
