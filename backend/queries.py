@@ -60,11 +60,12 @@ def query_inquiries(connection):
     Returns:
         Dictonary : A dictonary containing the inquiries and its attributes.
     """
+    connection.execute(text("SET search_path TO analytics_cable_measurement_inquiries"))
     result = execute_query(
         connection=connection,
-        main_file_path=f"{QUERY_PATH}/fetch_inquiries.sql",
+        main_file_path=f"{QUERY_PATH}/inquiry/fetch_inquiries.sql",
         subquery_files={
-            "/*cable_measurements*/": f"{QUERY_PATH}/fetch_number_of_cable_measurements_by_inquiry.sql"
+            "/*cable_measurements*/": f"{QUERY_PATH}/inquiry/fetch_number_of_measurements_per_inquiry.sql"
         },
     )
 
@@ -81,7 +82,7 @@ def query_inquiries(connection):
     return result
 
 
-def query_geometry_by_inquiry(inquiry_id, connection):
+def query_area_geometry_by_inquiry(inquiry_id, connection):
     """A method for querying geometry by inquiry.
 
     Args:
@@ -91,17 +92,19 @@ def query_geometry_by_inquiry(inquiry_id, connection):
     Returns:
         Dictonary : A dictonary containing the geometry and its related inquiry.
     """
+    # TODO Refactor schema declaration
+    connection.execute(text("SET search_path TO analytics_cable_measurement_inquiries"))
     result = execute_query(
         connection=connection,
-        main_file_path=f"{QUERY_PATH}/fetch_geometry_by_inquiry.sql",
+        main_file_path=f"{QUERY_PATH}/geometry/fetch_area_geometry_by_inquiry.sql",
         params={"inquiry_id": inquiry_id},
     )
 
     return [dict(row) for row in result.mappings()]
 
 
-def query_cable_measurements_by_inquiry(inquiry_id, connection):
-    """A method for querying cable measurements by inquiry.
+def query_measurement_geometry_by_inquiry(inquiry_id, connection):
+    """A method for querying measurement geometry by inquiry.
 
     Args:
         inquiry_id (int): The id of the inquiry to query.
@@ -109,9 +112,10 @@ def query_cable_measurements_by_inquiry(inquiry_id, connection):
     Returns:
         Dictonary : A dictonary containing the geometry and its related inquiry.
     """
+    connection.execute(text("SET search_path TO analytics_cable_measurement_inquiries"))
     result = execute_query(
         connection=connection,
-        main_file_path=f"{QUERY_PATH}/fetch_cable_measurements_by_inquiry.sql",
+        main_file_path=f"{QUERY_PATH}/geometry/fetch_measurement_geometry_by_inquiry.sql",
         params={"inquiry_id": inquiry_id},
     )
 

@@ -74,6 +74,10 @@ logs/
 .nx/cache
 .nx/workspace-data
 
+# Backend 
+./backend/sql/queries/templates
+
+
 # Misc
 /docs
 ./backend/sql/docs
