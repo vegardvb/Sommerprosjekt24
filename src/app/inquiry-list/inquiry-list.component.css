@@ -2,3 +2,18 @@ th {
   color: white;
   background-color: #004c97;
 }
+
+.title {
+  font-size: 2em;
+  color: #004c97;
+
+  margin-bottom: 20px;
+  font-family: 'Arial', sans-serif;
+}
+
+.search-bar {
+  font-size: 1em;
+  background-color: #f5f4f4; /* Slightly darker background */
+  border: 1px solid #bbbbbb; /* Slightly darker border */
+  border-radius: 2px;
+}
