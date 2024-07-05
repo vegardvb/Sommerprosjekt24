@@ -2,3 +2,7 @@ th {
   color: white;
   background-color: #004c97;
 }
+
+.search-container p-dropdown {
+  margin-right: 10px; /* Add margin to the right of the dropdown */
+    }

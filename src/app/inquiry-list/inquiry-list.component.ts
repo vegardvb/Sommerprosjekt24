@@ -8,6 +8,8 @@ import { ToastModule } from 'primeng/toast';
 import { DataService } from '../data.service';
 import { Inquiry } from '../../models/inquiry-interface';
 import { Router } from '@angular/router';
+import { DropdownModule } from 'primeng/dropdown';
+import { SelectItem } from 'primeng/api';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -19,6 +21,7 @@ import { Router } from '@angular/router';
     ButtonModule,
     InputTextModule,
     ToastModule,
+    DropdownModule,
   ],
   templateUrl: './inquiry-list.component.html',
   styleUrls: ['./inquiry-list.component.css'],
@@ -30,18 +33,32 @@ export class InquiryListComponent implements OnInit {
     'id',
     'name',
     'description',
+    'status_name',
     'organization',
     'mail',
+    'address',
     'municipality',
-    'status',
     'processing_deadline',
     'start_date',
     'end_date',
-    'status_name',
+
   ];
   selectedProduct!: Inquiry;
-
   @ViewChild('dt1') dt1!: Table;
+
+  groupByField: string | undefined;
+  groupOptions: SelectItem[] = [
+    { label: 'None', value: null },
+    { label: 'Name', value: 'name' },
+    { label: 'Description', value: 'description' },
+    { label: 'Status', value: 'status_name' },
+    { label: 'Organization', value: 'organization' },
+    { label: 'Email', value: 'mail' },
+    { label: 'Municipality', value: 'municipality' },
+    { label: 'Processing Deadline', value: 'processing_deadline' },
+    { label: 'Start Date', value: 'start_date' },
+    { label: 'End Date', value: 'end_date' },
+  ];
 
   constructor(
     private dataService: DataService,
@@ -57,7 +74,7 @@ export class InquiryListComponent implements OnInit {
           description: inquiry.description,
           mail: inquiry.mail,
           municipality: inquiry.municipality,
-          adress: inquiry.adress,
+          address: inquiry.address,
           status: inquiry.status,
           processing_deadline: inquiry.processing_deadline,
           start_date: inquiry.start_date,
@@ -68,7 +85,9 @@ export class InquiryListComponent implements OnInit {
       error: error => {
         console.error('Error fetching data:', error);
       },
-      complete: () => {},
+      complete: () => {
+        console.log('Data fetching completed.');
+      },
     });
   }
 
@@ -87,4 +106,12 @@ export class InquiryListComponent implements OnInit {
       });
     }
   }
+
+  onGroupChange(event: any): void {
+    if (this.dt1) {
+      this.dt1.reset();
+    }
+  }
+
 }
+ 
