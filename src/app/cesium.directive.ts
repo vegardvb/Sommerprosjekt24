@@ -86,6 +86,7 @@ export class CesiumDirective implements OnInit {
 
     const tileset = await Cesium3DTileset.fromIonAssetId(96188);
     this.viewer.scene.primitives.add(tileset);
+    this.tileset= tileset;
 
     const globeClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
@@ -122,7 +123,7 @@ export class CesiumDirective implements OnInit {
     this.viewer.scene.screenSpaceCameraController.enableCollisionDetection =
       false;
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
-      new NearFarScalar(400.0, 0.0, 800.0, 1.0);
+      new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
   }
 
   /**
