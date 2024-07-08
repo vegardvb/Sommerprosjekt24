@@ -28,6 +28,7 @@ import { SelectItem } from 'primeng/api';
 })
 export class InquiryListComponent implements OnInit {
   products: Inquiry[] = [];
+  sortedProducts: Inquiry[] = [];
   searchValue: string | undefined;
   globalFilterFields: string[] = [
     'id',
@@ -46,20 +47,19 @@ export class InquiryListComponent implements OnInit {
   selectedProduct!: Inquiry;
   @ViewChild('dt1') dt1!: Table;
 
-  groupByField: string | undefined;
-  groupOptions: SelectItem[] = [
-    { label: 'None', value: null },
-    { label: 'Name', value: 'name' },
-    { label: 'Description', value: 'description' },
-    { label: 'Status', value: 'status_name' },
-    { label: 'Organization', value: 'organization' },
-    { label: 'Email', value: 'mail' },
-    { label: 'Municipality', value: 'municipality' },
-    { label: 'Processing Deadline', value: 'processing_deadline' },
-    { label: 'Start Date', value: 'start_date' },
-    { label: 'End Date', value: 'end_date' },
-  ];
-
+  sortState: { [key: string]: number } = {
+    inquiry_id: 0,
+    name: 0,
+    description: 0,
+    status: 0,
+    mail: 0,
+    municipality: 0,
+    address: 0,
+    processing_deadline: 0,
+    start_date: 0,
+    end_date: 0,
+    status_name: 0,
+  };
   constructor(
     private dataService: DataService,
     private router: Router
@@ -81,6 +81,7 @@ export class InquiryListComponent implements OnInit {
           end_date: inquiry.end_date,
           status_name: inquiry.status_name,
         }));
+        this.sortedProducts = [...this.products];
       },
       error: error => {
         console.error('Error fetching data:', error);
@@ -106,12 +107,29 @@ export class InquiryListComponent implements OnInit {
       });
     }
   }
-
-  onGroupChange(event: any): void {
-    if (this.dt1) {
-      this.dt1.reset();
-    }
+  asKeyOfInquiry(field: string): keyof Inquiry {
+    return field as keyof Inquiry;
   }
 
+  sortBy(field: keyof Inquiry): void {
+    if (!this.sortState.hasOwnProperty(field)) return;
+
+    this.sortState[field]++;
+    if (this.sortState[field] > 2) {
+      this.sortState[field] = 0;
+    }
+
+    switch (this.sortState[field]) {
+      case 1:
+        this.sortedProducts.sort((a, b) => (a[field] ?? '') > (b[field] ?? '') ? 1 : -1);
+        break;
+      case 2:
+        this.sortedProducts.sort((a, b) => (a[field] ?? '') < (b[field] ?? '') ? 1 : -1);
+        break;
+      default:
+        this.sortedProducts = [...this.products];
+        break;
+    }
+  }
 }
  

@@ -1,7 +1,16 @@
 th {
   color: white;
   background-color: #004c97;
+  cursor: pointer;
+  text-decoration: underline;
 }
+
+
+th:hover {
+  color: darkblue;
+}
+
+
 html, body {
   height: 100%;
   margin: 0;

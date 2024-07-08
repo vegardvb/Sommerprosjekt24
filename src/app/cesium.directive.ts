@@ -53,7 +53,7 @@ export class CesiumDirective implements OnInit {
     private el: ElementRef,
     private geometryService: GeometryService,
     private route: ActivatedRoute,
-    private mapview: MapViewComponent
+
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -124,6 +124,7 @@ export class CesiumDirective implements OnInit {
       false;
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
       new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
+    
   }
 
   /**
@@ -148,7 +149,7 @@ export class CesiumDirective implements OnInit {
             });
           }
           this.updateMap(this.viewer);
-          this.updateGlobeAlpha(1);
+          
         },
         error: error => {
           console.error('Error fetching geometries:', error);
@@ -271,10 +272,10 @@ export class CesiumDirective implements OnInit {
   }
 
   public updateGlobeAlpha(alpha: number): void {
-    // Adjust globe base color translucency
-    this.viewer.scene.globe.translucency.enabled = true;
-    this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue =
-      alpha;
+    if (this.viewer) {
+      this.viewer.scene.globe.translucency.enabled = true;
+      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = alpha;}
+    
   }
 
   setTilesetVisibility(visible: boolean) {
@@ -283,8 +284,10 @@ export class CesiumDirective implements OnInit {
     }
   }
   setPolygonsVisibility(visible: boolean) {
-    this.polygons.forEach(polygon => {
+    if (this.polygons) {
+      this.polygons.forEach(polygon => {
       polygon.show = visible;
-    });
+    });}
+    
   }
 }

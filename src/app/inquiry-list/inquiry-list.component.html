@@ -4,13 +4,6 @@
   <span>
     <div class="search-container">
 
-    <p-dropdown 
-    [options]="groupOptions" 
-    [(ngModel)]="groupByField" 
-    placeholder="Sort By" 
-    (onChange)="onGroupChange($event)">
-    
-  </p-dropdown>
     <input
       class="my-5 border p-2"
       id="searchbar"
@@ -26,46 +19,42 @@
   </span>
   <p-table
     #dt1
-    [value]="products"
+    [value]="sortedProducts"
     [scrollable]="true"
     scrollHeight="900px"
     [(selection)]="selectedProduct"
     dataKey="id"
     selectionMode="single"
     [globalFilterFields]="globalFilterFields"
-    [groupRowsBy]="groupByField"
-    [sortField]="groupByField"
-    [sortMode]="'single'"
-    [sortOrder]="1"
     (onRowSelect)="onInquiryClick(selectedProduct.inquiry_id)"
   >
-    <ng-template pTemplate="header">
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Status</th>
-        <th>Email</th>
-        <th>Municipality</th>
-        <th>Address</th>
-        <th>Deadline</th>
-        <th>Start Date</th>
-        <th>End Date</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-product>
-      <tr [pSelectableRow]="product">
-        <td>{{ product.inquiry_id }}</td>
-        <td>{{ product.name }}</td>
-        <td>{{ product.description }}</td>
-        <td>{{ product.status_name }}</td>
-        <td>{{ product.mail }}</td>
-        <td>{{ product.municipality }}</td>
-        <td>{{ product.address }}</td>
-        <td>{{ product.processing_deadline }}</td>
-        <td>{{ product.start_date }}</td>
-        <td>{{ product.end_date }}</td>
-      </tr>
-    </ng-template>
-  </p-table>
+  <ng-template pTemplate="header">
+    <tr >
+      <th (click)="sortBy(asKeyOfInquiry('inquiry_id'))">ID</th>
+      <th (click)="sortBy(asKeyOfInquiry('name'))">Name</th>
+      <th (click)="sortBy(asKeyOfInquiry('description'))">Description</th>
+      <th (click)="sortBy(asKeyOfInquiry('status_name'))">Status</th>
+      <th (click)="sortBy(asKeyOfInquiry('mail'))">Email</th>
+      <th (click)="sortBy(asKeyOfInquiry('municipality'))">Municipality</th>
+      <th (click)="sortBy(asKeyOfInquiry('address'))">Address</th>
+      <th (click)="sortBy(asKeyOfInquiry('processing_deadline'))">Deadline</th>
+      <th (click)="sortBy(asKeyOfInquiry('start_date'))">Start Date</th>
+      <th (click)="sortBy(asKeyOfInquiry('end_date'))">End Date</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-product>
+    <tr [pSelectableRow]="product">
+      <td data-label="ID">{{ product.inquiry_id }}</td>
+      <td data-label="Name">{{ product.name }}</td>
+      <td data-label="Description">{{ product.description }}</td>
+      <td data-label="Status">{{ product.status_name }}</td>
+      <td data-label="Email">{{ product.mail }}</td>
+      <td data-label="Municipality">{{ product.municipality }}</td>
+      <td data-label="Address">{{ product.address }}</td>
+      <td data-label="Deadline">{{ product.processing_deadline }}</td>
+      <td data-label="Start Date">{{ product.start_date }}</td>
+      <td data-label="End Date">{{ product.end_date }}</td>
+    </tr>
+  </ng-template>
+</p-table>
 </div>
