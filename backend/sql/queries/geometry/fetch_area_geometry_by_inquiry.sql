@@ -5,12 +5,12 @@
  */
 SELECT
     inquiry.id AS inquiry_id,
-    public.st_asgeojson (
+    PUBLIC.st_asgeojson (
         PUBLIC.st_transform (PUBLIC.st_collect (geometry.geom), 4326)
     ) AS geometry
 FROM
-    inquiry inquiry
-    INNER JOIN geometry geometry ON geometry.inquiry_id = inquiry.id
+    "Inquiry" inquiry
+    INNER JOIN "Geometry" geometry ON geometry.inquiry_id = inquiry.id
     WHERE inquiry.id = :inquiry_id
 GROUP BY
     inquiry.id
