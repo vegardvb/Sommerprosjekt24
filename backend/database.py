@@ -1,4 +1,5 @@
-from sqlalchemy import ResultProxy, create_engine
+from sqlalchemy import ResultProxy, create_engine, text
+from sqlalchemy.orm import sessionmaker
 
 # Enviroment varaibles
 from dotenv import load_dotenv
@@ -16,9 +17,18 @@ db_port = os.getenv("DB_PORT")
 
 # Create connection to database
 DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+SCHEMA = f"analytics_cable_measurement"
+
 
 # Engine for executing queries
 engine = create_engine(DATABASE_URL, echo=True, future=True)
+
+# Session = sessionmaker(bind=engine)
+# session = Session()
+
+# # Execute SQL to set the search path
+# session.execute(text("SET search_path TO analytics_cable_measurement"))
+# session.commit()
 
 
 def get_db():
