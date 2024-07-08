@@ -14,3 +14,9 @@ client = TestClient(app)
 def test_read_main():
     response = client.get("/")
     assert response.status_code == 200
+
+
+def test_get_terrain():
+    response = client.get("/terrain?bbox=272669,7037582,273109,7038148&width=440&height=566")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/tiff"

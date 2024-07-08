@@ -15,35 +15,18 @@
   />
 </head>
 
-<app-sidenav class="sidenav"></app-sidenav>
-<div class="map" id="cesiumContainer" appCesium>
-  <div class="controls">
-    <label for="translucencySlider">Opacity:</label>
-    <input
-      type="range"
-      id="translucencySlider"
-      min="1"
-      max="100"
-      step="1"
-      (input)="updateAlpha($event)"
-      value="100"
-    />
-    <p>{{ alpha }} %</p>
-    <label>
-      <input
-        type="checkbox"
-        [checked]="tilesetVisible"
-        (change)="toggleTileset($event)"
-      />
-      View Buildings
-    </label>
-    <label>
-      <input
-        type="checkbox"
-        [checked]="polygonsVisible"
-        (change)="togglePolygons($event)"
-      />
-      View Workarea
-    </label>
-  </div>
-</div>
+
+  <app-sidenav class="sidenav"></app-sidenav>
+    <div class="map" id="cesiumContainer" appCesium>
+      <div class="controls">
+        <label for="translucencySlider">Opacity:</label>
+        <input type="range" id="translucencySlider" min="1" max="100" step="1" (input)="updateAlpha($event)" value="100">
+        <p> {{ alpha }} % </p>
+        <label>
+          <input type="checkbox" [checked]="tilesetVisible" (change)="toggleTileset($event)"> View Buildings
+        </label>
+        <label>
+          <input type="checkbox" [checked]="polygonsVisible" (change)="togglePolygons($event)"> View Workarea
+        </label>
+      </div>
+
