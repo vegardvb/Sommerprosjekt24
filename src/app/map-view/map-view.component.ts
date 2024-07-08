@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
-import { Math as cesiumMath, Cartesian2 } from 'cesium';
-import { DropdownComponent } from '../dropdown/dropdown.component';
+import { TerrainService } from '../services/terrain.service';
+import { GeoTiffService } from '../services/geo-tiff.service';
+import { Subscription } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 
 @Component({
@@ -10,49 +11,100 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
   templateUrl: './map-view.component.html',
   styleUrls: ['./map-view.component.css'],
   standalone: true,
-  imports: [CesiumDirective, DropdownComponent, SidenavComponent],
+  imports: [CesiumDirective, SidenavComponent],
 })
-export class MapViewComponent implements OnInit {
+export class MapViewComponent implements OnInit, OnDestroy {
+  @ViewChild(CesiumDirective, { static: true })
+  cesiumDirective!: CesiumDirective;
+  alpha = 1;
+  tilesetVisible: boolean = true;
+  polygonsVisible: boolean = true;
+  Math!: Math;
   inquiryId: number | undefined;
-  CesiumDirective!: CesiumDirective;
+  private queryParamsSubscription: Subscription | undefined;
+  private bboxSubscription: Subscription | undefined;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private terrainService: TerrainService,
+    private geoTiffService: GeoTiffService
+  ) {}
 
   ngOnInit() {
-    this.route.queryParams.subscribe(params => {
+    this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
-      this.filterMapById(this.inquiryId);
     });
+
+    this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
+      bbox => {
+        const { width, height } = this.calculateWidthHeight(bbox);
+        this.fetchTerrain(bbox, width, height);
+      }
+    );
   }
 
-  filterMapById(inquiryId: number | undefined) {
-    if (inquiryId) {
-      console.log('Filtering map for inquiry ID:', inquiryId);
+  ngOnDestroy() {
+    if (this.queryParamsSubscription) {
+      this.queryParamsSubscription.unsubscribe();
+    }
+    if (this.bboxSubscription) {
+      this.bboxSubscription.unsubscribe();
     }
   }
 
-  viewModel = {
-    translucencyEnabled: true,
-    fadeByDistance: true,
-    showVectorData: false,
-    alpha: 0.8,
-  };
-
-  updateCesium(): void {
-    const event = new CustomEvent('viewModelChange', {
-      detail: this.viewModel,
-    });
-    window.dispatchEvent(event);
+  /**
+   * Calculates the width and height based on the bounding box coordinates.
+   */
+  calculateWidthHeight(bbox: string): { width: number; height: number } {
+    const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
+    const width = Math.abs(maxX - minX);
+    const height = Math.abs(maxY - minY);
+    return { width, height };
   }
 
-  computeCircle(radius: number) {
-    const positions = [];
-    for (let i = 0; i < 360; i++) {
-      const radians = cesiumMath.toRadians(i);
-      positions.push(
-        new Cartesian2(radius * Math.cos(radians), radius * Math.sin(radians))
-      );
+  /**
+   * Fetches the terrain data based on the provided bounding box, width, and height.
+   */
+  fetchTerrain(bbox: string, width: number, height: number) {
+    this.terrainService.getTerrain(bbox, width, height).subscribe(blob => {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        if (reader.result instanceof ArrayBuffer) {
+          try {
+            const arrayBuffer: ArrayBuffer = reader.result;
+            const decodedData =
+              await this.geoTiffService.decodeGeoTiff(arrayBuffer);
+            console.log('Decoded GeoTIFF Data:', decodedData);
+          } catch (error) {
+            console.error('Error decoding GeoTIFF file:', error);
+          }
+        } else {
+          console.error('Failed to read the file as an ArrayBuffer.');
+        }
+      };
+      reader.readAsArrayBuffer(blob);
+    });
+  }
+
+  public updateAlpha(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.alpha = inputElement.valueAsNumber;
+    this.cesiumDirective.updateGlobeAlpha(this.alpha / 100);
+  }
+
+  toggleTileset(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.tilesetVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setTilesetVisibility(this.tilesetVisible);
     }
-    return positions;
+  }
+
+  togglePolygons(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.polygonsVisible = inputElement.checked;
+    if (this.cesiumDirective) {
+      this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
+    }
   }
 }

@@ -1,3 +1,33 @@
-<app-sidenav class="sidenav"></app-sidenav>
 
-<div class="map" id="cesiumContainer" appCesium></div>
+<head>
+  <base href="/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://unpkg.com/primeflex/primeflex.css" rel="stylesheet" />
+  <link href="https://unpkg.com/primeicons/primeicons.css" rel="stylesheet" />
+  <link
+    href="https://unpkg.com/quill@1.3.7/dist/quill.snow.css"
+    rel="stylesheet"
+  />
+  <link
+    rel="icon"
+    type="image/x-icon"
+    href="https://primefaces.org/cdn/primeng/images/favicon.png"
+  />
+</head>
+
+
+  <app-sidenav class="sidenav"></app-sidenav>
+    <div class="map" id="cesiumContainer" appCesium>
+      <div class="controls">
+        <label for="translucencySlider">Opacity:</label>
+        <input type="range" id="translucencySlider" min="1" max="100" step="1" (input)="updateAlpha($event)" value="100">
+        <p> {{ alpha }} % </p>
+        <label>
+          <input type="checkbox" [checked]="tilesetVisible" (change)="toggleTileset($event)"> View Buildings
+        </label>
+        <label>
+          <input type="checkbox" [checked]="polygonsVisible" (change)="togglePolygons($event)"> View Workarea
+        </label>
+      </div>
+

@@ -34,7 +34,6 @@ export class CableMeasurementInfoComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
-      console.log(this.inquiryId);
       if (this.inquiryId) {
         this.fetchCableInfo(this.inquiryId);
       } else {
@@ -44,19 +43,14 @@ export class CableMeasurementInfoComponent implements OnInit {
   }
 
   fetchCableInfo(inquiry_id: string): void {
-    console.log('kjører');
     this.cableInfoService.getData(inquiry_id).subscribe({
       next: (response: CableInfo[]) => {
         this.cableInfo = response;
-        console.log('Fetched data:', response);
-        console.log(response[0].feature_type);
       },
       error: error => {
         console.error('Error fetching data:', error);
       },
-      complete: () => {
-        console.log('Data fetching completed.');
-      },
+      complete: () => {},
     });
   }
 }

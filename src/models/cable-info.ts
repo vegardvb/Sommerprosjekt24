@@ -5,6 +5,6 @@ export interface CableInfo {
       text: string;
       value: string;
       geomType: string;
-    };
-  };
+    } | null;
+  } | null;
 }
