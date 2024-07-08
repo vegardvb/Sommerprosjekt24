@@ -13,7 +13,7 @@ class ActivatedRouteStub {
   private subject = new BehaviorSubject(convertToParamMap({}));
   paramMap = this.subject.asObservable();
 
-  setParamMap(params: {}) {
+  setParamMap(params: object) {
     this.subject.next(convertToParamMap(params));
   }
 }
