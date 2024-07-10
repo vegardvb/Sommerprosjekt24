@@ -102,21 +102,17 @@ def fetch_geotiff(bbox: str, width: float, height: float):
 @app.get("/process-geotiff")
 async def process_geotiff(file_path: str):
     try:
-        # Ensure the file path exists
         if not os.path.exists(file_path):
             logger.error(f"GeoTIFF file not found at: {file_path}")
             raise HTTPException(status_code=404, detail="GeoTIFF file not found")
 
         logger.info(f"Processing GeoTIFF file at: {file_path}")
 
-        # Create an output directory
         output_dir = os.path.join(tempfile.gettempdir(), "output")
         os.makedirs(output_dir, exist_ok=True)
-        
-        # Run Docker command to generate terrain tiles
+
         client = docker.from_env()
 
-        # First command to create terrain files
         container1 = client.containers.run(
             "cesium-terrain-builder",
             f"ctb-tile -f Mesh -C -N -o /output /input/{os.path.basename(file_path)}",
@@ -133,7 +129,6 @@ async def process_geotiff(file_path: str):
             logger.error(f"Docker container exited with code {result1}")
             raise HTTPException(status_code=500, detail="Error during terrain tile generation")
 
-        # Second command to create layer.json
         container2 = client.containers.run(
             "cesium-terrain-builder",
             f"ctb-tile -f Mesh -C -N -l -o /output /input/{os.path.basename(file_path)}",
@@ -152,27 +147,10 @@ async def process_geotiff(file_path: str):
 
         logger.info("Terrain tiles generated successfully using Docker.")
         
-        # Read and modify the layer.json file
         tile_path = os.path.join(output_dir, "layer.json")
-        logger.info(f"Checking for layer.json at: {tile_path}")
         if os.path.exists(tile_path):
-            logger.info(f"layer.json exists: {os.path.exists(tile_path)}")
-            
-            # Read the layer.json file
-            with open(tile_path, "r") as file:
-                layer_json = json.load(file)
-            
-            # Modify the tile URLs
-            base_url = "http://localhost:8000/output"
-            layer_json["tiles"] = [f"{base_url}/{tile}" for tile in layer_json["tiles"]]
-            
-            # Write the modified layer.json back
-            with open(tile_path, "w") as file:
-                json.dump(layer_json, file)
-
-            layer_url = f"http://localhost:8000/output/layer.json"
-            logger.info(f"Serving layer.json at: {layer_url}")
-            return {"layerUrl": layer_url}
+            logger.info("Serving layer.json at: http://localhost:8000/output/layer.json")
+            return {"layerUrl": "http://localhost:8000/output/layer.json"}
         else:
             logger.error("Failed to generate terrain tiles: layer.json not found.")
             raise HTTPException(status_code=500, detail="Failed to generate terrain tiles")
@@ -180,6 +158,9 @@ async def process_geotiff(file_path: str):
     except Exception as e:
         logger.error(f"Error during terrain tile generation: {e}")
         raise HTTPException(status_code=500, detail=f"Error processing GeoTIFF: {e}")
+
+# Serve static files
+app.mount("/output", StaticFiles(directory=os.path.join(tempfile.gettempdir(), "output")), name="output")
 
 # Serve the output directory where the terrain tiles are generated
 app.mount("/output", StaticFiles(directory=os.path.join(tempfile.gettempdir(), "output")), name="output")
