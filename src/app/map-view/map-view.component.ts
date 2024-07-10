@@ -16,7 +16,7 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
-  alpha = 1;
+  alpha = 100;
   tilesetVisible: boolean = true;
   polygonsVisible: boolean = true;
   Math!: Math;

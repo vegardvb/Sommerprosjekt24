@@ -22,6 +22,13 @@ import {
   PolygonHierarchy,
   Entity,
   GeoJsonDataSource,
+  Cartesian2,
+  ScreenSpaceEventType,
+  defined,
+  ScreenSpaceEventHandler,
+  JulianDate,
+  CallbackProperty,
+  PositionProperty,
 } from 'cesium';
 import { CableMeasurementService } from './services/cable-measurement.service';
 import { Geometry } from '../models/geometry-interface';
@@ -44,19 +51,24 @@ export class CesiumDirective implements OnInit {
   alpha!: number;
   tileset!: Cesium3DTileset;
   polygons: Entity[] = [];
-  @Output() bboxExtracted = new EventEmitter<string>();
+  @Output() bboxExtracted = new EventEmitter<string>();   
+  @Output() selectedEntityChanged = new EventEmitter<Entity>();
+
   inquiryId: number | undefined;
   products: Geometry[] = [];
   coords: number[][][][] = [];
   center!: Cartesian3;
+  private isEditing = false;
+  private selectedEntity: Entity | null = null;
 
   private viewer!: Viewer;
+  private handler: any;
+  private currentPopup: HTMLElement | null = null;
 
   constructor(
     private el: ElementRef,
     private geometryService: GeometryService,
     private route: ActivatedRoute,
-    private mapview: MapViewComponent
   ) {}
 
   // Service for fetching data from the backend
@@ -121,6 +133,30 @@ export class CesiumDirective implements OnInit {
       },
     });
 
+        // Set up a screen space event handler to select entities and create a popup
+        this.viewer.screenSpaceEventHandler.setInputAction((movement: { position: Cartesian2; }) => {
+          var pickedObject = this.viewer.scene.pick(movement.position);
+          if (defined(pickedObject)) {
+            var entity = pickedObject.id;
+            this.viewer.selectedEntity = entity;  // Set the selected entity
+            // Create a popup next to the mouse click
+            //this.createPopup(movement.position, pickedObject);
+          } else {
+            this.viewer.selectedEntity = undefined;
+          }
+        }, ScreenSpaceEventType.LEFT_CLICK);
+    
+        this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
+          if (defined(entity)) {
+            console.log('Entity selected: ', entity.id);
+            this.selectedEntityChanged.emit(entity)
+            console.log('emitafterselect', this.selectedEntityChanged)
+          } else {
+            console.log('No entity selected');
+          }
+        });
+      
+
     globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
       1000.0,
       0.0,
@@ -134,9 +170,6 @@ export class CesiumDirective implements OnInit {
       await Cesium3DTileset.fromIonAssetId(96188)
     );
 
-    const tileset = await Cesium3DTileset.fromIonAssetId(96188);
-    this.viewer.scene.primitives.add(tileset);
-    this.tileset = tileset;
 
     const globeClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
@@ -167,7 +200,7 @@ export class CesiumDirective implements OnInit {
     });
 
     this.viewer.scene.globe.clippingPlanes = globeClippingPlanes;
-    tileset.clippingPlanes = tilesetClippingPlanes;
+    this.tileset.clippingPlanes = tilesetClippingPlanes;
 
     this.viewer.scene.globe.tileCacheSize = 10000;
     this.viewer.scene.screenSpaceCameraController.enableCollisionDetection =
@@ -319,6 +352,166 @@ export class CesiumDirective implements OnInit {
       }
     );
   }
+
+  private createPopup(screenPosition: Cartesian2, entity: Entity) {
+    if (this.currentPopup) {
+      this.currentPopup.remove();
+    }
+
+    const popup = document.createElement('div');
+    popup.style.position = 'absolute';
+    popup.style.backgroundColor = 'white';
+    popup.style.border = '1px solid black';
+    popup.style.padding = '10px';
+    popup.style.zIndex = '999';
+    popup.style.left = `${screenPosition.x}px`;
+    popup.style.top = `${screenPosition.y}px`;
+
+    const button = document.createElement('button');
+    button.innerText = this.isEditing ? 'Disable Editing' : 'Enable Editing';
+    popup.appendChild(button);
+
+    document.body.appendChild(popup);
+
+    button.addEventListener('click', () => {
+      this.isEditing = !this.isEditing;
+      if (this.isEditing) {
+        this.enableEditing();
+        button.innerText = 'Disable Editing';
+      } else {
+        this.disableEditing();
+        button.innerText = 'Enable Editing';
+        if (this.currentPopup) {
+          this.currentPopup.remove();
+          this.currentPopup = null;
+      }
+      }
+    });
+
+    this.currentPopup = popup;
+  }
+
+  private isDragging = false; // To keep track of the dragging state
+
+private enableEditing() {
+    this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
+
+    this.handler.setInputAction((movement: any) => {
+        const pickedObject = this.viewer.scene.pick(movement.position);
+        if (defined(pickedObject)) {
+            this.selectedEntity = pickedObject.id as Entity;
+            this.selectedEntityChanged.emit(pickedObject); // Emit the event
+            console.log('totitties',this.selectedEntityChanged)
+           
+            // Disable camera interactions
+            this.viewer.scene.screenSpaceCameraController.enableRotate = false;
+            this.viewer.scene.screenSpaceCameraController.enableZoom = false;
+            this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
+            this.viewer.scene.screenSpaceCameraController.enableLook = false;
+        }
+    }, ScreenSpaceEventType.LEFT_DOWN);
+
+    this.handler.setInputAction((movement: any) => {
+      if (this.isDragging && defined(this.selectedEntity)) {
+          const cartesian = this.viewer.camera.pickEllipsoid(movement.endPosition);
+          if (defined(cartesian)) {
+              if (defined(this.selectedEntity.polyline?.positions)) {
+                  const positions = this.selectedEntity.polyline.positions.getValue(JulianDate.now());
+                  if (positions && positions.length > 0) {
+                      const offset = Cartesian3.subtract(cartesian, positions[0], new Cartesian3());
+                      const newPositions = positions.map((position: Cartesian3) => Cartesian3.add(position, offset, new Cartesian3()));
+                      this.selectedEntity.polyline.positions = new CallbackProperty(() => newPositions, false);
+                  }
+              } else if (defined(this.selectedEntity.position)) {
+                  this.selectedEntity.position = new CallbackProperty(() => cartesian, false) as unknown as PositionProperty;
+              }
+          }
+      }
+  }, ScreenSpaceEventType.MOUSE_MOVE);
+
+    this.handler.setInputAction(() => {
+        if (this.isDragging) {
+            this.isDragging = false;
+        } else if (defined(this.selectedEntity)) {
+            this.isDragging = true;
+        }
+
+        if (!this.isDragging) {
+            // Re-enable camera interactions after dropping
+            this.viewer.scene.screenSpaceCameraController.enableRotate = true;
+            this.viewer.scene.screenSpaceCameraController.enableZoom = true;
+            this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
+            this.viewer.scene.screenSpaceCameraController.enableTilt = true;
+            this.viewer.scene.screenSpaceCameraController.enableLook = true;
+        }
+    }, ScreenSpaceEventType.LEFT_UP);
+
+    this.handler.setInputAction((movement: any) => {
+      const pickedObject = this.viewer.scene.pick(movement.position);
+      if (!defined(pickedObject)) {
+          if (this.currentPopup) {
+              this.currentPopup.remove();
+              this.currentPopup = null;
+          }
+      }
+  }, ScreenSpaceEventType.LEFT_CLICK);
+}
+
+
+private disableEditing() {
+    if (this.handler) {
+        this.handler.destroy();
+        this.handler = null;
+    }
+    this.isDragging = false;
+    this.selectedEntity = null;
+    // Ensure camera interactions are re-enabled if editing is disabled
+    this.viewer.scene.screenSpaceCameraController.enableRotate = true;
+    this.viewer.scene.screenSpaceCameraController.enableZoom = true;
+    this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
+    this.viewer.scene.screenSpaceCameraController.enableTilt = true;
+    this.viewer.scene.screenSpaceCameraController.enableLook = true;
+}
+
+  private addSampleCable() {
+    const start = Cartesian3.fromDegrees(10.436776, 63.421800, 0);
+    const end = Cartesian3.fromDegrees(10.437776, 63.421800, 0); // Slightly offset for visibility
+
+    const sampleCable = this.viewer.entities.add({
+        name: 'Sample Cable',
+        polyline: {
+            positions: [start, end],
+            width: 5,
+            material: Color.RED,
+        }
+    });
+
+    const pointPosition = Cartesian3.fromDegrees(10.436776, 63.421500, 50); // Nearby point
+
+    const samplePoint = this.viewer.entities.add({
+        name: 'Sample Point',
+        position: pointPosition,
+        point: {
+            pixelSize: 10,
+            color: Color.BLUE
+        }
+    });
+
+    
+}
+
+public updateEntityPosition(cartesian: Cartesian3) {
+  if (this.selectedEntity) {
+      if (this.selectedEntity.polyline?.positions) {
+          const positions = this.selectedEntity.polyline.positions.getValue(JulianDate.now());
+          const offset = Cartesian3.subtract(cartesian, positions[0], new Cartesian3());
+          const newPositions = positions.map((position: Cartesian3) => Cartesian3.add(position, offset, new Cartesian3()));
+          this.selectedEntity.polyline.positions = new CallbackProperty(() => newPositions, false);
+      } else if (this.selectedEntity.position) {
+          this.selectedEntity.position = new CallbackProperty(() => cartesian, false) as unknown as PositionProperty;
+      }
+  }
+}
 
   public updateGlobeAlpha(alpha: number): void {
     // Adjust globe base color translucency
