@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, HostListener, Output, ViewEncapsulation } from '@angular/core';
 import { SidenavService } from './sidenav.service';
 import { SidenavLinkComponent } from './sidenav-link.component';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
@@ -21,6 +21,9 @@ export class SidenavComponent {
   longitude: number = 0;
   latitude: number = 0;
   height: number = 0;
+  isEditing: boolean = false;
+  @Output() editingToggled = new EventEmitter<boolean>();
+  
 
   get sidenavWidth(): number {
     return parseInt(
@@ -104,6 +107,11 @@ export class SidenavComponent {
     }
   }
   
+  toggleEditing() {
+    this.isEditing = !this.isEditing;
+    this.editingToggled.emit(this.isEditing);
+    console.log('toggle dit sidenav', this.editingToggled)
+  }
 
   @HostListener('window:mousemove', ['$event'])
   updateSidenavWidth(event: MouseEvent) {

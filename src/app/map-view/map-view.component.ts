@@ -17,7 +17,7 @@ import { Entity } from 'cesium';
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
-  @ViewChild(SidenavComponent) sidenavComponent!: SidenavComponent;
+  @ViewChild(SidenavComponent, { static: true }) sidenavComponent!: SidenavComponent;
 
   alpha = 100;
   tilesetVisible: boolean = true;
@@ -27,6 +27,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
   private entitySubscription: Subscription | undefined;
+  private editingSubscription: Subscription | undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -52,6 +53,11 @@ export class MapViewComponent implements OnInit, OnDestroy {
         this.handleEntitySelected(entity);
       }
     );
+    this.editingSubscription = this.sidenavComponent.editingToggled.subscribe(
+      isEditing => { 
+      console.log('mapviewediting', isEditing)
+      this.cesiumDirective.setEditingMode(isEditing);
+    });
   
   }
 
@@ -64,6 +70,9 @@ export class MapViewComponent implements OnInit, OnDestroy {
     }
     if (this.entitySubscription) {
       this.entitySubscription.unsubscribe();
+    }
+    if (this.editingSubscription) {
+      this.editingSubscription.unsubscribe();
     }
   }
 
@@ -126,5 +135,8 @@ export class MapViewComponent implements OnInit, OnDestroy {
   handleEntitySelected(entity: Entity) {
     console.log('Handling selected entity:', entity); // Further verification
     this.sidenavComponent.updateSelectedEntity(entity);
+  }
+  handleEntityDeselection() {
+    this.sidenavComponent.clearSelectedEntity();
   }
 }

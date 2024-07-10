@@ -58,12 +58,12 @@ export class CesiumDirective implements OnInit {
   products: Geometry[] = [];
   coords: number[][][][] = [];
   center!: Cartesian3;
-  private isEditing = false;
+  isEditing = false;
   private selectedEntity: Entity | null = null;
 
   private viewer!: Viewer;
   private handler: any;
-  private currentPopup: HTMLElement | null = null;
+  
 
   constructor(
     private el: ElementRef,
@@ -102,9 +102,9 @@ export class CesiumDirective implements OnInit {
         var entity = pickedObject.id;
         this.viewer.selectedEntity = entity;  // Set the selected entity
         // Create a popup next to the mouse click
-        this.createPopup(movement.position, pickedObject);
       } else {
         this.viewer.selectedEntity = undefined;
+
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
 
@@ -128,6 +128,9 @@ export class CesiumDirective implements OnInit {
       animation: false,
       sceneModePicker: false,
     });
+
+    this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
+    this.enableEntitySelection();
 
     const scene = this.viewer.scene;
     const globe = scene.globe;
@@ -159,29 +162,6 @@ export class CesiumDirective implements OnInit {
         console.error('Error fetching data:', err);
       },
     });
-
-        // Set up a screen space event handler to select entities and create a popup
-        this.viewer.screenSpaceEventHandler.setInputAction((movement: { position: Cartesian2; }) => {
-          var pickedObject = this.viewer.scene.pick(movement.position);
-          if (defined(pickedObject)) {
-            var entity = pickedObject.id;
-            this.viewer.selectedEntity = entity;  // Set the selected entity
-            // Create a popup next to the mouse click
-            //this.createPopup(movement.position, pickedObject);
-          } else {
-            this.viewer.selectedEntity = undefined;
-          }
-        }, ScreenSpaceEventType.LEFT_CLICK);
-    
-        this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
-          if (defined(entity)) {
-            console.log('Entity selected: ', entity.id);
-            this.selectedEntityChanged.emit(entity)
-            console.log('emitafterselect', this.selectedEntityChanged)
-          } else {
-            console.log('No entity selected');
-          }
-        });
       
 
     globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
@@ -234,6 +214,9 @@ export class CesiumDirective implements OnInit {
       false;
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
       new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
+    
+
+    
   }
 
   /**
@@ -379,46 +362,19 @@ export class CesiumDirective implements OnInit {
       }
     );
   }
-
-  private createPopup(screenPosition: Cartesian2, entity: Entity) {
-    if (this.currentPopup) {
-      this.currentPopup.remove();
-    }
-
-    const popup = document.createElement('div');
-    popup.style.position = 'absolute';
-    popup.style.backgroundColor = 'white';
-    popup.style.border = '1px solid black';
-    popup.style.padding = '10px';
-    popup.style.zIndex = '999';
-    popup.style.left = `${screenPosition.x}px`;
-    popup.style.top = `${screenPosition.y}px`;
-
-    const button = document.createElement('button');
-    button.innerText = this.isEditing ? 'Disable Editing' : 'Enable Editing';
-    popup.appendChild(button);
-
-    document.body.appendChild(popup);
-
-    button.addEventListener('click', () => {
-      this.isEditing = !this.isEditing;
-      if (this.isEditing) {
-        this.enableEditing();
-        button.innerText = 'Disable Editing';
-      } else {
-        this.disableEditing();
-        button.innerText = 'Enable Editing';
-        if (this.currentPopup) {
-          this.currentPopup.remove();
-          this.currentPopup = null;
+  private enableEntitySelection() {
+    this.handler.setInputAction((movement: any) => {
+      const pickedObject = this.viewer.scene.pick(movement.position);
+      if (defined(pickedObject)) {
+        this.selectedEntity = pickedObject.id as Entity;
+        this.selectedEntityChanged.emit(this.selectedEntity);
       }
-      }
-    });
-
-    this.currentPopup = popup;
+    }, ScreenSpaceEventType.LEFT_DOWN);
   }
 
-  private isDragging = false; // To keep track of the dragging state
+ 
+
+private isDragging = false; // To keep track of the dragging state
 
 private enableEditing() {
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
@@ -474,13 +430,6 @@ private enableEditing() {
     }, ScreenSpaceEventType.LEFT_UP);
 
     this.handler.setInputAction((movement: any) => {
-      const pickedObject = this.viewer.scene.pick(movement.position);
-      if (!defined(pickedObject)) {
-          if (this.currentPopup) {
-              this.currentPopup.remove();
-              this.currentPopup = null;
-          }
-      }
   }, ScreenSpaceEventType.LEFT_CLICK);
 }
 
@@ -554,5 +503,15 @@ public updateEntityPosition(cartesian: Cartesian3) {
     this.polygons.forEach(polygon => {
       polygon.show = visible;
     });
+  }
+
+  setEditingMode(isEditing: boolean) {
+    this.isEditing = isEditing;
+    console.log('editign', isEditing)
+    if (isEditing) {
+      this.enableEditing();
+    } else {
+      this.disableEditing();
+    }
   }
 }
