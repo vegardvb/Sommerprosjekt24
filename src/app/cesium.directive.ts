@@ -81,15 +81,42 @@ export class CesiumDirective implements OnInit {
       this.inquiryId = params['inquiryId'];
     });
     this.filterMapByInquiryId(this.inquiryId);
+ 
 
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.initializeViewer();
+    this.addSampleCable();
+
+
 
     const cameraMoveEndListener = () => {
       this.extractBbox();
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
+
+    // Set up a screen space event handler to select entities and create a popup
+    this.viewer.screenSpaceEventHandler.setInputAction((movement: { position: Cartesian2; }) => {
+      var pickedObject = this.viewer.scene.pick(movement.position);
+      if (defined(pickedObject)) {
+        var entity = pickedObject.id;
+        this.viewer.selectedEntity = entity;  // Set the selected entity
+        // Create a popup next to the mouse click
+        this.createPopup(movement.position, pickedObject);
+      } else {
+        this.viewer.selectedEntity = undefined;
+      }
+    }, ScreenSpaceEventType.LEFT_CLICK);
+
+    this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
+      if (defined(entity)) {
+        console.log('Entity selected: ', entity.id);
+        this.selectedEntityChanged.emit(entity)
+        console.log('emitafterselect', this.selectedEntityChanged)
+      } else {
+        console.log('No entity selected');
+      }
+    });
   }
 
   /**
@@ -473,31 +500,29 @@ private disableEditing() {
     this.viewer.scene.screenSpaceCameraController.enableLook = true;
 }
 
-  private addSampleCable() {
-    const start = Cartesian3.fromDegrees(10.436776, 63.421800, 0);
-    const end = Cartesian3.fromDegrees(10.437776, 63.421800, 0); // Slightly offset for visibility
+private addSampleCable() {
+  const start = Cartesian3.fromDegrees(10.436776, 63.421800, 0);
+  const end = Cartesian3.fromDegrees(10.437776, 63.421800, 0); // Slightly offset for visibility
 
-    const sampleCable = this.viewer.entities.add({
-        name: 'Sample Cable',
-        polyline: {
-            positions: [start, end],
-            width: 5,
-            material: Color.RED,
-        }
-    });
+  const sampleCable = this.viewer.entities.add({
+      name: 'Sample Cable',
+      polyline: {
+          positions: [start, end],
+          width: 5,
+          material: Color.RED,
+      }
+  });
 
-    const pointPosition = Cartesian3.fromDegrees(10.436776, 63.421500, 50); // Nearby point
+  const pointPosition = Cartesian3.fromDegrees(10.436776, 63.421500, 50); // Nearby point
 
-    const samplePoint = this.viewer.entities.add({
-        name: 'Sample Point',
-        position: pointPosition,
-        point: {
-            pixelSize: 10,
-            color: Color.BLUE
-        }
-    });
-
-    
+  const samplePoint = this.viewer.entities.add({
+      name: 'Sample Point',
+      position: pointPosition,
+      point: {
+          pixelSize: 10,
+          color: Color.BLUE
+      }
+  });
 }
 
 public updateEntityPosition(cartesian: Cartesian3) {

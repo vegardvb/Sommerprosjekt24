@@ -14,5 +14,17 @@
       (mousedown)="startResizing($event)"
       [class.resizing]="resizingEvent.isResizing"
     ></div>-->
+    <div *ngIf="selectedEntity">
+      <label for="longitude">Longitude</label>
+      <input id="longitude" [value]="longitude" (input)="onLongitudeChange($event)" type="number" class="form-control mb-2">
+    
+      <label for="latitude">Latitude</label>
+      <input id="latitude" [value]="latitude" (input)="onLatitudeChange($event)" type="number" class="form-control mb-2">
+    
+      <label for="height">Height</label>
+      <input id="height" [value]="height" (input)="onHeightChange($event)" type="number" class="form-control mb-2">
+    </div>
   </div>
 </div>
+
+

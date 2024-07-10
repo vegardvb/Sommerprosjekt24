@@ -2,6 +2,9 @@ import { Component, HostListener, ViewEncapsulation } from '@angular/core';
 import { SidenavService } from './sidenav.service';
 import { SidenavLinkComponent } from './sidenav-link.component';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
+import { Entity, JulianDate, Cartographic, Math as CesiumMath, Cartesian3, ConstantPositionProperty} from 'cesium';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sidenav',
@@ -9,11 +12,15 @@ import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-m
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [SidenavLinkComponent, CableMeasurementInfoComponent],
+  imports: [SidenavLinkComponent, CableMeasurementInfoComponent, ReactiveFormsModule, CommonModule],
 })
 export class SidenavComponent {
   readonly sidenavMinWidth = 250;
   readonly sidenavMaxWidth = window.innerWidth - 300;
+  selectedEntity!: Entity | null;
+  longitude: number = 0;
+  latitude: number = 0;
+  height: number = 0;
 
   get sidenavWidth(): number {
     return parseInt(
@@ -37,7 +44,9 @@ export class SidenavComponent {
     startingWidth: 0,
   };
 
-  constructor(public sidenavService: SidenavService) {}
+  constructor(public sidenavService: SidenavService) {
+
+  }
 
   startResizing(event: MouseEvent): void {
     this.resizingEvent = {
@@ -46,6 +55,55 @@ export class SidenavComponent {
       startingWidth: this.sidenavService.sidenavWidth,
     };
   }
+
+  updateSelectedEntity(entity: Entity) {
+    this.selectedEntity = entity;
+    const position = this.selectedEntity.position?.getValue(JulianDate.now());
+    if (position) {
+      console.log('before cond',position)
+      const cartographic = Cartographic.fromCartesian(position);
+      this.longitude = CesiumMath.toDegrees(cartographic.longitude);
+      this.latitude = CesiumMath.toDegrees(cartographic.latitude);
+      this.height = cartographic.height;
+    }
+  }
+
+  clearSelectedEntity() {
+    this.selectedEntity = null;
+    this.longitude = 0;
+    this.latitude = 0;
+    this.height = 0;
+  }
+
+  onLongitudeChange(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.longitude = Number(inputElement.value);
+    this.updateEntityPosition();
+  }
+
+  onLatitudeChange(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.latitude = Number(inputElement.value);
+    this.updateEntityPosition();
+  }
+
+  onHeightChange(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    this.height = Number(inputElement.value);
+    this.updateEntityPosition();
+  }
+
+  private updateEntityPosition() {
+    if (this.selectedEntity) {
+      const newPosition = Cartesian3.fromDegrees(this.longitude, this.latitude, this.height);
+      this.selectedEntity.position = new ConstantPositionProperty(newPosition);
+      console.log('after text', this.selectedEntity.position)
+    
+
+      
+    }
+  }
+  
 
   @HostListener('window:mousemove', ['$event'])
   updateSidenavWidth(event: MouseEvent) {

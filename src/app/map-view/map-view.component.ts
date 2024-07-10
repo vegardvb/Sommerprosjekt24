@@ -5,6 +5,7 @@ import { TerrainService } from '../services/terrain.service';
 import { GeoTiffService } from '../services/geo-tiff.service';
 import { Subscription } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
+import { Entity } from 'cesium';
 
 @Component({
   selector: 'app-map-view',
@@ -16,6 +17,8 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
+  @ViewChild(SidenavComponent) sidenavComponent!: SidenavComponent;
+
   alpha = 100;
   tilesetVisible: boolean = true;
   polygonsVisible: boolean = true;
@@ -23,6 +26,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
   inquiryId: number | undefined;
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
+  private entitySubscription: Subscription | undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -37,10 +41,18 @@ export class MapViewComponent implements OnInit, OnDestroy {
 
     this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
       bbox => {
+        console.log('bbox',bbox)
         const { width, height } = this.calculateWidthHeight(bbox);
         this.fetchTerrain(bbox, width, height);
+      });
+
+    this.entitySubscription = this.cesiumDirective.selectedEntityChanged.subscribe(
+      entity => {
+        console.log('entity', entity)
+        this.handleEntitySelected(entity);
       }
     );
+  
   }
 
   ngOnDestroy() {
@@ -49,6 +61,9 @@ export class MapViewComponent implements OnInit, OnDestroy {
     }
     if (this.bboxSubscription) {
       this.bboxSubscription.unsubscribe();
+    }
+    if (this.entitySubscription) {
+      this.entitySubscription.unsubscribe();
     }
   }
 
@@ -106,5 +121,10 @@ export class MapViewComponent implements OnInit, OnDestroy {
     if (this.cesiumDirective) {
       this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
     }
+  }
+
+  handleEntitySelected(entity: Entity) {
+    console.log('Handling selected entity:', entity); // Further verification
+    this.sidenavComponent.updateSelectedEntity(entity);
   }
 }
