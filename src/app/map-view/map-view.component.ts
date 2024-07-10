@@ -2,8 +2,7 @@ import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
 import { TerrainService } from '../services/terrain.service';
-import { GeoTiffService } from '../services/geo-tiff.service';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 
 @Component({
@@ -26,8 +25,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private terrainService: TerrainService,
-    private geoTiffService: GeoTiffService
+    private terrainService: TerrainService
   ) {}
 
   ngOnInit() {
@@ -38,7 +36,10 @@ export class MapViewComponent implements OnInit, OnDestroy {
     this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
       bbox => {
         const { width, height } = this.calculateWidthHeight(bbox);
-        this.fetchTerrain(bbox, width, height);
+        console.log(
+          `Fetching and processing terrain with bbox: ${bbox}, width: ${width}, height: ${height}`
+        );
+        this.fetchAndProcessTerrain(bbox, width, height);
       }
     );
   }
@@ -63,27 +64,29 @@ export class MapViewComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Fetches the terrain data based on the provided bounding box, width, and height.
+   * Fetches and processes the terrain data based on the provided bounding box, width, and height.
    */
-  fetchTerrain(bbox: string, width: number, height: number) {
-    this.terrainService.getTerrain(bbox, width, height).subscribe(blob => {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        if (reader.result instanceof ArrayBuffer) {
-          try {
-            const arrayBuffer: ArrayBuffer = reader.result;
-            const decodedData =
-              await this.geoTiffService.decodeGeoTiff(arrayBuffer);
-            console.log('Decoded GeoTIFF Data:', decodedData);
-          } catch (error) {
-            console.error('Error decoding GeoTIFF file:', error);
+  fetchAndProcessTerrain(bbox: string, width: number, height: number) {
+    this.terrainService
+      .fetchGeoTIFF(bbox, width, height)
+      .pipe(
+        switchMap(response => {
+          const filePath = response.file_path;
+          return this.terrainService.processGeoTIFF(filePath);
+        })
+      )
+      .subscribe({
+        next: async response => {
+          if (response && response.layerUrl) {
+            await this.cesiumDirective.loadTerrainFromUrl(response.layerUrl);
+          } else {
+            console.error('Layer URL not provided in the response', response);
           }
-        } else {
-          console.error('Failed to read the file as an ArrayBuffer.');
-        }
-      };
-      reader.readAsArrayBuffer(blob);
-    });
+        },
+        error: (error: Error) => {
+          console.error('Error processing GeoTIFF file:', error);
+        },
+      });
   }
 
   public updateAlpha(event: Event): void {

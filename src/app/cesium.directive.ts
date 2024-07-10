@@ -20,12 +20,12 @@ import {
   HeadingPitchRange,
   PolygonHierarchy,
   Entity,
+  CesiumTerrainProvider,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
-import { MapViewComponent } from './map-view/map-view.component';
 import proj4 from 'proj4';
 
 // Define the source and target projections
@@ -52,8 +52,7 @@ export class CesiumDirective implements OnInit {
   constructor(
     private el: ElementRef,
     private geometryService: GeometryService,
-    private route: ActivatedRoute,
-    private mapview: MapViewComponent
+    private route: ActivatedRoute
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -286,5 +285,16 @@ export class CesiumDirective implements OnInit {
     this.polygons.forEach(polygon => {
       polygon.show = visible;
     });
+  }
+
+  public async loadTerrainFromUrl(url: string): Promise<void> {
+    try {
+      const terrainProvider = await CesiumTerrainProvider.fromUrl(url, {
+        requestVertexNormals: true,
+      });
+      this.viewer.terrainProvider = terrainProvider;
+    } catch (error) {
+      console.error('Error loading terrain into Cesium:', error);
+    }
   }
 }
