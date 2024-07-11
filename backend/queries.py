@@ -35,14 +35,8 @@ def execute_query(connection, main_file_path, subquery_files=None, params=None):
         connection (Connection): A connection to the database to execute the query.
         main_file_path (String): The relative path to the main query file.
         subquery_files (Dictonary<placeholder, Path> , optional): A dictonary containing the placeholder and path
-        subquery_files (Dictonary<placeholder, Path> , optional): A dictonary containing the placeholder and path
-        for the subquery. Defaults to None.
         params (Dictonary<String, Any>, optional): A dictonary containing the parameters and their
         name to be injected into the query file. Defaults to None.
-        subquery_files (Dictonary<String, String>, optional): A dictonary containing the placeholder and path
-
-        subquery_files (Dictonary<String, String>, optional): A dictonary containing the placeholder and path
-
 
     Returns:
         Dictonary<String,Any> : A dictonary contining the name and value of the query for each row and column.
@@ -76,12 +70,6 @@ def query_inquiries(connection):
     # Transform the result to a list of dictionaries
     result = [dict(row) for row in result.mappings()]
 
-    # Maps status code to status name in inquiry
-    for row in result:
-        try:
-            row["status_name"] = henvendelse_status_dict[row["status"]]
-        except KeyError as e:
-            row["status_name"] = "Unknown"
     # Maps status code to status name in inquiry
     for row in result:
         try:
@@ -126,6 +114,17 @@ def query_measurement_geometry_by_inquiry(inquiry_id, connection):
     result = execute_query(
         connection=connection,
         main_file_path=f"{QUERY_PATH}/geometry/fetch_measurement_geometry_by_inquiry.sql",
+        params={"inquiry_id": inquiry_id},
+    )
+
+    return [dict(row) for row in result.mappings()]
+
+
+def query_points_of_cables_by_inquiry(inquiry_id, connection):
+    connection.execute(text("SET search_path TO analytics_cable_measurement_inquiries"))
+    result = execute_query(
+        connection=connection,
+        main_file_path=f"{QUERY_PATH}/geometry/fetch_points_of_cables_by_inquiry.sql",
         params={"inquiry_id": inquiry_id},
     )
 

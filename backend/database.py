@@ -23,13 +23,6 @@ SCHEMA = f"analytics_cable_measurement"
 # Engine for executing queries
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 
-# Session = sessionmaker(bind=engine)
-# session = Session()
-
-# # Execute SQL to set the search path
-# session.execute(text("SET search_path TO analytics_cable_measurement"))
-# session.commit()
-
 
 def get_db():
     """Establishes a connection to the database.
