@@ -42,6 +42,7 @@
     "rimraf": "^5.0.7",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.3",
+    "turf": "^3.0.14",
     "zone.js": "~0.14.7"
   },
   "devDependencies": {

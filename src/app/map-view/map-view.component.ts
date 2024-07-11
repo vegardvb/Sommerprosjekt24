@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
-import { TerrainService } from '../services/terrain.service';
-import { GeoTiffService } from '../services/geo-tiff.service';
+// import { TerrainService } from '../services/terrain.service';
+// import { GeoTiffService } from '../services/geo-tiff.service';
 import { Subscription } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 import { Entity } from 'cesium';
@@ -31,21 +31,22 @@ export class MapViewComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private terrainService: TerrainService,
-    private geoTiffService: GeoTiffService
+    // private terrainService: TerrainService,
+    // private geoTiffService: GeoTiffService
   ) {}
 
   ngOnInit() {
+    console.log('initmapview')
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
     });
 
-    this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
-      bbox => {
-        console.log('bbox',bbox)
-        const { width, height } = this.calculateWidthHeight(bbox);
-        this.fetchTerrain(bbox, width, height);
-      });
+    // this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
+    //   bbox => {
+    //     console.log('bbox',bbox)
+    //     const { width, height } = this.calculateWidthHeight(bbox);
+    //     this.fetchTerrain(bbox, width, height);
+    //   });
 
     this.entitySubscription = this.cesiumDirective.selectedEntityChanged.subscribe(
       entity => {
@@ -58,85 +59,98 @@ export class MapViewComponent implements OnInit, OnDestroy {
       console.log('mapviewediting', isEditing)
       this.cesiumDirective.setEditingMode(isEditing);
     });
+    console.log('initmapview')
   
   }
 
   ngOnDestroy() {
+    console.log('destroymapview')
     if (this.queryParamsSubscription) {
       this.queryParamsSubscription.unsubscribe();
     }
-    if (this.bboxSubscription) {
-      this.bboxSubscription.unsubscribe();
-    }
+    // if (this.bboxSubscription) {
+    //   this.bboxSubscription.unsubscribe();
+    // }
     if (this.entitySubscription) {
       this.entitySubscription.unsubscribe();
     }
     if (this.editingSubscription) {
       this.editingSubscription.unsubscribe();
     }
+    console.log('destroymapview')
   }
 
-  /**
-   * Calculates the width and height based on the bounding box coordinates.
-   */
-  calculateWidthHeight(bbox: string): { width: number; height: number } {
-    const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
-    const width = Math.abs(maxX - minX);
-    const height = Math.abs(maxY - minY);
-    return { width, height };
-  }
+  // /**
+  //  * Calculates the width and height based on the bounding box coordinates.
+  //  */
+  // calculateWidthHeight(bbox: string): { width: number; height: number } {
+  //   const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
+  //   const width = Math.abs(maxX - minX);
+  //   const height = Math.abs(maxY - minY);
+  //   return { width, height };
+  // }
 
-  /**
-   * Fetches the terrain data based on the provided bounding box, width, and height.
-   */
-  fetchTerrain(bbox: string, width: number, height: number) {
-    this.terrainService.getTerrain(bbox, width, height).subscribe(blob => {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        if (reader.result instanceof ArrayBuffer) {
-          try {
-            const arrayBuffer: ArrayBuffer = reader.result;
-            const decodedData =
-              await this.geoTiffService.decodeGeoTiff(arrayBuffer);
-            console.log('Decoded GeoTIFF Data:', decodedData);
-          } catch (error) {
-            console.error('Error decoding GeoTIFF file:', error);
-          }
-        } else {
-          console.error('Failed to read the file as an ArrayBuffer.');
-        }
-      };
-      reader.readAsArrayBuffer(blob);
-    });
-  }
+  // /**
+  //  * Fetches the terrain data based on the provided bounding box, width, and height.
+  //  */
+  // fetchTerrain(bbox: string, width: number, height: number) {
+  //   this.terrainService.getTerrain(bbox, width, height).subscribe(blob => {
+  //     const reader = new FileReader();
+  //     reader.onload = async () => {
+  //       if (reader.result instanceof ArrayBuffer) {
+  //         try {
+  //           const arrayBuffer: ArrayBuffer = reader.result;
+  //           const decodedData =
+  //             await this.geoTiffService.decodeGeoTiff(arrayBuffer);
+  //           console.log('Decoded GeoTIFF Data:', decodedData);
+  //         } catch (error) {
+  //           console.error('Error decoding GeoTIFF file:', error);
+  //         }
+  //       } else {
+  //         console.error('Failed to read the file as an ArrayBuffer.');
+  //       }
+  //     };
+  //     reader.readAsArrayBuffer(blob);
+  //   });
+  // }
 
   public updateAlpha(event: Event): void {
+    console.log('alphamapview')
     const inputElement = event.target as HTMLInputElement;
     this.alpha = inputElement.valueAsNumber;
     this.cesiumDirective.updateGlobeAlpha(this.alpha / 100);
+    console.log('alphamapview')
   }
 
   toggleTileset(event: Event): void {
+    console.log('toggletilesetmapview')
     const inputElement = event.target as HTMLInputElement;
     this.tilesetVisible = inputElement.checked;
     if (this.cesiumDirective) {
       this.cesiumDirective.setTilesetVisibility(this.tilesetVisible);
     }
+    console.log('toggletilesetmapview')
   }
 
   togglePolygons(event: Event): void {
+    console.log('togglepolygonsmapview')
     const inputElement = event.target as HTMLInputElement;
     this.polygonsVisible = inputElement.checked;
     if (this.cesiumDirective) {
       this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
+      console.log('togglepolygonsmapview')
     }
   }
 
   handleEntitySelected(entity: Entity) {
+    console.log('handleentityselected')
     console.log('Handling selected entity:', entity); // Further verification
     this.sidenavComponent.updateSelectedEntity(entity);
+    console.log('handleentityselected')
   }
   handleEntityDeselection() {
+    console.log('handleentitydeselected')
     this.sidenavComponent.clearSelectedEntity();
+    console.log('handleentitydeselected')
   }
 }

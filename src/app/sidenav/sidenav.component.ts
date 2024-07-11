@@ -1,7 +1,7 @@
 import { Component, EventEmitter, HostListener, Output, ViewEncapsulation } from '@angular/core';
 import { SidenavService } from './sidenav.service';
 import { SidenavLinkComponent } from './sidenav-link.component';
-import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
+// import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 import { Entity, JulianDate, Cartographic, Math as CesiumMath, Cartesian3, ConstantPositionProperty} from 'cesium';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [SidenavLinkComponent, CableMeasurementInfoComponent, ReactiveFormsModule, CommonModule],
+  imports: [SidenavLinkComponent, ReactiveFormsModule, CommonModule],
 })
 export class SidenavComponent {
   readonly sidenavMinWidth = 250;
@@ -111,6 +111,11 @@ export class SidenavComponent {
     this.isEditing = !this.isEditing;
     this.editingToggled.emit(this.isEditing);
     console.log('toggle dit sidenav', this.editingToggled)
+  }
+
+  closeEditor() {
+    this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
+    this.isEditing = false;
   }
 
   @HostListener('window:mousemove', ['$event'])
