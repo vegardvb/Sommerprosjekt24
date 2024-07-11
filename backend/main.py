@@ -160,7 +160,6 @@ async def process_geotiff(file_path: str):
         raise HTTPException(status_code=500, detail=f"Error processing GeoTIFF: {e}")
 
 # Serve static files
-app.mount("/output", StaticFiles(directory=os.path.join(tempfile.gettempdir(), "output")), name="output")
-
-# Serve the output directory where the terrain tiles are generated
-app.mount("/output", StaticFiles(directory=os.path.join(tempfile.gettempdir(), "output")), name="output")
+output_directory = os.path.join(tempfile.gettempdir(), "output")
+os.makedirs(output_directory, exist_ok=True)
+app.mount("/output", StaticFiles(directory=output_directory), name="output")
