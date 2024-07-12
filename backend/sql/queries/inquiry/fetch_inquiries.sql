@@ -1,4 +1,3 @@
--- Tables stor og gul, variabler liten og rød
 SELECT DISTINCT
     inquiry.id AS inquiry_id,
     inquiry_measurement.id AS inquiry_measurement_id,
@@ -13,7 +12,7 @@ SELECT DISTINCT
     cable_measurements.number_of_measurements
 FROM
     "Inquiry" inquiry
-    INNER JOIN "Inquiry_Measurement" inquiry_measurement ON inquiry.id = inquiry_measurement.inquiry_id
+    INNER JOIN "InquiryMeasurement" inquiry_measurement ON inquiry.id = inquiry_measurement.inquiry_id
     -- Include the number of measurements related to the inquiry as a sub-query
     INNER JOIN (/*cable_measurements*/) AS cable_measurements ON cable_measurements.inquiry_id = inquiry.id
     INNER JOIN "Organization" organization ON organization.id = inquiry.organization_id

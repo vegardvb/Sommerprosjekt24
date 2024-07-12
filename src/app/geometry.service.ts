@@ -11,7 +11,7 @@ import { ParsedGeometry } from '../models/parsedgeometry-interface';
   providedIn: 'root',
 })
 export class GeometryService {
-  private apiUrl = 'http://127.0.0.1:8000/geometries/inquiry/{inquiry_id}';
+  private apiUrl = 'http://127.0.0.1:8000/geometries/area/inquiry/{inquiry_id}';
   private parsedGeometry!: ParsedGeometry;
 
   constructor(private http: HttpClient) {

@@ -1,16 +1,20 @@
--- Finn ut hvor mange measurement_inquiry som er 
--- Sjekk at det stemmer overens med antall measurements
---TODO sjekke null values hvorfor det skjer? 
-CREATE VIEW
-    measurement_inquiry_geometry AS
+--TODO Sjekke null values hvorfor det skjer? 
+--TODO Enkelte instanser av MultiPoint. Hvorfor ikke multistring som andre? Ikke sammensatt målinger?
+--TODO Sjekk om null på ny versjon
+-- CREATE VIEW
+--     Measurement_Inquiry_Geometry AS
 SELECT
-    -- *
     measurement_inquiries.inquiry_measurement_id,
+    --TODO Bygg som JSON features for kabler med ID som property. Points må legge til metadata
     PUBLIC.st_asgeojson (
         PUBLIC.st_collect (
+            -- Bygges som features med properties begge to? Ta heller i geoJSON som egne features som 
+            -- er bygd som json objekter også kombiner til feature collection med lednings id som property
             PUBLIC.st_collect (cable.cable_geometry),
-            public.st_collect (point.point_geometry)
-        )
+            PUBLIC.st_collect (point.point_geometry)
+        ),
+        15,
+        9
     ) AS geometry_collection
 FROM
     measurements_by_inquiry_and_inquiry_measurement measurement_inquiries

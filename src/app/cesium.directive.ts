@@ -38,10 +38,11 @@ import {
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
-import { MapViewComponent } from './map-view/map-view.component';
+
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
 import proj4 from 'proj4';
-import GeoTIFF, { fromUrl } from 'geotiff';
+import { fromUrl } from 'geotiff';
+import { CableMeasurementService } from './services/cable-measurement.service';
 
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
@@ -62,6 +63,7 @@ export class CesiumDirective implements OnInit {
   inquiryId: number | undefined;
   products: Geometry[] = [];
   coords: number[][][][] = [];
+  bbox: number[] =[];
   center!: Cartesian3;
   isEditing = false;
   private selectedEntity: Entity | null = null;
@@ -76,10 +78,10 @@ export class CesiumDirective implements OnInit {
     private route: ActivatedRoute,
   ) {}
 
-  // // Service for fetching data from the backend
-  // private cableMeasurementService: CableMeasurementService = inject(
-  //   CableMeasurementService
-  // );
+  // Service for fetching data from the backend
+  private cableMeasurementService: CableMeasurementService = inject(
+    CableMeasurementService
+  );
 
   async ngOnInit(): Promise<void> {
     console.log('ngoninit')
@@ -91,8 +93,7 @@ export class CesiumDirective implements OnInit {
 
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.initializeViewer();
-    this.addSampleCable();
-    this.loadCables();
+    //this.loadCables();
 
 
 
@@ -148,34 +149,7 @@ export class CesiumDirective implements OnInit {
     
     
 
-    // //TODO Refactor to own service
-    // this.cableMeasurementService.getData(this.inquiryId).subscribe({
-    //   next: data => {
-    //     if (data) {
-    //       console.log(data);
-    //       // Ensure data is not undefined or null
-    //       GeoJsonDataSource.load(data, {
-    //         stroke: Color.BLUE,
-    //         fill: Color.BLUE.withAlpha(1),
-    //         strokeWidth: 3,
-    //         credit: "Provided by Petter's Cable measurement service",
-    //       })
-    //         .then((dataSource: GeoJsonDataSource) => {
-    //           this.viewer.dataSources.add(dataSource);
-    //           this.viewer.zoomTo(dataSource);
-    //         })
-    //         .catch(error => {
-    //           console.error('Failed to load GeoJSON data:', error);
-    //         });
-    //     } else {
-    //       console.error('No data received from service');
-    //     }
-    //   },
-    //   error: err => {
-    //     console.error('Error fetching data:', err);
-    //   },
-    // });
-      
+     
 
     globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
       1000.0,
@@ -240,6 +214,7 @@ export class CesiumDirective implements OnInit {
             const parsedGeometry = geometry.geometry as ParsedGeometry;
             return { id: geometry.id, geometry: parsedGeometry };
           });
+          
 
           this.extractCoordinates(this.products);
           if (this.coords.length > 0) {
@@ -276,8 +251,9 @@ export class CesiumDirective implements OnInit {
       },
       [] as number[][][][]
     );
-    console.log('extractcoordinates')
+    console.log(this.coords);
   }
+  
 
   /**
    * Updates the map view to fit the extracted coordinates.
@@ -475,160 +451,57 @@ private disableEditing() {
 }
 
 private loadCables(): void {
-  console.log('loadcables')
-  const data = {
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "properties": {
-          "point_id": 4218,
-          "metadata": {
-            "x": 272340.264,
-            "y": 7040733.727,
-            "lat": 63.4220986,
-            "lon": 10.436597,
-            "PDOP": 0.8,
-            "height": 103.483,
-            "fixType": "rtk",
-            "accuracy": 0.014,
-            "timestamp": 1720595755444,
-            "antennaHeight": 1.8,
-            "numSatellites": 23,
-            "numMeasurements": 3,
-            "verticalAccuracy": 0.018
-          }
-        },
-        "geometry": {
-          "type": "Point",
-          "coordinates": [10.436597, 63.4220986]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {
-          "id": 822
-        },
-        "geometry": {
-          "type": "LineString",
-          "coordinates": [
-            [10.4365917, 63.4220991],
-            [10.4365872, 63.4221003],
-            [10.4365867, 63.4220992],
-            [10.4365879, 63.4221158],
-            [10.4365434, 63.4221234],
-            [10.4365389, 63.4221244],
-            [10.4365019, 63.4221486],
-            [10.4364934, 63.4221787],
-            [10.4366107, 63.4222048]
-          ]
-        }
-      },
-      {
-        "type": "Feature",
-        "properties": {
-          "id": 823
-        },
-        "geometry": {
-          "type": "LineString",
-          "coordinates": [
-            [10.4365594, 63.422287],
-            [10.4366929, 63.4222636],
-            [10.436654, 63.4222757],
-            [10.436654, 63.4222894],
-            [10.4366804, 63.4222987],
-            [10.4367052, 63.4222975],
-            [10.4367435, 63.4222931],
-            [10.4367737, 63.4223016],
-            [10.436777, 63.4223184],
-            [10.4367408, 63.422342],
-            [10.4367039, 63.4223357],
-            [10.436749, 63.4223266],
-            [10.4368225, 63.4223407],
-            [10.4368495, 63.4223585],
-            [10.4368392, 63.4223663],
-            [10.4367735, 63.4223829],
-            [10.4368763, 63.4223725]
-          ]
-        }
-      }
-    ]
-  };
-  // this.cableMeasurementService.getData(this.inquiryId).subscribe({
-  //   next: data => {
-  //     console.log('data received from service', data)
-  GeoJsonDataSource.load(data, {
-    stroke: Color.BLUE,
-    fill: Color.BLUE.withAlpha(1),
-    strokeWidth: 3,
-    markerSize: 1, // Size of the marker
-    credit: "Provided by Petters Cable measurement service",
-  })
-    .then((dataSource: GeoJsonDataSource) => {
-      
+  this.cableMeasurementService.getData(this.inquiryId).subscribe({
+    next: data => {
+      if (data) {
+        console.log('data received from service', data);
+        GeoJsonDataSource.load(data, {
+          stroke: Color.BLUE,
+          fill: Color.BLUE.withAlpha(1),
+          strokeWidth: 3,
+          markerSize: 1, // Size of the marker
+          credit: "Provided by Petters Cable measurement service",
+        })
+        .then((dataSource: GeoJsonDataSource) => {
+          this.viewer.dataSources.add(dataSource);
 
-      this.viewer.dataSources.add(dataSource);
-      
-      // Add picking and moving functionality to cables
-      dataSource.entities.values.forEach(entity => {
-        if (entity.polyline?.positions) {
-          const coordinates = entity.polyline.positions.getValue(JulianDate.now());
-          const pointEntities = coordinates.map((position: any, index: any) => {
-            const pointEntity = new Entity({
-              position,
-              point: new PointGraphics({
+          // Add picking and moving functionality to cables
+          dataSource.entities.values.forEach(entity => {
+            if (entity.polyline?.positions) {
+              const coordinates = entity.polyline.positions.getValue(JulianDate.now());
+              coordinates.forEach((position: any, index: any) => {
+                const pointEntity = new Entity({
+                  position,
+                  point: new PointGraphics({
+                    color: Color.BLUE,
+                    pixelSize: 10,
+                    outlineColor: Color.WHITE,
+                    outlineWidth: 2,
+                  }),
+                });
+                this.viewer.entities.add(pointEntity);
+              });
+            }
+            if (entity.position) {
+              entity.point = new PointGraphics({
                 color: Color.BLUE,
                 pixelSize: 10,
                 outlineColor: Color.WHITE,
                 outlineWidth: 2,
-              })
-            });
-            this.viewer.entities.add(pointEntity); })}
-        if (entity.position) {
-          entity.point = new PointGraphics({
-            color: Color.BLUE,
-            pixelSize: 10,
-            outlineColor: Color.WHITE,
-            outlineWidth: 2,
+              });
+            }
           });
-        }
-
-      
-      });
-    })
-    .catch(error => {
-      console.error('Failed to load GeoJSON data:', error);
-    });
-    console.log('loadcables')
-  }
-
-
-private addSampleCable() {
-  console.log('addsamplecable')
-  const start = Cartesian3.fromDegrees(10.436776, 63.421800, 0);
-  const end = Cartesian3.fromDegrees(10.437776, 63.421800, 0); // Slightly offset for visibility
-
-  const sampleCable = this.viewer.entities.add({
-      name: 'Sample Cable',
-      polyline: {
-          positions: [start, end],
-          width: 5,
-          material: Color.RED,
+        })
+        .catch(error => {
+          console.error('Failed to load GeoJSON data:', error);
+        });
+        console.log('loadcables');
       }
+    }
   });
-
-  const pointPosition = Cartesian3.fromDegrees(10.436776, 63.421500, 50); // Nearby point
-
-  const samplePoint = this.viewer.entities.add({
-      name: 'Sample Point',
-      position: pointPosition,
-      point: {
-          pixelSize: 10,
-          color: Color.BLUE
-      }
-  });
-  console.log('addsamplecable')
 }
+
+
 
 public updateEntityPosition(cartesian: Cartesian3) {
   console.log('updateentityposition')
