@@ -6,6 +6,7 @@ import {
   inject,
   OnInit,
   Output,
+  contentChild,
 } from '@angular/core';
 import {
   Viewer,
@@ -30,6 +31,8 @@ import {
   CallbackProperty,
   PositionProperty,
   PointGraphics,
+  SingleTileImageryProvider,
+  Rectangle,
 } from 'cesium';
 //import { CableMeasurementService } from './services/cable-measurement.service';
 import { Geometry } from '../models/geometry-interface';
@@ -38,6 +41,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MapViewComponent } from './map-view/map-view.component';
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
 import proj4 from 'proj4';
+import GeoTIFF, { fromUrl } from 'geotiff';
 
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
@@ -97,6 +101,7 @@ export class CesiumDirective implements OnInit {
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
+  
 
     // Set up a screen space event handler to select entities and create a popup
     this.viewer.screenSpaceEventHandler.setInputAction((movement: { position: Cartesian2; }) => {
@@ -139,6 +144,9 @@ export class CesiumDirective implements OnInit {
 
     const scene = this.viewer.scene;
     const globe = scene.globe;
+    
+    
+    
 
     // //TODO Refactor to own service
     // this.cableMeasurementService.getData(this.inquiryId).subscribe({
@@ -673,5 +681,85 @@ public updateEntityPosition(cartesian: Cartesian3) {
     }
     console.log('seteditingmode')
   }
-  
+
+  constructGeoTIFFUrl(bbox: any[]) {
+    const baseUrl = 'https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833';
+    const params = new URLSearchParams({
+        SERVICE: 'WCS',
+        VERSION: '1.0.0',
+        REQUEST: 'GetCoverage',
+        FORMAT: 'GeoTIFF',
+        COVERAGE: 'nhm_dtm_topo_25833',
+        BBOX: bbox.join(','),
+        CRS: 'EPSG:25833',
+        RESPONSE_CRS: 'EPSG:25833',
+        WIDTH: '440',
+        HEIGHT: '566'
+    });
+    return `${baseUrl}?${params.toString()}`;
+}
+async loadGeoTIFF(url: any) {
+  try {
+      // Fetch the GeoTIFF
+      const tiff = await fromUrl(url);
+      const image = await tiff.getImage();
+      
+      // Read the raster data
+      const raster = await image.readRasters();
+      const values = raster[0]; // Assuming single band GeoTIFF
+
+      // Get dimensions and bounding box
+      const width = image.getWidth();
+      const height = image.getHeight();
+      const bbox = image.getBoundingBox(); // Get bounding box from image
+
+      // Create a canvas to draw the raster data
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (context!==null) {
+      const imageData = context.createImageData(width, height);
+
+      if (Array.isArray(values) || values instanceof Float32Array || values instanceof Uint8Array) {
+        // Find min and max values for scaling
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min;
+
+        // Populate the image data
+        for (let i = 0; i < values.length; i++) {
+            const value = values[i];
+            const scaledValue = ((value - min) / range) * 255;
+            imageData.data[i * 4] = scaledValue; // Red
+            imageData.data[i * 4 + 1] = scaledValue; // Green
+            imageData.data[i * 4 + 2] = scaledValue; // Blue
+            imageData.data[i * 4 + 3] = 255; // Alpha
+        }
+
+        context.putImageData(imageData, 0, 0);
+
+        // Create an imagery provider from the canvas
+        const imageryProvider = new SingleTileImageryProvider({
+            url: canvas.toDataURL(),
+            rectangle: Rectangle.fromDegrees(
+                bbox[0], bbox[1], bbox[2], bbox[3]
+            )
+        });
+        // Add the imagery layer to the Cesium viewer
+      this.viewer.scene.imageryLayers.addImageryProvider(imageryProvider); }
+}
+
+      
+  } catch (error) {
+      console.error('Error loading GeoTIFF:', error);
+  }
+}
+}
+function convertDegreesToMeters(lon: any, lat: any) {
+  const proj4 = window.proj4;
+  const fromProj = 'EPSG:4326';
+  const toProj = 'EPSG:25833';
+  const [x, y] = proj4(fromProj, toProj, [lon, lat]);
+  return [x, y];
 }

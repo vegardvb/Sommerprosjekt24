@@ -116,7 +116,9 @@ export class SidenavComponent {
   closeEditor() {
     this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
     this.isEditing = false;
+    this.editingToggled.emit(this.isEditing);
   }
+  
 
   @HostListener('window:mousemove', ['$event'])
   updateSidenavWidth(event: MouseEvent) {
@@ -139,4 +141,7 @@ export class SidenavComponent {
   stopResizing() {
     this.resizingEvent.isResizing = false;
   }
+
+  
+
 }
