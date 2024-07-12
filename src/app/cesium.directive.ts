@@ -44,6 +44,7 @@ import proj4 from 'proj4';
 import { fromUrl } from 'geotiff';
 import { CableMeasurementService } from './services/cable-measurement.service';
 
+
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
 proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
@@ -93,7 +94,7 @@ export class CesiumDirective implements OnInit {
 
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.initializeViewer();
-    //this.loadCables();
+    this.loadCables();
 
 
 
@@ -157,9 +158,9 @@ export class CesiumDirective implements OnInit {
       2000.0,
       1.0
     );
-    const merge = 'ups'
+    
 
-    const distance = 200.0;
+    const distance = 50.0;
 
      this.tileset = this.viewer.scene.primitives.add(
        await Cesium3DTileset.fromIonAssetId(96188)
@@ -212,18 +213,23 @@ export class CesiumDirective implements OnInit {
       this.geometryService.getGeometry(inquiryId).subscribe({
         next: (response: Geometry[]) => {
           this.products = response.map(geometry => {
-            const parsedGeometry = geometry.geometry as ParsedGeometry;
-            return { id: geometry.id, geometry: parsedGeometry };
+            const parsedGeometry = geometry.st_asgeojson as ParsedGeometry;
+            return { id: geometry.id, st_asgeojson: parsedGeometry };
           });
           
+         
+          this.extractCoordinates(this.products)
+          console.log(this.coords[0])
+          Cartesian3.fromDegrees(this.coords[0][0][1][0],this.coords[0][0][1][1])
 
-          this.extractCoordinates(this.products);
+
           if (this.coords.length > 0) {
             this.coords.forEach(coordSet => {
               const polygonCoordinates = coordSet[0].map(coordPair =>
                 Cartesian3.fromDegrees(coordPair[0], coordPair[1])
               );
               this.plotPolygon(polygonCoordinates, this.viewer);
+              
             });
           }
           this.updateMap(this.viewer);
@@ -244,7 +250,7 @@ export class CesiumDirective implements OnInit {
     console.log('extractcoordinates')
     this.coords = geometries.reduce(
       (acc, geometry) => {
-        const parsedGeometry = geometry.geometry as ParsedGeometry;
+        const parsedGeometry = geometry.st_asgeojson as ParsedGeometry;
         if (parsedGeometry && parsedGeometry.coordinates) {
           acc.push(...parsedGeometry.coordinates);
         }
@@ -266,6 +272,7 @@ export class CesiumDirective implements OnInit {
       const positions = Cartesian3.fromDegreesArray(flatCoordinates);
       const boundingSphere = BoundingSphere.fromPoints(positions);
       this.center = boundingSphere.center;
+      console.log(this.center)
       viewer.camera.flyToBoundingSphere(boundingSphere, {
         offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000), // Adjust the range as needed
       });
@@ -335,6 +342,7 @@ export class CesiumDirective implements OnInit {
    * Plots a polygon on the viewer.
    */
   private plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
+
     console.log('plotpolygon')
     const polygonEntity = viewer.entities.add({
       polygon: {
@@ -343,6 +351,7 @@ export class CesiumDirective implements OnInit {
       },
     });
     this.polygons.push(polygonEntity);
+    console.log('polygons')
     console.log('plotpolygon')
   }
   private changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {

@@ -35,7 +35,7 @@ export class GeometryService {
       this.parseGeoJSON(geometry);
 
       if (this.parsedGeometry) {
-        geometry.geometry = this.parsedGeometry; // Replace geometry with parsed geometry
+        geometry.st_asgeojson = this.parsedGeometry; // Replace geometry with parsed geometry
       }
       return geometry;
     });
@@ -44,7 +44,7 @@ export class GeometryService {
   private parseGeoJSON(geometry: Geometry): ParsedGeometry | null {
     try {
       this.parsedGeometry = JSON.parse(
-        geometry.geometry as string
+        geometry.st_asgeojson as string
       ) as ParsedGeometry;
       return this.parsedGeometry;
     } catch (error) {
