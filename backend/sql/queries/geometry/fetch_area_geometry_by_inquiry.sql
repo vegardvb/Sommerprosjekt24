@@ -11,5 +11,5 @@ FROM "Inquiry"                                                  inquiry
                     ON area_geometry.inquiry_id = inquiry.id
          INNER JOIN "Geometry_from_Measurement_by_Inquiry"      measurement_geometry
                     ON measurement_geometry.inquiry_id = inquiry.id
-WHERE inquiry.id = :inquiry_id
+WHERE inquiry.id = 5008886
 
