@@ -157,6 +157,7 @@ export class CesiumDirective implements OnInit {
       2000.0,
       1.0
     );
+    const merge = 'ups'
 
     const distance = 200.0;
 
