@@ -1,16 +1,15 @@
 /**
- * Fetches transformed geometry data for a specific inquiry ID including a Bounding box 
- * and its SRID should it differ from the default SRID (WGS84/EPSG4326).
+ * Fetches transformed geometry data for a specific inquiry ID which includes a Bounding box (Polygon)
+ * of the total area measurementand its SRID should it differ from the default SRID (WGS84/EPSG4326).
  *
  * @param inquiry_id The ID of the inquiry for which to fetch the geometry data.
  **/
-SELECT inquiry.id AS inquiry_id,
-       PUBLIC.st_asgeojson(
-               PUBLIC.st_transform(PUBLIC.st_collect(geometry.geom), 4326),
-               15,
-               9
-       )          AS geometry
-FROM "Inquiry"                 inquiry
-         INNER JOIN "Geometry" geometry ON geometry.inquiry_id = inquiry.id
+SELECT inquiry.id,
+       public.st_asgeojson(public.st_envelope(public.st_collect(measurement_geometry.geometry, area_geometry.geometry)))
+FROM "Inquiry"                                                  inquiry
+         INNER JOIN "Geometry_from_Area_by_Inquiry_as_geometry" area_geometry
+                    ON area_geometry.inquiry_id = inquiry.id
+         INNER JOIN "Geometry_from_Measurement_by_Inquiry"      measurement_geometry
+                    ON measurement_geometry.inquiry_id = inquiry.id
 WHERE inquiry.id = :inquiry_id
-GROUP BY inquiry.id
+
