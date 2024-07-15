@@ -63,7 +63,7 @@ export class CesiumDirective implements OnInit {
 
   inquiryId: number | undefined;
   products: Geometry[] = [];
-  coords: number[][][][] = [];
+  coords: number[][][] = [];
   bbox: number[] =[];
   center!: Cartesian3;
   isEditing = false;
@@ -94,7 +94,7 @@ export class CesiumDirective implements OnInit {
 
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.initializeViewer();
-    this.loadCables();
+    //this.loadCables();
 
 
 
@@ -111,7 +111,6 @@ export class CesiumDirective implements OnInit {
       if (defined(pickedObject)) {
         var entity = pickedObject.id;
         this.viewer.selectedEntity = entity;  // Set the selected entity
-        // Create a popup next to the mouse click
       } else {
         this.viewer.selectedEntity = undefined;
 
@@ -120,21 +119,16 @@ export class CesiumDirective implements OnInit {
 
     this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
       if (defined(entity)) {
-        console.log('Entity selected: ', entity.id);
         this.selectedEntityChanged.emit(entity)
-        console.log('emitafterselect', this.selectedEntityChanged)
       } else {
-        console.log('No entity selected');
       }
     });
-    console.log('ngoninit')
   }
 
   /**
    * Initializes the Cesium Viewer and adds the tileset and clipping planes.
    */
   private async initializeViewer(): Promise<void> {
-    console.log('inistializeviewer')
     this.viewer = new Viewer(this.el.nativeElement, {
       timeline: false,
       animation: false,
@@ -146,11 +140,6 @@ export class CesiumDirective implements OnInit {
 
     const scene = this.viewer.scene;
     const globe = scene.globe;
-    
-    
-    
-
-     
 
     globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
       1000.0,
@@ -160,7 +149,7 @@ export class CesiumDirective implements OnInit {
     );
     
 
-    const distance = 50.0;
+    const distance = 500.0;
 
      this.tileset = this.viewer.scene.primitives.add(
        await Cesium3DTileset.fromIonAssetId(96188)
@@ -201,14 +190,59 @@ export class CesiumDirective implements OnInit {
       false;
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
       new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
-      console.log('inistializeviewer')
+
+
+    //   const mcoords = this.coords.map(coord => 
+    //     convertDegreesToMeters(coord[0], coord[1])
+
+    // );
+
+    
+
+
+    const url = this.constructGeoTIFFUrl([1167898,7059451, 1168399, 7060147])
+    console.log(url)
+    this.loadGeoTIFF('https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&FORMAT=GeoTIFF&COVERAGE=nhm_dtm_topo_25833&BBOX=272669,7037582,273109,7038148&CRS=EPSG:25833&RESPONSE_CRS=EPSG:25833&WIDTH=440&HEIGHT=566')
+
+    // Test loading the GeoTIFF
+fetch(url)
+.then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.blob();
+})
+.then(blob => {
+  console.log('GeoTIFF successfully fetched:', blob);
+
+  // Create a blob URL for the GeoTIFF
+  const blobUrl = URL.createObjectURL(blob);
+
+  // Create a link element
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = 'geotiff.tif'; // Specify the file name
+
+  // Append the link to the document and trigger the download
+  document.body.appendChild(link);
+  link.click();
+
+  // Remove the link from the document
+  document.body.removeChild(link);
+
+  // Revoke the blob URL
+  URL.revokeObjectURL(blobUrl);
+
+})
+.catch(error => {
+    console.error('Error loading GeoTIFF:', error);
+});
   }
 
   /**
    * Filters the map by inquiry ID and fetches geometries.
    */
   private filterMapByInquiryId(inquiryId: number | undefined): void {
-    console.log('filtermap')
     if (inquiryId) {
       this.geometryService.getGeometry(inquiryId).subscribe({
         next: (response: Geometry[]) => {
@@ -217,21 +251,18 @@ export class CesiumDirective implements OnInit {
             return { id: geometry.id, st_asgeojson: parsedGeometry };
           });
           
-         
-          this.extractCoordinates(this.products)
-          console.log(this.coords[0])
-          Cartesian3.fromDegrees(this.coords[0][0][1][0],this.coords[0][0][1][1])
-
-
+         this.extractCoordinates(this.products)
+       
           if (this.coords.length > 0) {
-            this.coords.forEach(coordSet => {
-              const polygonCoordinates = coordSet[0].map(coordPair =>
-                Cartesian3.fromDegrees(coordPair[0], coordPair[1])
-              );
+            console.log(this.coords)
+            this.coords.forEach(coordlist => {
+                const polygonCoordinates = coordlist.map(coordinate =>
+                  Cartesian3.fromDegrees(coordinate[0], coordinate[1])
+                );
               this.plotPolygon(polygonCoordinates, this.viewer);
-              
-            });
+              });
           }
+
           this.updateMap(this.viewer);
           this.updateGlobeAlpha(1);
         },
@@ -241,6 +272,8 @@ export class CesiumDirective implements OnInit {
       });
     }
     console.log('filtermap')
+
+
   }
 
   /**
@@ -256,9 +289,10 @@ export class CesiumDirective implements OnInit {
         }
         return acc;
       },
-      [] as number[][][][]
+      [] as number[][][]
     );
-    console.log(this.coords);
+    console.log('ec', this.coords);
+    console.log('ec', this.coords[0][0][0]);
   }
   
 
@@ -565,7 +599,7 @@ public updateEntityPosition(cartesian: Cartesian3) {
     console.log('seteditingmode')
   }
 
-  constructGeoTIFFUrl(bbox: any[]) {
+  constructGeoTIFFUrl(bbox: any) {
     const baseUrl = 'https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833';
     const params = new URLSearchParams({
         SERVICE: 'WCS',
@@ -646,3 +680,4 @@ function convertDegreesToMeters(lon: any, lat: any) {
   const [x, y] = proj4(fromProj, toProj, [lon, lat]);
   return [x, y];
 }
+

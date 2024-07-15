@@ -33,6 +33,7 @@ export class GeometryService {
   private parseAndConvertGeometries(geometries: Geometry[]): Geometry[] {
     return geometries.map(geometry => {
       this.parseGeoJSON(geometry);
+      console.log(geometry)
 
       if (this.parsedGeometry) {
         geometry.st_asgeojson = this.parsedGeometry; // Replace geometry with parsed geometry
