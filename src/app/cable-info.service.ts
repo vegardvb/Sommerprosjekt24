@@ -8,7 +8,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 })
 export class CableInfoService {
   private apiUrl =
-    'http://127.0.0.1:8000/cable_measurements/inquiry/{inquiry_id}';
+    'http://127.0.0.1:8000/geometries/area/inquiry/{inquiry_id}';
 
   constructor(private http: HttpClient) {}
 

@@ -94,7 +94,7 @@ export class CesiumDirective implements OnInit {
 
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.initializeViewer();
-    //this.loadCables();
+    this.loadCables();
 
 
 
@@ -200,7 +200,7 @@ export class CesiumDirective implements OnInit {
     
 
 
-    const url = this.constructGeoTIFFUrl([1167898,7059451, 1168399, 7060147])
+   /* const url = this.constructGeoTIFFUrl([1167898,7059451, 1168399, 7060147])
     console.log(url)
     this.loadGeoTIFF('https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&FORMAT=GeoTIFF&COVERAGE=nhm_dtm_topo_25833&BBOX=272669,7037582,273109,7038148&CRS=EPSG:25833&RESPONSE_CRS=EPSG:25833&WIDTH=440&HEIGHT=566')
 
@@ -236,7 +236,16 @@ fetch(url)
 })
 .catch(error => {
     console.error('Error loading GeoTIFF:', error);
-});
+});*/
+  }
+
+  public updateGlobeAlpha(alpha: number): void {
+    console.log('updateglobealpha')
+    // Adjust globe base color translucency
+    this.viewer.scene.globe.translucency.enabled = true;
+    this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue =
+      alpha;
+      console.log('updateglobealpha')
   }
 
   /**
@@ -276,6 +285,49 @@ fetch(url)
 
   }
 
+  setTilesetVisibility(visible: boolean) {
+    console.log('settilesetvisibility')
+    if (this.tileset) {
+      this.tileset.show = visible;
+    }
+    console.log('settilesetvisibility')
+  }
+  setPolygonsVisibility(visible: boolean) {
+    console.log('setpolygonsetvisibility')
+    this.polygons.forEach(polygon => {
+      polygon.show = visible;
+    });
+    console.log('setpolygonsetvisibility')
+  }
+ 
+  setEditingMode(isEditing: boolean) {
+    console.log('seteditingmode')
+    this.isEditing = isEditing;
+    console.log('editign', isEditing)
+    if (isEditing) {
+      this.enableEditing();
+    } else {
+      this.disableEditing();
+    }
+    console.log('seteditingmode')
+  }
+ 
+
+
+  public updateEntityPosition(cartesian: Cartesian3) {
+    console.log('updateentityposition')
+    if (this.selectedEntity) {
+        if (this.selectedEntity.polyline?.positions) {
+            const positions = this.selectedEntity.polyline.positions.getValue(JulianDate.now());
+            const offset = Cartesian3.subtract(cartesian, positions[0], new Cartesian3());
+            const newPositions = positions.map((position: Cartesian3) => Cartesian3.add(position, offset, new Cartesian3()));
+            this.selectedEntity.polyline.positions = new CallbackProperty(() => newPositions, false);
+        } else if (this.selectedEntity.position) {
+            this.selectedEntity.position = new CallbackProperty(() => cartesian, false) as unknown as PositionProperty;
+        }
+    }
+    console.log('updateentityposition')
+  }
   /**
    * Extracts coordinates from geometries.
    */
@@ -495,110 +547,128 @@ private disableEditing() {
 }
 
 private loadCables(): void {
-  this.cableMeasurementService.getData(this.inquiryId).subscribe({
-    next: data => {
-      if (data) {
-        console.log('data received from service', data);
-        GeoJsonDataSource.load(data, {
-          stroke: Color.BLUE,
-          fill: Color.BLUE.withAlpha(1),
-          strokeWidth: 3,
-          markerSize: 1, // Size of the marker
-          credit: "Provided by Petters Cable measurement service",
-        })
-        .then((dataSource: GeoJsonDataSource) => {
-          this.viewer.dataSources.add(dataSource);
-
-          // Add picking and moving functionality to cables
-          dataSource.entities.values.forEach(entity => {
-            if (entity.polyline?.positions) {
-              const coordinates = entity.polyline.positions.getValue(JulianDate.now());
-              coordinates.forEach((position: any, index: any) => {
-                const pointEntity = new Entity({
-                  position,
-                  point: new PointGraphics({
-                    color: Color.BLUE,
-                    pixelSize: 10,
-                    outlineColor: Color.WHITE,
-                    outlineWidth: 2,
-                  }),
-                });
-                this.viewer.entities.add(pointEntity);
-              });
-            }
-            if (entity.position) {
-              entity.point = new PointGraphics({
-                color: Color.BLUE,
-                pixelSize: 10,
-                outlineColor: Color.WHITE,
-                outlineWidth: 2,
-              });
-            }
+  const geoJsonData = {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "point_id": 4218,
+          "metadata": {
+            "x": 272340.264,
+            "y": 7040733.727,
+            "lat": 63.4220986,
+            "lon": 10.436597,
+            "PDOP": 0.8,
+            "height": 103.483,
+            "fixType": "rtk",
+            "accuracy": 0.014,
+            "timestamp": 1720595755444,
+            "antennaHeight": 1.8,
+            "numSatellites": 23,
+            "numMeasurements": 3,
+            "verticalAccuracy": 0.018
+          }
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [10.436597, 63.4220986]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 822
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [10.4365917, 63.4220991],
+            [10.4365872, 63.4221003],
+            [10.4365867, 63.4220992],
+            [10.4365879, 63.4221158],
+            [10.4365434, 63.4221234],
+            [10.4365389, 63.4221244],
+            [10.4365019, 63.4221486],
+            [10.4364934, 63.4221787],
+            [10.4366107, 63.4222048]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "id": 823
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [10.4365594, 63.422287],
+            [10.4366929, 63.4222636],
+            [10.436654, 63.4222757],
+            [10.436654, 63.4222894],
+            [10.4366804, 63.4222987],
+            [10.4367052, 63.4222975],
+            [10.4367435, 63.4222931],
+            [10.4367737, 63.4223016],
+            [10.436777, 63.4223184],
+            [10.4367408, 63.422342],
+            [10.4367039, 63.4223357],
+            [10.436749, 63.4223266],
+            [10.4368225, 63.4223407],
+            [10.4368495, 63.4223585],
+            [10.4368392, 63.4223663],
+            [10.4367735, 63.4223829],
+            [10.4368763, 63.4223725]
+          ]
+        }
+      }
+    ]
+  };
+ 
+  GeoJsonDataSource.load(geoJsonData, {
+    stroke: Color.BLUE,
+    fill: Color.BLUE.withAlpha(1),
+    strokeWidth: 3,
+    credit: "Provided by Petters Cable measurement service",
+  })
+  .then((dataSource: GeoJsonDataSource) => {
+    this.viewer.dataSources.add(dataSource);
+ 
+    // Add picking and moving functionality to cables
+    dataSource.entities.values.forEach(entity => {
+      if (entity.polyline?.positions) {
+        const coordinates = entity.polyline.positions.getValue(JulianDate.now());
+        coordinates.forEach((position: any, index: any) => {
+          const pointEntity = new Entity({
+            position,
+            point: new PointGraphics({
+              color: Color.BLUE,
+              pixelSize: 10,
+              outlineColor: Color.WHITE,
+              outlineWidth: 2,
+            }),
           });
-        })
-        .catch(error => {
-          console.error('Failed to load GeoJSON data:', error);
+          this.viewer.entities.add(pointEntity);
         });
-        console.log('loadcables');
       }
-    }
-  });
-}
-
-
-
-public updateEntityPosition(cartesian: Cartesian3) {
-  console.log('updateentityposition')
-  if (this.selectedEntity) {
-      if (this.selectedEntity.polyline?.positions) {
-          const positions = this.selectedEntity.polyline.positions.getValue(JulianDate.now());
-          const offset = Cartesian3.subtract(cartesian, positions[0], new Cartesian3());
-          const newPositions = positions.map((position: Cartesian3) => Cartesian3.add(position, offset, new Cartesian3()));
-          this.selectedEntity.polyline.positions = new CallbackProperty(() => newPositions, false);
-      } else if (this.selectedEntity.position) {
-          this.selectedEntity.position = new CallbackProperty(() => cartesian, false) as unknown as PositionProperty;
+      if (entity.position) {
+        entity.point = new PointGraphics({
+          color: Color.BLUE,
+          pixelSize: 10,
+          outlineColor: Color.WHITE,
+          outlineWidth: 2,
+        });
       }
-  }
-  console.log('updateentityposition')
-}
-
-
-  public updateGlobeAlpha(alpha: number): void {
-    console.log('updateglobealpha')
-    // Adjust globe base color translucency
-    this.viewer.scene.globe.translucency.enabled = true;
-    this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue =
-      alpha;
-      console.log('updateglobealpha')
-  }
-
-  setTilesetVisibility(visible: boolean) {
-    console.log('settilesetvisibility')
-    if (this.tileset) {
-      this.tileset.show = visible;
-    }
-    console.log('settilesetvisibility')
-  }
-  setPolygonsVisibility(visible: boolean) {
-    console.log('setpolygonsetvisibility')
-    this.polygons.forEach(polygon => {
-      polygon.show = visible;
     });
-    console.log('setpolygonsetvisibility')
-  }
-
-  setEditingMode(isEditing: boolean) {
-    console.log('seteditingmode')
-    this.isEditing = isEditing;
-    console.log('editign', isEditing)
-    if (isEditing) {
-      this.enableEditing();
-    } else {
-      this.disableEditing();
-    }
-    console.log('seteditingmode')
-  }
-
+  })
+  .catch(error => {
+    console.error('Failed to load GeoJSON data:', error);
+  });
+ 
+  console.log('loadCables');
+}
+/*
   constructGeoTIFFUrl(bbox: any) {
     const baseUrl = 'https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833';
     const params = new URLSearchParams({
@@ -671,7 +741,7 @@ async loadGeoTIFF(url: any) {
   } catch (error) {
       console.error('Error loading GeoTIFF:', error);
   }
-}
+}*/
 }
 function convertDegreesToMeters(lon: any, lat: any) {
   const proj4 = window.proj4;

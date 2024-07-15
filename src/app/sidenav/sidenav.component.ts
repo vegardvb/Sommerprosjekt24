@@ -5,6 +5,7 @@ import { SidenavLinkComponent } from './sidenav-link.component';
 import { Entity, JulianDate, Cartographic, Math as CesiumMath, Cartesian3, ConstantPositionProperty} from 'cesium';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { CableMeasurementInfoComponent } from "../cable-measurement-info/cable-measurement-info.component";
 
 @Component({
   selector: 'app-sidenav',
@@ -12,7 +13,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [SidenavLinkComponent, ReactiveFormsModule, CommonModule],
+  imports: [SidenavLinkComponent, ReactiveFormsModule, CommonModule, CableMeasurementInfoComponent],
 })
 export class SidenavComponent {
   readonly sidenavMinWidth = 250;
