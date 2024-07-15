@@ -11,7 +11,7 @@ import { ParsedGeometry } from '../models/parsedgeometry-interface';
   providedIn: 'root',
 })
 export class GeometryService {
-  private apiUrl = 'http://127.0.0.1:8000/geometries/area/inquiry/{inquiry_id}';
+  private apiUrl = 'http://127.0.0.1:8000/geometries/area/boundary/inquiry/{inquiry_id}';
   private parsedGeometry!: ParsedGeometry;
 
   constructor(private http: HttpClient) {
@@ -21,37 +21,18 @@ export class GeometryService {
       '+proj=utm +zone=33 +datum=WGS84 +units=m +no_defs'
     );
   }
-
-  getGeometry(inquiry_id: number): Observable<Geometry[]> {
-    const url = this.apiUrl.replace('{inquiry_id}', inquiry_id.toString());
-    return this.http.get<Geometry[]>(url).pipe(
-      map(geometries => this.parseAndConvertGeometries(geometries)),
+  getGeometry(inquiry_id: number | undefined): Observable<Array<Geometry>> {
+    const apiUrl = `http://127.0.0.1:8000/geometries/area/boundary/inquiry/${inquiry_id}`;
+    return this.http.get<Array<Geometry>>(apiUrl).pipe(
+      map((data: Array<Geometry>) => {
+        console.log(
+          'Processed geometry: ',
+          data
+        );
+        return data;
+      }),
       catchError(this.handleError)
     );
-  }
-
-  private parseAndConvertGeometries(geometries: Geometry[]): Geometry[] {
-    return geometries.map(geometry => {
-      this.parseGeoJSON(geometry);
-      console.log(geometry)
-
-      if (this.parsedGeometry) {
-        geometry.st_asgeojson = this.parsedGeometry; // Replace geometry with parsed geometry
-      }
-      return geometry;
-    });
-  }
-
-  private parseGeoJSON(geometry: Geometry): ParsedGeometry | null {
-    try {
-      this.parsedGeometry = JSON.parse(
-        geometry.st_asgeojson as string
-      ) as ParsedGeometry;
-      return this.parsedGeometry;
-    } catch (error) {
-      console.error('Error parsing geojson:', error);
-      return null;
-    }
   }
 
   private handleError(error: Error): Observable<never> {

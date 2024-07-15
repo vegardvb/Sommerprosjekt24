@@ -38,7 +38,7 @@ import {
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
-
+import * as turf from '@turf/turf';
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
 import proj4 from 'proj4';
 import { fromUrl } from 'geotiff';
@@ -75,13 +75,15 @@ export class CesiumDirective implements OnInit {
 
   constructor(
     private el: ElementRef,
-    private geometryService: GeometryService,
     private route: ActivatedRoute,
   ) {}
 
   // Service for fetching data from the backend
   private cableMeasurementService: CableMeasurementService = inject(
     CableMeasurementService
+  );
+  private geometryService: GeometryService = inject(
+    GeometryService
   );
 
   async ngOnInit(): Promise<void> {
@@ -94,7 +96,7 @@ export class CesiumDirective implements OnInit {
 
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.initializeViewer();
-    //this.loadCables();
+    this.loadCables();
 
 
 
@@ -247,21 +249,21 @@ fetch(url)
       this.geometryService.getGeometry(inquiryId).subscribe({
         next: (response: Geometry[]) => {
           this.products = response.map(geometry => {
-            const parsedGeometry = geometry.st_asgeojson as ParsedGeometry;
-            return { id: geometry.id, st_asgeojson: parsedGeometry };
+            const parsedGeometry = geometry.geojson as ParsedGeometry;
+            return { id: geometry.id, geojson: parsedGeometry };
           });
           
          this.extractCoordinates(this.products)
        
-          if (this.coords.length > 0) {
-            console.log(this.coords)
-            this.coords.forEach(coordlist => {
-                const polygonCoordinates = coordlist.map(coordinate =>
-                  Cartesian3.fromDegrees(coordinate[0], coordinate[1])
-                );
-              this.plotPolygon(polygonCoordinates, this.viewer);
-              });
-          }
+           if (this.coords.length > 0) {
+             console.log(this.coords)
+             this.coords.forEach(coordlist => {
+                 const polygonCoordinates = coordlist.map(coordinate =>
+                   Cartesian3.fromDegrees(coordinate[0], coordinate[1])
+                 );
+               this.plotPolygon(polygonCoordinates, this.viewer);
+               });
+           }
 
           this.updateMap(this.viewer);
           this.updateGlobeAlpha(1);
@@ -279,22 +281,25 @@ fetch(url)
   /**
    * Extracts coordinates from geometries.
    */
-  private extractCoordinates(geometries: Geometry[]): void {
-    console.log('extractcoordinates')
-    this.coords = geometries.reduce(
-      (acc, geometry) => {
-        const parsedGeometry = geometry.st_asgeojson as ParsedGeometry;
-        if (parsedGeometry && parsedGeometry.coordinates) {
-          acc.push(...parsedGeometry.coordinates);
-        }
-        return acc;
-      },
-      [] as number[][][]
-    );
-    console.log('ec', this.coords);
-    console.log('ec', this.coords[0][0][0]);
-  }
-  
+private extractCoordinates(geometries: Geometry[]): void {
+  this.geometryService.getGeometry(this.inquiryId).subscribe({
+    next: data => {
+      if (data) {
+        console.log('data received from geometry', data);
+        GeoJsonDataSource.load(data, {
+          stroke: Color.BLUE,
+          fill: Color.BLUE.withAlpha(1),
+          strokeWidth: 3,
+          markerSize: 1, // Size of the marker
+          credit: "Provided by Petters Cable measurement service",
+        }).then((dataSource: GeoJsonDataSource) => {
+          this.viewer.dataSources.add(dataSource);
+          console.log('extract');
+        });
+      }
+    }
+  });
+}
 
   /**
    * Updates the map view to fit the extracted coordinates.
@@ -500,7 +505,7 @@ private loadCables(): void {
     next: data => {
       if (data) {
         console.log('data received from service', data);
-        GeoJsonDataSource.load(data, {
+        GeoJsonDataSource.load(data[0].geojson, {
           stroke: Color.BLUE,
           fill: Color.BLUE.withAlpha(1),
           strokeWidth: 3,
