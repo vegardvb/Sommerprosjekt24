@@ -1,5 +1,5 @@
 CREATE OR REPLACE VIEW
-    "Points_by_Measurement_as_GeoJSON" AS
+    "Standalone_Points_by_Measurement_as_GeoJSON" AS
 SELECT measurement.id AS measurement_id,
        json_build_object(
                'type',
@@ -7,11 +7,7 @@ SELECT measurement.id AS measurement_id,
                'properties',
                json_build_object('point_id', point.id, 'metadata', point.metadata),
                'geometry',
-               json_build_object(
-                       'type', 'Point',
-                       'coordinates',
-                       point_with_height.point_geojson
-               )
+               point_with_height.point_geojson
        )              AS point_geojson
 FROM "Measurement"                                  measurement
          INNER JOIN "Measurement_Point"             link ON link.measurement_id = measurement.id
