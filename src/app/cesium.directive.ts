@@ -492,6 +492,7 @@ private disableEditing() {
     this.viewer.scene.screenSpaceCameraController.enableTilt = true;
     this.viewer.scene.screenSpaceCameraController.enableLook = true;
     console.log('disableediting')
+    //fkpdofkp
 }
 
 private loadCables(): void {
