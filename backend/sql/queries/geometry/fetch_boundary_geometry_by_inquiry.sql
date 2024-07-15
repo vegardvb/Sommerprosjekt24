@@ -7,7 +7,9 @@
 SELECT inquiry.id,
        json_build_object(
                'type', 'Feature',
-               'properties', json_build_object(),
+               'properties', json_build_object(
+              'center' , public.st_centroid(public.st_envelope(public.st_collect(measurement_geometry.geometry, area_geometry.geometry)))
+               ),
                'geometry',
                public.st_asgeojson(public.st_envelope(public.st_collect(measurement_geometry.geometry,
                                                                         area_geometry.geometry)))::jsonb
