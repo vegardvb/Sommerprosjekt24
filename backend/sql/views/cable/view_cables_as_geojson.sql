@@ -1,12 +1,11 @@
---TODO Optimalize query
 CREATE OR REPLACE VIEW
     "Cables_as_GeoJSON" AS
 SELECT cable.cable_measurement_id,
-       JSON_BUILD_OBJECT(
+       json_build_object(
                'type',
                'Feature',
                'properties',
-               JSON_BUILD_OBJECT('measurement_id', cable.cable_measurement_id),
+               json_build_object('measurement_id', cable.cable_measurement_id),
                'geometry',
                PUBLIC.ST_ASGEOJSON(PUBLIC.ST_MakeLine(point.geom))
        ) AS cable_geojson

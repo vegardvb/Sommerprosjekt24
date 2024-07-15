@@ -52,10 +52,10 @@ def get_inquiries(connection=Depends(get_db)):
     return result
 
 
-@app.get("/geometries/area/inquiry/{inquiry_id}")
+@app.get("/geometries/area/boundary/inquiry/{inquiry_id}")
 def get_area_geometry_by_inquiery(inquiry_id: int, connection=Depends(get_db)):
     """
-    Endpoint for measurement geometry by given inquiery id. \n
+    Endpoint for retrieving the boundary geometry by the given inquiery id. \n
 
     **Args**:
     \n *inquiry_id (int)*: The id of the inquiery to sort by.
@@ -64,7 +64,28 @@ def get_area_geometry_by_inquiery(inquiry_id: int, connection=Depends(get_db)):
     \n *Array<JSON>*: Array containing a JSON object which holds the area geometry for the inquiry.
 
     """
-    result = query_area_geometry_by_inquiry(inquiry_id, connection)
+    result = query_boundary_geometry_by_inquiry(inquiry_id, connection)
+
+    if DEBUG:
+        for row in result:
+            print(f"{row} | Type: {type(row)} ")
+
+    return result
+
+
+@app.get("/geometries/area/working_area/inquiry/{inquiry_id}")
+def get_working_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
+    """
+    Endpoint for the geometry of the working area by given inquiery id. \n
+
+    **Args**:
+    \n *inquiry_id (int)*: The id of the inquiery to sort by.
+
+    **Returns**:
+    \n *Array<JSON>*: Array containing a JSON object which holds the area geometry for the inquiry.
+
+    """
+    result = query_working_area_geometry_by_inquiry(inquiry_id, connection)
 
     if DEBUG:
         for row in result:
