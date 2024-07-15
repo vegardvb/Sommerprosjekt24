@@ -1,4 +1,7 @@
 export interface CableInfo {
+  properties: {
+    point_id: number;
+  }
   feature_type: string;
   metadata: {
     objectType: {

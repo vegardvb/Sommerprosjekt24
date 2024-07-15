@@ -2,13 +2,12 @@
   <div class="sidenav overflow-scroll" style="padding: 1rem">
     <div class="sidenav-body">
       <app-sidenav-link routerLink="/">
-        
         <span icon>🏠</span>
 
         <span class="text-white">Home</span>
       </app-sidenav-link>
     </div>
-    <app-cable-measurement-info></app-cable-measurement-info> 
+    <app-cable-measurement-info></app-cable-measurement-info>
     <!--
     <div
       class="resize-handle"
@@ -16,31 +15,51 @@
       [class.resizing]="resizingEvent.isResizing"
     ></div>-->
     <div *ngIf="selectedEntity" class="coordinate-inputs">
-
       <button (click)="toggleEditing()" class="btn edit-btn mb-3">
         {{ isEditing ? 'Disable Editing' : 'Enable Editing' }}
       </button>
-    
+
       <div class="form-group">
         <label for="longitude" class="form-label">Longitude</label>
-        <input id="longitude" [(value)]="longitude" (input)="onLongitudeChange($event)" [readonly]="!isEditing" class="form-control mb-2">
-      </div>
-    
-      <div class="form-group">
-        <label for="latitude" class="form-label">Latitude</label>
-        <input id="latitude" [(value)]="latitude" (input)="onLatitudeChange($event)" [readonly]="!isEditing" class="form-control mb-2">
-      </div>
-    
-      <div class="form-group">
-        <label for="height" class="form-label">Height</label>
-        <input id="height" [(value)]="height" (input)="onHeightChange($event)" [readonly]="!isEditing" class="form-control mb-2">
+        <input
+          id="longitude"
+          [(value)]="longitude"
+          (input)="onLongitudeChange($event)"
+          [readonly]="!isEditing"
+          class="form-control mb-2"
+        />
       </div>
 
-      <button (click)="closeEditor()" class="btn close-btn mb-3">
+      <div class="form-group">
+        <label for="latitude" class="form-label">Latitude</label>
+        <input
+          id="latitude"
+          [(value)]="latitude"
+          (input)="onLatitudeChange($event)"
+          [readonly]="!isEditing"
+          class="form-control mb-2"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="height" class="form-label">Height</label>
+        <input
+          id="height"
+          [(value)]="height"
+          (input)="onHeightChange($event)"
+          [readonly]="!isEditing"
+          class="form-control mb-2"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="accuracy" class="form-label">Accuracy</label>
+        <p class="text-white" id="accuracy">{{ accuracy }}</p>
+      </div>
+
+      <button (click)="closeEditor()" class="btn close-btn mb text-white">
         Close Editor
       </button>
     </div>
   </div>
 </div>
-
-

@@ -6,6 +6,7 @@ import { Entity, JulianDate, Cartographic, Math as CesiumMath, Cartesian3, Const
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from "../cable-measurement-info/cable-measurement-info.component";
+import { CesiumDirective } from '../cesium.directive';
 
 @Component({
   selector: 'app-sidenav',
@@ -13,7 +14,7 @@ import { CableMeasurementInfoComponent } from "../cable-measurement-info/cable-m
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [SidenavLinkComponent, ReactiveFormsModule, CommonModule, CableMeasurementInfoComponent],
+  imports: [SidenavLinkComponent, ReactiveFormsModule, CommonModule, CableMeasurementInfoComponent, CesiumDirective],
 })
 export class SidenavComponent {
   readonly sidenavMinWidth = 250;
@@ -22,6 +23,7 @@ export class SidenavComponent {
   longitude: number = 0;
   latitude: number = 0;
   height: number = 0;
+  accuracy: string = "";
   isEditing: boolean = false;
   @Output() editingToggled = new EventEmitter<boolean>();
   
@@ -70,6 +72,7 @@ export class SidenavComponent {
       this.latitude = CesiumMath.toDegrees(cartographic.latitude);
       this.height = cartographic.height;
     }
+    this.accuracy = "3";
   }
 
   clearSelectedEntity() {
@@ -83,19 +86,26 @@ export class SidenavComponent {
     const inputElement = event.target as HTMLInputElement;
     this.longitude = Number(inputElement.value);
     this.updateEntityPosition();
+    this.accuracy = 'Edited';
+
   }
 
   onLatitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.latitude = Number(inputElement.value);
     this.updateEntityPosition();
+    this.accuracy = 'Edited';
+
   }
 
   onHeightChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
+    this.accuracy = 'Edited';
   }
+
+  
 
   private updateEntityPosition() {
     if (this.selectedEntity) {
