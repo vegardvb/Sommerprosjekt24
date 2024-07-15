@@ -86,8 +86,8 @@ def query_inquiries(connection):
     return result
 
 
-def query_area_geometry_by_inquiry(inquiry_id, connection):
-    """A method for querying geometry by inquiry.
+def query_boundary_geometry_by_inquiry(inquiry_id, connection):
+    """A method for querying boundary geometry by inquiry.
 
     Args:
         inquiry_id (int): The id of the inquiry to query.
@@ -100,7 +100,28 @@ def query_area_geometry_by_inquiry(inquiry_id, connection):
     connection.execute(text("SET search_path TO analytics_cable_measurement_inquiries"))
     result = execute_query(
         connection=connection,
-        main_file_path=f"{QUERY_PATH}/geometry/fetch_area_geometry_by_inquiry.sql",
+        main_file_path=f"{QUERY_PATH}/geometry/fetch_boundary_geometry_by_inquiry.sql",
+        params={"inquiry_id": inquiry_id},
+    )
+
+    return [dict(row) for row in result.mappings()]
+
+
+def query_working_area_geometry_by_inquiry(inquiry_id, connection):
+    """A method for querying working area geometry by inquiry.
+
+    Args:
+        inquiry_id (int): The id of the inquiry to query.
+        connection (Connection):  A connection to the database to execute the query.
+
+    Returns:
+        Dictonary : A dictonary containing the geometry and its related inquiry.
+    """
+    # TODO Refactor schema declaration
+    connection.execute(text("SET search_path TO analytics_cable_measurement_inquiries"))
+    result = execute_query(
+        connection=connection,
+        main_file_path=f"{QUERY_PATH}/geometry/fetch_working_area_by_inquiry.sql",
         params={"inquiry_id": inquiry_id},
     )
 
@@ -108,7 +129,7 @@ def query_area_geometry_by_inquiry(inquiry_id, connection):
 
 
 def query_measurement_geometry_by_inquiry(inquiry_id, connection):
-    """A method for querying measurement geometry by inquiry.
+    """A method for querying the geometry for the working area by inquiry.
 
     Args:
         inquiry_id (int): The id of the inquiry to query.

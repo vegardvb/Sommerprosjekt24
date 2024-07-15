@@ -76,6 +76,7 @@ logs/
 
 # Backend 
 ./backend/sql/queries/templates
+./backend/sql/test.sql
 
 
 # Misc
