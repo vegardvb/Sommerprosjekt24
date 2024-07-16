@@ -1,15 +1,34 @@
-<p-accordion [multiple]="true" [activeIndex]="[0]">
+
+<p-accordion [multiple]="false" [activeIndex]="0">
   <p-accordionTab
-    *ngFor="let info of cableInfo"
-    header="{{ info.feature_type }}"
-    class="p-1"
+    *ngFor="let feature of features"
+    [header]="getHeader(feature)"
   >
-    <!--<p>Text: {{ info.metadata?.objectType?.text }}</p>
-    <p>Value: {{ info.metadata?.objectType?.value }}</p>
-    <p>Geometry type: {{ info.metadata?.objectType?.geomType }}</p>-->
-    <p>test</p>
-    <p>x: ejdeje</p>
-    <p>y: bfchrbfhr</p>
-    <p>type: point</p>
+    <div *ngIf="feature.geometry.type">
+      <p><strong>Type:</strong> {{ feature.geometry.type }}</p>
+      <div class="flex flex-wrap">
+        <p><strong>Coordinates:</strong></p>
+        <div class="flex flex-wrap">
+          <span *ngFor="let coord of formatCoordinates(feature.geometry.coordinates)" class="mr-2">{{ coord }}</span>
+        </div>
+      </div>
+    </div>
+    <div *ngIf="feature.properties.point_id !== undefined && feature.properties.metadata">
+      <strong>Metadata:</strong>
+      <ul>
+        <li>Accuracy: {{ feature.properties.metadata.accuracy }}</li>
+        <li>Antenna Height: {{ feature.properties.metadata.antennaHeight }}</li>
+        <li>Fix Type: {{ feature.properties.metadata.fixType }}</li>
+        <li>Height: {{ feature.properties.metadata.height }}</li>
+        <li>Latitude: {{ feature.properties.metadata.lat }}</li>
+        <li>Longitude: {{ feature.properties.metadata.lon }}</li>
+        <li>Number of Measurements: {{ feature.properties.metadata.numMeasurements }}</li>
+        <li>Number of Satellites: {{ feature.properties.metadata.numSatellites }}</li>
+        <li>Timestamp: {{ feature.properties.metadata.timestamp }}</li>
+        <li>Vertical Accuracy: {{ feature.properties.metadata.verticalAccuracy }}</li>
+        <li>X: {{ feature.properties.metadata.x }}</li>
+        <li>Y: {{ feature.properties.metadata.y }}</li>
+      </ul>
+    </div>
   </p-accordionTab>
 </p-accordion>
