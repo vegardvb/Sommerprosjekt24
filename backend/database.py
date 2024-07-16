@@ -17,7 +17,7 @@ db_port = os.getenv("DB_PORT")
 
 # Create connection to database
 DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-SCHEMA = f"analytics_cable_measurement"
+SCHEMA = f"analytics_cable_measurement_inquiries"
 
 
 # Engine for executing queries
@@ -33,4 +33,5 @@ def get_db():
     with engine.connect() as connection:
         # Set the default options for results
         connection = connection.execution_options(mapper=ResultProxy.mappings)
+        connection.execute(text(f"SET search_path TO {SCHEMA}"))
         yield connection
