@@ -44,7 +44,7 @@ import { ParsedGeometry } from '../models/parsedgeometry-interface';
 import proj4 from 'proj4';
 import { fromUrl } from 'geotiff';
 import { CableMeasurementService } from './services/cable-measurement.service';
-
+import { WorkingAreaService } from './services/workingarea.service';
 
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
@@ -90,6 +90,10 @@ export class CesiumDirective implements OnInit {
   private geometryService: GeometryService = inject(
     GeometryService
   );
+  private workingAreaService: WorkingAreaService = inject(
+    WorkingAreaService
+  );
+
 
   async ngOnInit(): Promise<void> {
     console.log('ngoninit')
@@ -97,19 +101,13 @@ export class CesiumDirective implements OnInit {
       this.inquiryId = params['inquiryId'];
     });
     
-    //this.filterMapByInquiryId(this.inquiryId);
-    
- this.extractCoordinates()
- console.log('1',this.height)
-
-    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    this.extractCoordinates()
     this.initializeViewer();
-    console.log('2',this.height)
     this.loadCables();
+    this.loadWorkingArea();
 
     
 
-    console.log('3',this.height)
 
 
 
@@ -134,11 +132,14 @@ export class CesiumDirective implements OnInit {
 
     this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
       if (defined(entity)) {
+        console.log('Entity selected: ', entity.id);
         this.selectedEntityChanged.emit(entity)
+        console.log('emitafterselect', this.selectedEntityChanged)
       } else {
+        console.log('No entity selected');
       }
     });
-    console.log('4',this.height)
+
   }
 
   /**
@@ -154,8 +155,6 @@ export class CesiumDirective implements OnInit {
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
     this.enableEntitySelection();
 
-    
-
     const scene = this.viewer.scene;
     const globe = scene.globe;
 
@@ -165,13 +164,6 @@ export class CesiumDirective implements OnInit {
       2000.0,
       1.0
     );
-
-     
-    
-
-    
-
-    const distance = 500.0;
 
     this.tileset = this.viewer.scene.primitives.add(
       await Cesium3DTileset.fromIonAssetId(96188)
@@ -216,25 +208,6 @@ export class CesiumDirective implements OnInit {
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
       new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
 
-
-    //   const mcoords = this.coords.map(coord => 
-    //     convertDegreesToMeters(coord[0], coord[1])
-
-    // );
-
-    
-
-
-   
-  }
-
-  /**
-   * Filters the map by inquiry ID and fetches geometries.
-   */
-  private filterMapByInquiryId(inquiryId: number | undefined): void {
-    
-
-
   }
 
   /**
@@ -250,13 +223,12 @@ export class CesiumDirective implements OnInit {
             const geoJson = data[0].geojson; // URL or object containing your GeoJSON data
   
             GeoJsonDataSource.load(geoJson, {
-              stroke: Color.BLUE,
-              fill: Color.BLUE.withAlpha(0.5),
-              strokeWidth: 3,
+              fill: Color.BLUE.withAlpha(0),
+              strokeWidth: 0,
               markerSize: 1, // Size of the marker
               credit: "Provided by Petters Cable measurement service",
             }).then((dataSource: GeoJsonDataSource) => {
-              this.viewer.dataSources.add(dataSource);
+
   
               const bottomLeftCoord = data[0].geojson.geometry.coordinates[0][0];
               const topRightCoord = data[0].geojson.geometry.coordinates[0][2];
@@ -293,6 +265,7 @@ export class CesiumDirective implements OnInit {
               },
               pitchAdjustHeight: 1000
             });
+            this.changeHomeButton(this.viewer, this.center);
   
               console.log('Finished processing');
               resolve();
@@ -308,10 +281,7 @@ export class CesiumDirective implements OnInit {
   /**
    * Updates the map view to fit the extracted coordinates.
    */
-  private updateMap(viewer: Viewer): void {
-      // Camera.DEFAULT_VIEW_RECTANGLE = rectangle
-      // this.changeHomeButton(viewer, rectangle);
-    }
+
   
   // /**
   //  * Extracts the bounding box of the current view based on clipping planes and emits the coordinates.
@@ -370,32 +340,24 @@ export class CesiumDirective implements OnInit {
   //   }
   // }
 
-  /**
-   * Plots a polygon on the viewer.
-   */
-  private plotPolygon(coordinates: Cartesian3[], viewer: Viewer): void {
 
-    console.log('plotpolygon')
-    const polygonEntity = viewer.entities.add({
-      polygon: {
-        hierarchy: new PolygonHierarchy(coordinates),
-        material: Color.RED.withAlpha(0.5),
-      },
-    });
-    this.polygons.push(polygonEntity);
-    console.log('polygons')
-    console.log('plotpolygon')
-  }
-  private changeHomeButton(viewer: Viewer, retangle: Rectangle) {
-    console.log('changehome')
+  
+  private changeHomeButton(viewer: Viewer, centerCoordinates : Cartesian3) {
     // Change the home button view
     viewer.homeButton.viewModel.command.beforeExecute.addEventListener(
       function (e) {
         e.cancel = true; // Cancel the default home view
-        Camera.DEFAULT_VIEW_RECTANGLE = retangle;
+        viewer.camera.flyTo({
+          destination: centerCoordinates,
+          orientation: {
+            heading: CesiumMath.toRadians(0.0), // Set the heading of the camera in radians
+            pitch: CesiumMath.toRadians(-90.0), // Set the pitch of the camera in radians
+            roll: 0.0 // Set the roll of the camera
+          },
+          pitchAdjustHeight: 1000
+        });
       }
     );
-    console.log('changehome')
   }
   private enableEntitySelection() {
     console.log('enablentity')
@@ -541,6 +503,39 @@ private loadCables(): void {
     }
   });
 }
+
+private loadWorkingArea(): void {
+  this.workingAreaService.getArea(this.inquiryId).subscribe({
+    next: data => {
+      if (data) {
+        console.log('data received from service', data);
+        GeoJsonDataSource.load(data[0].geojson, {
+          stroke: Color.BLUE,
+          fill: Color.BLUE.withAlpha(0.3),
+          strokeWidth: 2,
+          markerSize: 1, // Size of the marker
+          credit: "Provided by Petters Cable measurement service",
+        })
+        .then((dataSource: GeoJsonDataSource) => {
+          this.viewer.dataSources.add(dataSource);
+          
+
+          // Add picking and moving functionality to cables
+          dataSource.entities.values.forEach(entity => {
+            this.polygons.push(entity)
+            this.viewer.entities.add(entity);
+          });
+        })
+        .catch(error => {
+          console.error('Failed to load GeoJSON data:', error);
+        });
+        console.log('loadcables');
+      }
+    }
+  });
+}
+
+
 
 
 
