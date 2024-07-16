@@ -36,9 +36,6 @@ export class MapViewComponent implements OnInit, OnDestroy {
     this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
       bbox => {
         const { width, height } = this.calculateWidthHeight(bbox);
-        console.log(
-          `Fetching and processing terrain with bbox: ${bbox}, width: ${width}, height: ${height}`
-        );
         this.fetchAndProcessTerrain(bbox, width, height);
       }
     );
@@ -77,10 +74,13 @@ export class MapViewComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: async response => {
-          if (response && response.layerUrl) {
-            await this.cesiumDirective.loadTerrainFromUrl(response.layerUrl);
+          if (response && response.tilesetUrl) {
+            console.log(
+              `Loading terrain from tileset URL: ${response.tilesetUrl}`
+            );
+            await this.cesiumDirective.loadTerrainFromUrl(response.tilesetUrl);
           } else {
-            console.error('Layer URL not provided in the response', response);
+            console.error('Tileset URL not provided in the response', response);
           }
         },
         error: (error: Error) => {

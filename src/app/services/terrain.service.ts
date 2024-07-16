@@ -19,8 +19,8 @@ export class TerrainService {
     return this.http.get<{ file_path: string }>(url);
   }
 
-  processGeoTIFF(filePath: string): Observable<{ layerUrl: string }> {
+  processGeoTIFF(filePath: string): Observable<{ tilesetUrl: string }> {
     const url = `${this.apiUrl}/process-geotiff?file_path=${encodeURIComponent(filePath)}`;
-    return this.http.get<{ layerUrl: string }>(url);
+    return this.http.get<{ tilesetUrl: string }>(url);
   }
 }
