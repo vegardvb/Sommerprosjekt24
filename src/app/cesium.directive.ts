@@ -33,6 +33,7 @@ import {
   PointGraphics,
   SingleTileImageryProvider,
   Rectangle,
+  Camera,
 } from 'cesium';
 //import { CableMeasurementService } from './services/cable-measurement.service';
 import { Geometry } from '../models/geometry-interface';
@@ -71,6 +72,10 @@ export class CesiumDirective implements OnInit {
 
   private viewer!: Viewer;
   private handler: any;
+  tilesetClippingPlanes!: ClippingPlaneCollection;
+  globeClippingPlanes!: ClippingPlaneCollection;
+  width!: number;
+  height!: number;
   
 
   constructor(
@@ -91,12 +96,20 @@ export class CesiumDirective implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
     });
-    this.filterMapByInquiryId(this.inquiryId);
- 
+    
+    //this.filterMapByInquiryId(this.inquiryId);
+    
+ this.extractCoordinates()
+ console.log('1',this.height)
 
     // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
     this.initializeViewer();
+    console.log('2',this.height)
     this.loadCables();
+
+    
+
+    console.log('3',this.height)
 
 
 
@@ -125,6 +138,7 @@ export class CesiumDirective implements OnInit {
       } else {
       }
     });
+    console.log('4',this.height)
   }
 
   /**
@@ -140,6 +154,8 @@ export class CesiumDirective implements OnInit {
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
     this.enableEntitySelection();
 
+    
+
     const scene = this.viewer.scene;
     const globe = scene.globe;
 
@@ -149,41 +165,48 @@ export class CesiumDirective implements OnInit {
       2000.0,
       1.0
     );
+
+     
+    
+
     
 
     const distance = 500.0;
 
-     this.tileset = this.viewer.scene.primitives.add(
-       await Cesium3DTileset.fromIonAssetId(96188)
-     );
+    this.tileset = this.viewer.scene.primitives.add(
+      await Cesium3DTileset.fromIonAssetId(96188)
+    );
 
+    console.log(this.center)
 
      const globeClippingPlanes = new ClippingPlaneCollection({
        modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
        planes: [
-         new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
-         new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), distance),
-         new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), distance),
-         new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), distance),
+         new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), this.width),
+         new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), this.width),
+         new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), this.height),
+         new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), this.height),
        ],
        unionClippingRegions: true,
        edgeWidth: 1,
-       edgeColor: Color.RED,
-       enabled: true,
-     });
-    const tilesetClippingPlanes = new ClippingPlaneCollection({
-       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
-       planes: [
-         new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), distance),
-         new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), distance),
-         new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), distance),
-         new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), distance),
-       ],
-       unionClippingRegions: true,
-       edgeWidth: 1,
-       edgeColor: Color.RED,
-       enabled: true,
-     });
+      edgeColor: Color.RED,
+      enabled: true,
+    });
+   
+   const tilesetClippingPlanes = new ClippingPlaneCollection({
+      modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
+      planes: [
+        new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), this.width),
+        new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), this.width),
+        new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), this.height),
+        new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), this.height),
+      
+      ],
+      unionClippingRegions: true,
+      edgeWidth: 1,
+      edgeColor: Color.RED,
+      enabled: true,
+    });
 
     this.viewer.scene.globe.clippingPlanes = globeClippingPlanes;
     this.tileset.clippingPlanes = tilesetClippingPlanes;
@@ -202,78 +225,14 @@ export class CesiumDirective implements OnInit {
     
 
 
-    const url = this.constructGeoTIFFUrl([1167898,7059451, 1168399, 7060147])
-    console.log(url)
-    this.loadGeoTIFF('https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833?SERVICE=WCS&VERSION=1.0.0&REQUEST=GetCoverage&FORMAT=GeoTIFF&COVERAGE=nhm_dtm_topo_25833&BBOX=272669,7037582,273109,7038148&CRS=EPSG:25833&RESPONSE_CRS=EPSG:25833&WIDTH=440&HEIGHT=566')
-
-    // Test loading the GeoTIFF
-fetch(url)
-.then(response => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.blob();
-})
-.then(blob => {
-  console.log('GeoTIFF successfully fetched:', blob);
-
-  // Create a blob URL for the GeoTIFF
-  const blobUrl = URL.createObjectURL(blob);
-
-  // Create a link element
-  const link = document.createElement('a');
-  link.href = blobUrl;
-  link.download = 'geotiff.tif'; // Specify the file name
-
-  // Append the link to the document and trigger the download
-  document.body.appendChild(link);
-  link.click();
-
-  // Remove the link from the document
-  document.body.removeChild(link);
-
-  // Revoke the blob URL
-  URL.revokeObjectURL(blobUrl);
-
-})
-.catch(error => {
-    console.error('Error loading GeoTIFF:', error);
-});
+   
   }
 
   /**
    * Filters the map by inquiry ID and fetches geometries.
    */
   private filterMapByInquiryId(inquiryId: number | undefined): void {
-    if (inquiryId) {
-      this.geometryService.getGeometry(inquiryId).subscribe({
-        next: (response: Geometry[]) => {
-          this.products = response.map(geometry => {
-            const parsedGeometry = geometry.geojson as ParsedGeometry;
-            return { id: geometry.id, geojson: parsedGeometry };
-          });
-          
-         this.extractCoordinates(this.products)
-       
-           if (this.coords.length > 0) {
-             console.log(this.coords)
-             this.coords.forEach(coordlist => {
-                 const polygonCoordinates = coordlist.map(coordinate =>
-                   Cartesian3.fromDegrees(coordinate[0], coordinate[1])
-                 );
-               this.plotPolygon(polygonCoordinates, this.viewer);
-               });
-           }
-
-          this.updateMap(this.viewer);
-          this.updateGlobeAlpha(1);
-        },
-        error: error => {
-          console.error('Error fetching geometries:', error);
-        },
-      });
-    }
-    console.log('filtermap')
+    
 
 
   }
@@ -281,45 +240,79 @@ fetch(url)
   /**
    * Extracts coordinates from geometries.
    */
-private extractCoordinates(geometries: Geometry[]): void {
-  this.geometryService.getGeometry(this.inquiryId).subscribe({
-    next: data => {
-      if (data) {
-        console.log('data received from geometry', data);
-        GeoJsonDataSource.load(data, {
-          stroke: Color.BLUE,
-          fill: Color.BLUE.withAlpha(1),
-          strokeWidth: 3,
-          markerSize: 1, // Size of the marker
-          credit: "Provided by Petters Cable measurement service",
-        }).then((dataSource: GeoJsonDataSource) => {
-          this.viewer.dataSources.add(dataSource);
-          console.log('extract');
-        });
-      }
-    }
-  });
-}
+  private extractCoordinates(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.geometryService.getGeometry(this.inquiryId).subscribe({
+        next: data => {
+          if (data) {
+            console.log('data received from geometry', data);
+            
+            const geoJson = data[0].geojson; // URL or object containing your GeoJSON data
+  
+            GeoJsonDataSource.load(geoJson, {
+              stroke: Color.BLUE,
+              fill: Color.BLUE.withAlpha(0.5),
+              strokeWidth: 3,
+              markerSize: 1, // Size of the marker
+              credit: "Provided by Petters Cable measurement service",
+            }).then((dataSource: GeoJsonDataSource) => {
+              this.viewer.dataSources.add(dataSource);
+  
+              const bottomLeftCoord = data[0].geojson.geometry.coordinates[0][0];
+              const topRightCoord = data[0].geojson.geometry.coordinates[0][2];
+  
+              const bottomLeft = turf.point(bottomLeftCoord);
+              const topRight = turf.point(topRightCoord);
+  
+              // Calculate width
+              const bottomRight = turf.point([topRightCoord[0], bottomLeftCoord[1]]);
+              this.width = (turf.distance(bottomLeft, bottomRight, { units: 'meters' }) / 2) +100;
+  
+              // Calculate height
+              const topLeft = turf.point([bottomLeftCoord[0], topRightCoord[1]]);
+              this.height = (turf.distance(bottomLeft, topLeft, { units: 'meters' }) / 2) +100;
+  
+              console.log('Width:', this.width, 'Height:', this.height);
+  
+              // Extract the center coordinates from the GeoJSON properties
+            const centerCoordinates = data[0].geojson.properties.center.coordinates;
+            if (!centerCoordinates || centerCoordinates.length < 2) {
+              reject(new Error('Invalid center coordinates'));
+              return;
+            }
+            this.center = Cartesian3.fromDegrees(centerCoordinates[0], centerCoordinates[1],700);
+            console.log('Center coordinates:', this.center);
 
+            // Fly to the center coordinates
+            this.viewer.camera.flyTo({
+              destination: this.center,
+              orientation: {
+                heading: CesiumMath.toRadians(0.0), // Set the heading of the camera in radians
+                pitch: CesiumMath.toRadians(-90.0), // Set the pitch of the camera in radians
+                roll: 0.0 // Set the roll of the camera
+              },
+              pitchAdjustHeight: 1000
+            });
+  
+              console.log('Finished processing');
+              resolve();
+            }).catch(error => reject(error));
+          } else {
+            reject(new Error('No data received'));
+          }
+        },
+        error: error => reject(error)
+      });
+    });
+  }
   /**
    * Updates the map view to fit the extracted coordinates.
    */
   private updateMap(viewer: Viewer): void {
-    console.log('updatemap')
-    if (this.coords.length > 0) {
-      const flatCoordinates = this.coords.flat(3);
-      const positions = Cartesian3.fromDegreesArray(flatCoordinates);
-      const boundingSphere = BoundingSphere.fromPoints(positions);
-      this.center = boundingSphere.center;
-      console.log(this.center)
-      viewer.camera.flyToBoundingSphere(boundingSphere, {
-        offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000), // Adjust the range as needed
-      });
-      this.changeHomeButton(viewer, boundingSphere);
+      // Camera.DEFAULT_VIEW_RECTANGLE = rectangle
+      // this.changeHomeButton(viewer, rectangle);
     }
-    console.log('updatemap')
-  }
-
+  
   // /**
   //  * Extracts the bounding box of the current view based on clipping planes and emits the coordinates.
   //  */
@@ -393,15 +386,13 @@ private extractCoordinates(geometries: Geometry[]): void {
     console.log('polygons')
     console.log('plotpolygon')
   }
-  private changeHomeButton(viewer: Viewer, boundingsphere: BoundingSphere) {
+  private changeHomeButton(viewer: Viewer, retangle: Rectangle) {
     console.log('changehome')
     // Change the home button view
     viewer.homeButton.viewModel.command.beforeExecute.addEventListener(
       function (e) {
         e.cancel = true; // Cancel the default home view
-        viewer.camera.flyToBoundingSphere(boundingsphere, {
-          offset: new HeadingPitchRange(0, -CesiumMath.PI_OVER_TWO, 1000), // Adjust the range as needed
-        });
+        Camera.DEFAULT_VIEW_RECTANGLE = retangle;
       }
     );
     console.log('changehome')
