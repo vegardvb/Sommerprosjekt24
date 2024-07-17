@@ -23,7 +23,7 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 1. **Install Dependencies:**
 
    - Ensure you have Python 3.8+ installed.
-   - Create a virtual environment and activate it:
+   - Set up a Python virtual environment:
 
      ```sh
      python -m venv venv
@@ -38,8 +38,15 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 
 2. **Database Setup:**
 
-   - Ensure you have the necessary database setup as per your project requirements.
-   - Update the database configurations in the `database.py` file.
+   - Create a `.env` file in the `backend` directory with the following content:
+
+     ```sh
+     DB_NAME=your_db_name
+     DB_USER=your_db_user
+     DB_PASSWORD=your_db_password
+     DB_HOST=your_db_host
+     DB_PORT=your_db_port
+     ```
 
 3. **Running the Backend:**
 
