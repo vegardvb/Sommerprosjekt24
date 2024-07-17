@@ -71,9 +71,7 @@ export class SidenavComponent {
       this.longitude = CesiumMath.toDegrees(cartographic.longitude);
       this.latitude = CesiumMath.toDegrees(cartographic.latitude);
       this.height = cartographic.height;
-    }
-    this.accuracy = "3";
-  }
+    }  }
 
   clearSelectedEntity() {
     this.selectedEntity = null;
@@ -86,7 +84,6 @@ export class SidenavComponent {
     const inputElement = event.target as HTMLInputElement;
     this.longitude = Number(inputElement.value);
     this.updateEntityPosition();
-    this.accuracy = 'Edited';
 
   }
 
@@ -94,7 +91,6 @@ export class SidenavComponent {
     const inputElement = event.target as HTMLInputElement;
     this.latitude = Number(inputElement.value);
     this.updateEntityPosition();
-    this.accuracy = 'Edited';
 
   }
 
@@ -102,7 +98,6 @@ export class SidenavComponent {
     const inputElement = event.target as HTMLInputElement;
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
-    this.accuracy = 'Edited';
   }
 
   
