@@ -1,11 +1,7 @@
 import logging
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-import requests
-import docker
-import os
-import tempfile
+
 
 from database import get_db
 from queries import *
