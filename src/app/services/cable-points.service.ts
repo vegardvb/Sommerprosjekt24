@@ -1,10 +1,7 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { FeatureCollection } from 'geojson';
-
-import { MeasurementGeometry } from '../../models/measurement_geometry';
 import { CablePoints } from '../../models/cable_points';
 
 /**
@@ -15,7 +12,6 @@ import { CablePoints } from '../../models/cable_points';
 })
 export class CablePointsService {
   // Parser service for converting JSON to GeoJSON
-
 
   constructor(private http: HttpClient) {}
 
@@ -29,17 +25,12 @@ export class CablePointsService {
     const apiUrl = `http://127.0.0.1:8000/geometries/measurements/cable_points/inquiry/${inquiry_id}`;
     return this.http.get<Array<CablePoints>>(apiUrl).pipe(
       map((data: Array<CablePoints>) => {
-        console.log(
-          'Processed geometry: ',
-          data
-        );
+        console.log('Processed geometry: ', data);
         return data;
       }),
       catchError(this.handleError)
     );
   }
-
-  
 
   /**
    * Handles the error occurred during the HTTP request.

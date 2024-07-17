@@ -1,9 +1,9 @@
 export interface CablePoints {
   inquiry_id: number;
   geojson: {
-    type: "FeatureCollection";
+    type: 'FeatureCollection';
     features: {
-      type: "Feature";
+      type: 'Feature';
       properties: {
         point_id: number;
         measurement_id: number;
@@ -24,7 +24,7 @@ export interface CablePoints {
         };
       };
       geometry: {
-        type: "Point";
+        type: 'Point';
         coordinates: number[];
       };
     }[];

@@ -1,8 +1,7 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { FeatureCollection } from 'geojson';
 
 import { MeasurementGeometry } from '../../models/measurement_geometry';
 
@@ -15,7 +14,6 @@ import { MeasurementGeometry } from '../../models/measurement_geometry';
 export class CableMeasurementService {
   // Parser service for converting JSON to GeoJSON
 
-
   constructor(private http: HttpClient) {}
 
   /**
@@ -24,27 +22,14 @@ export class CableMeasurementService {
    * @param inquiry_id - The ID of the inquiry.
    * @returns An Observable that emits a FeatureCollection.
    */
-  getData(inquiry_id: number | undefined): Observable<Array<MeasurementGeometry>> {
+  getData(
+    inquiry_id: number | undefined
+  ): Observable<Array<MeasurementGeometry>> {
     const apiUrl = `http://127.0.0.1:8000/geometries/measurements/inquiry/${inquiry_id}`;
     return this.http.get<Array<MeasurementGeometry>>(apiUrl).pipe(
       map((data: Array<MeasurementGeometry>) => {
-        console.log(
-          'Processed geometry: ',
-          data
-        );
+        console.log('Processed geometry: ', data);
         return data;
-      }),
-      catchError(this.handleError)
-    );
-  }
-
-  updateData(updatedData: Array<MeasurementGeometry>): Observable<any> {
-    const apiUrl = 'http://127.0.0.1:8000/geometries/measurements/update'; // Update endpoint
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(apiUrl, updatedData, { headers }).pipe(
-      map((response: any) => {
-        console.log('Successfully updated positions on backend:', response);
-        return response;
       }),
       catchError(this.handleError)
     );
