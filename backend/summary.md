@@ -4,10 +4,12 @@
 ## Endring av metadata
 
 ### Tanke
+
 Enkleste måte tror jeg blir og lage endpoint som tar input av Features i Geojson form[https://www.ibm.com/docs/en/db2/11.5?topic=formats-geojson-format]som brukes
 i front-end. Dette er definert i geojson_models som kan bruker direkte i FastAPI ettersom det er Pydantic[https://docs.pydantic.dev/latest/] modeller (Veldig likt models i front-end).
+
 ---
-        {
+{
           "type": "Feature",
           "geometry": {
             "type": "Point",
@@ -61,15 +63,18 @@ views blir oppdatert. Altså "Measurement", "Measurement_Point" og "Point"
 For å definere punkt som skal endres filtreres det ved å bruke en UPDATE clause med 
 WHERE som presiserer punktet som skal endres. Noe som blir å tilsvare 
 noe slikt:
+
 ---
 UPDATE ledningsmaaling_innmaaling_punkt
 SET metadata = :metadata
 WHERE id = 4218
 ---
+
 ":metadata" her er da variabelen(placeholder) slik som sql_executer tolker dette 
 og er tiltenkt at skal inkludere json med metadata'n på samme format som sendt.
 
 ### API håndtering
+
 Istedefor å definere procedures og triggers osv som kan blir litt mer vanskelig så tror jeg det blir enklest å gjøre ved å 
 bygge et sql statment som string og execute dette direkte noe likt dette.
 ---
