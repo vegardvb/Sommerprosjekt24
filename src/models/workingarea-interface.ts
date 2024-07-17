@@ -1,3 +1,6 @@
+/**
+ * Represents the parsed geometry of a working area.
+ */
 export interface ParsedGeometry {
   type: string;
   properties: {
