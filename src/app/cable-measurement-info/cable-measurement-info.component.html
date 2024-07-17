@@ -1,23 +1,42 @@
 <div class="p-2">
-  <button class="p-2" id="editButton"> Edit</button>
+  <button
+    (click)="toggleEditMode()"
+    class="p-2"
+    id="editButton"
+  >
+    {{ editMode ? 'Save changes' : 'Edit data' }}
+  </button>
+
   <p-accordion [multiple]="false" [activeIndex]="0">
     <p-accordionTab
       *ngFor="let feature of features"
       [header]="getHeader(feature)"
     >
-      <div *ngIf="feature.geometry.type">
-        <p >
-          <strong>Type: </strong><span class="editable">{{ feature.geometry.type }}</span>
+    <div *ngIf="feature.geometry.type">
+        <p>
+          <strong>Type: </strong
+          ><span
+            id="type"
+            [class.editable]="editMode"
+            [attr.contenteditable]="editMode"
+            >{{ feature.geometry.type }}</span
+          >
         </p>
         <div class="flex flex-wrap">
           <p><strong>Coordinates:</strong></p>
           <div class="flex flex-wrap">
             <span
               *ngFor="
-                let coord of formatCoordinates(feature.geometry.coordinates)
+                let coord of formatCoordinates(feature.geometry.coordinates);
+                let i = index
               "
               class="mr-2"
-              ><span class="editable">{{ coord }}</span></span
+              ><span
+                id="coordinate-{{ i }}"
+                [class.editable]="editMode"
+                [attr.contenteditable]="editMode"
+                >{{ coord }}</span
+              ></span
             >
           </div>
         </div>
@@ -29,35 +48,119 @@
         "
       >
         <strong>Metadata:</strong>
-        
         <ul>
-          <li>Accuracy: <span class="editable">{{ feature.properties.metadata.accuracy }}</span></li>
           <li>
-            Antenna Height: {{ feature.properties.metadata.antennaHeight }}
+            Accuracy:
+            <span
+              id="accuracy"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+            >
+              {{ feature.properties.metadata.accuracy }}
+            </span>
           </li>
-          <li>Fix Type: <span class="editable">{{ feature.properties.metadata.fixType }}</span></li>
-          <li>Height: {{ feature.properties.metadata.height }}</li>
-          <li>Latitude: {{ feature.properties.metadata.lat }}</li>
-          <li>Longitude: {{ feature.properties.metadata.lon }}</li>
+          <li>
+            Antenna Height:
+            <span
+              id="antennaHeight"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.antennaHeight }}</span
+            >
+          </li>
+          <li>
+            Fix Type:
+            <span
+              id="fixType"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.fixType }}</span
+            >
+          </li>
+          <li>
+            Height:
+            <span
+              id="height"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.height }}</span
+            >
+          </li>
+          <li>
+            Latitude:
+            <span
+              id="lat"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.lat }}</span
+            >
+          </li>
+          <li>
+            Longitude:
+            <span
+              id="lon"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.lon }}</span
+            >
+          </li>
           <li>
             Number of Measurements:
-            {{ feature.properties.metadata.numMeasurements }}
+            <span
+              id="numMeasurements"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.numMeasurements }}</span
+            >
           </li>
           <li>
             Number of Satellites:
-            {{ feature.properties.metadata.numSatellites }}
+            <span
+              id="numSatellites"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.numSatellites }}</span
+            >
           </li>
-          <li>Timestamp: {{ feature.properties.metadata.timestamp }}</li>
+          <li>
+            Timestamp:
+            <span
+              id="timestamp"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+            >
+              {{ feature.properties.metadata.timestamp }}</span
+            >
+          </li>
           <li>
             Vertical Accuracy:
-            {{ feature.properties.metadata.verticalAccuracy }}
+            <span
+              id="verticalAccuracy"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.verticalAccuracy }}</span
+            >
           </li>
-          <li>X: {{ feature.properties.metadata.x }}</li>
-          <li>Y: {{ feature.properties.metadata.y }}</li>
+          <li>
+            X:
+            <span
+              id="x"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.x }}</span
+            >
+          </li>
+          <li>
+            Y:
+            <span
+              id="y"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.y }}</span
+            >
+          </li>
         </ul>
       </div>
     </p-accordionTab>
   </p-accordion>
-
-  <button id="saveButton" disabled>Save Changes</button>
 </div>

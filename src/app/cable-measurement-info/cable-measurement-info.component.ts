@@ -82,65 +82,30 @@ formatCoordinates(coordinates: number[] | number[][]): string[] {
   }
 }
 
+editMode: boolean = false;
+toggleEditMode(): void {
+  this.editMode = !this.editMode;
 
-document.addEventListener('DOMContentLoaded', () => {
-  const editableSpan = document.getElementById('editableContent') as HTMLSpanElement | null;
-  const editButton = document.getElementById('editButton') as HTMLButtonElement | null;
-  const saveButton = document.getElementById('saveButton') as HTMLButtonElement | null;
+  if (!this.editMode) {
+    console.log('Save changes');
 
-  if (!editableSpan || !editButton || !saveButton) {
-      console.error("One or more required elements are missing.");
-      return;
-  }
+    const editedFeatures: any = {}; 
 
-  // Define the types for the custom event listener
-  type CustomEventType = 'click' | 'type1';
-  type CustomEventListener = (ev: Event | number) => any;
+    const editableElements = document.querySelectorAll('.editable');
 
-  // Custom addEventListener function
-  function addEventListener(type: CustomEventType, listener: CustomEventListener): void {
-      if (type === 'click' && listener instanceof Function) {
-          document.addEventListener(type, listener as EventListener);
-      } else if (type === 'type1' && typeof listener === 'function') {
-          // Simulate the custom event type1
-          listener(1);
+    editableElements.forEach((element) => {
+      const editableElement = element as HTMLElement; 
+      const id = editableElement.getAttribute('id');
+      if (id) {
+        editedFeatures[id] = editableElement.innerText.trim();
       }
+    });
+
+    console.log('Edited features:', editedFeatures);
+
+  } else {
+    console.log('Edit mode enabled');
   }
-
-  // Load saved content from local storage
-  const savedContent = localStorage.getItem('editableContent');
-  if (savedContent) {
-      editableSpan.innerText = savedContent;
-  }
-
-  // Toggle editing mode
-  addEventListener('click', () => {
-      if (editableSpan.contentEditable === "true") {
-          editableSpan.contentEditable = "false";
-          editableSpan.classList.remove('editing');
-          editButton.textContent = "Edit";
-          saveButton.disabled = true;
-      } else {
-          editableSpan.contentEditable = "true";
-          editableSpan.classList.add('editing');
-          editButton.textContent = "Stop Editing";
-          saveButton.disabled = false;
-      }
-  });
-
-  // Save content to local storage on button click
-  addEventListener('click', () => {
-      localStorage.setItem('editableContent', editableSpan.innerText);
-      alert('Changes saved!');
-      editableSpan.contentEditable = "false";
-      editableSpan.classList.remove('editing');
-      editButton.textContent = "Edit";
-      saveButton.disabled = true;
-  });
-
-
+}
 
 }
-  
-
-
