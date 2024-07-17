@@ -1,5 +1,12 @@
+import os
+import sys
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
+
+
+# Imports the root directory to the path in order to import project modules
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, project_root)
 
 
 # Base Geometry class

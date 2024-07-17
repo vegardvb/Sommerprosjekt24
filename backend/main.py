@@ -1,3 +1,10 @@
+import os
+import sys
+
+# Imports the root directory to the path in order to import project modules
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, project_root)
+
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,7 +13,7 @@ from database import get_db
 from queries import *
 
 # Base models
-from models import FeatureCollection
+from models.geojson_models import FeatureCollection
 
 
 # FastAPI instance

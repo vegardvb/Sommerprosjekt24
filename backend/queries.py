@@ -1,6 +1,6 @@
 from sqlalchemy import text
-from sql_executer import execute_query
-from status_codes import henvendelse_status_dict
+from sql_executer import execute_sql
+from common.status_codes import henvendelse_status_dict
 
 """
 This script serves as a collection of frequently used queries that extracts data from the database.
@@ -18,12 +18,11 @@ def query_inquiries(connection):
     Returns:
         Dictonary : A dictonary containing the inquiries and its attributes.
     """
-    # connection.execute(text("SET search_path TO analytics_cable_measurement_inquiries"))
-    result = execute_query(
+    result = execute_sql(
         connection=connection,
         # TODO Refactor file path system to a more flexible approach
         main_file_path=f"{QUERY_PATH}/inquiry/fetch_inquiries.sql",
-        subquery_files={
+        placeholders={
             "/*cable_measurements*/": f"{QUERY_PATH}/inquiry/fetch_number_of_measurements_per_inquiry.sql"
         },
     )
@@ -51,7 +50,7 @@ def query_boundary_geometry_by_inquiry(inquiry_id, connection):
     Returns:
         Dictonary : A dictonary containing the geometry and its related inquiry.
     """
-    result = execute_query(
+    result = execute_sql(
         connection=connection,
         main_file_path=f"{QUERY_PATH}/geometry/fetch_boundary_geometry_by_inquiry.sql",
         params={"inquiry_id": inquiry_id},
@@ -70,7 +69,7 @@ def query_working_area_geometry_by_inquiry(inquiry_id, connection):
     Returns:
         Dictonary : A dictonary containing the geometry and its related inquiry.
     """
-    result = execute_query(
+    result = execute_sql(
         connection=connection,
         main_file_path=f"{QUERY_PATH}/geometry/fetch_working_area_by_inquiry.sql",
         params={"inquiry_id": inquiry_id},
@@ -88,7 +87,7 @@ def query_measurement_geometry_by_inquiry(inquiry_id, connection):
     Returns:
         Dictonary : A dictonary containing the geometry and its related inquiry.
     """
-    result = execute_query(
+    result = execute_sql(
         connection=connection,
         main_file_path=f"{QUERY_PATH}/geometry/fetch_measurement_geometry_by_inquiry.sql",
         params={"inquiry_id": inquiry_id},
@@ -109,7 +108,7 @@ def query_points_of_cables_by_inquiry(inquiry_id, connection):
         list: A list of dictionaries representing the points of cables.
 
     """
-    result = execute_query(
+    result = execute_sql(
         connection=connection,
         main_file_path=f"{QUERY_PATH}/geometry/fetch_points_of_cables_by_inquiry.sql",
         params={"inquiry_id": inquiry_id},

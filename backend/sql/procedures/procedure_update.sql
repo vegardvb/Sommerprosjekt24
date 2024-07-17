@@ -1,18 +1,34 @@
 -- Disp for procedure
-CREATE OR REPLACE PROCEDURE
-    update_transactions_and_refresh_view(user_id INT,
-                                         product_id INT,
-                                         quantity INT,
-                                         transaction_time TIMESTAMP)
+CREATE OR REPLACE PROCEDURE update_entity_dynamic(json_data JSONB)
     LANGUAGE plpgsql
 AS
 $$
+DECLARE
+    key NUMBER;
+    value TEXT;
+    update TEXT := 'UPDATE entities SET ';
+    where_clause TEXT := ' WHERE id = ';
+    is_first BOOLEAN := TRUE;
 BEGIN
     BEGIN
-        INSERT INTO ledningsmaaling_innmaaling (user_id, product_id, quantity, transaction_time)
-        VALUES (:user_id, product_id, quantity, transaction_time);
 
-        REFRESH MATERIALIZED VIEW CONCURRENTLY sales_summary;
+        FOR key, value IN SELECT * FROM jsonb_each_text(json_data)
+        LOOP
+            IF key = 'id' THEN
+                where_clause := where_clause || quote_literal(value);
+            ELSE
+                IF NOT is_first THEN
+                    update := update || ', ';
+                END IF;
+                update := update || format('%I = %L', key, value);
+                is_first := FALSE;
+            END IF;
+        END LOOP;
+
+        update := update || where_clause || ';';
+        EXECUTE update;
+
+            REFRESH MATERIALIZED VIEW CONCURRENTLY Point;
 
         COMMIT;
     EXCEPTION
@@ -22,3 +38,5 @@ BEGIN
     END;
 END;
 $$;
+
+
