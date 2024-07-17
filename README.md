@@ -6,12 +6,13 @@ This project integrates an Angular front-end with a FastAPI back-end to visualiz
 
 1. [Development Server](#development-server)
 2. [Backend Setup](#backend-setup)
-3. [Running Docker Containers](#running-docker-containers)
-4. [Code Scaffolding](#code-scaffolding)
-5. [Build](#build)
-6. [Running Unit Tests](#running-unit-tests)
-7. [Running End-to-End Tests](#running-end-to-end-tests)
-8. [Further Help](#further-help)
+3. [Installing Docker](#installing-docker)
+4. [Running Docker Containers](#running-docker-containers)
+5. [Code Scaffolding](#code-scaffolding)
+6. [Build](#build)
+7. [Running Unit Tests](#running-unit-tests)
+8. [Running End-to-End Tests](#running-end-to-end-tests)
+9. [Further Help](#further-help)
 
 ## Development Server
 
@@ -49,6 +50,20 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
      ```
 
    - The backend server will be available at `http://localhost:8000`.
+
+## Installing Docker
+
+1. **Install Docker:**
+
+   - Follow the instructions on the [Docker website](https://docs.docker.com/get-docker/) to install Docker for your operating system.
+
+2. **Verify Docker Installation:**
+
+   - After installation, verify that Docker is installed correctly by running:
+
+     ```sh
+     docker --version
+     ```
 
 ## Running Docker Containers
 
