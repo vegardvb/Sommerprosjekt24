@@ -34,6 +34,9 @@ import {
   SingleTileImageryProvider,
   Rectangle,
   Camera,
+  Matrix4,
+  Cartographic,
+  ConstantProperty,
 } from 'cesium';
 //import { CableMeasurementService } from './services/cable-measurement.service';
 import { Geometry } from '../models/geometry-interface';
@@ -45,10 +48,8 @@ import proj4 from 'proj4';
 import { fromUrl } from 'geotiff';
 import { CableMeasurementService } from './services/cable-measurement.service';
 import { WorkingAreaService } from './services/workingarea.service';
+import { CablePointsService } from './services/cable-points.service';
 
-// Define the source and target projections
-proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
-proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
 @Directive({
   selector: '[appCesium]',
@@ -66,6 +67,7 @@ export class CesiumDirective implements OnInit {
   products: Geometry[] = [];
   coords: number[][][] = [];
   bbox: number[] =[];
+  pointEntities : Entity[] = [];
   center!: Cartesian3;
   isEditing = false;
   private selectedEntity: Entity | null = null;
@@ -92,6 +94,9 @@ export class CesiumDirective implements OnInit {
   );
   private workingAreaService: WorkingAreaService = inject(
     WorkingAreaService
+  ); 
+  private CablePointService: CablePointsService = inject(
+    CablePointsService
   );
 
 
@@ -105,6 +110,7 @@ export class CesiumDirective implements OnInit {
     this.initializeViewer();
     this.loadCables();
     this.loadWorkingArea();
+    this.loadCablepoints();
 
     
 
@@ -135,8 +141,25 @@ export class CesiumDirective implements OnInit {
         console.log('Entity selected: ', entity.id);
         this.selectedEntityChanged.emit(entity)
         console.log('emitafterselect', this.selectedEntityChanged)
+
+        if (entity.polyline) {
+         console.log(entity.point)
+          this.pointEntities.forEach(pointEntity => {
+            if (pointEntity.point) {
+              pointEntity.point.show = new ConstantProperty(true);
+            }
+          });
+        }
+
       } else {
+        
         console.log('No entity selected');
+      // Hide points when no entity is selected
+      this.pointEntities.forEach(pointEntity => {
+        if (pointEntity.point) {
+          pointEntity.point.show = new ConstantProperty(false);
+        }
+      });
       }
     });
 
@@ -169,6 +192,7 @@ export class CesiumDirective implements OnInit {
       await Cesium3DTileset.fromIonAssetId(96188)
     );
 
+    
     console.log(this.center)
 
      const globeClippingPlanes = new ClippingPlaneCollection({
@@ -457,7 +481,9 @@ private loadCables(): void {
   this.cableMeasurementService.getData(this.inquiryId).subscribe({
     next: data => {
       if (data) {
-        console.log('data received from service', data);
+        console.log('data received from service2', data);
+        const features = data[0].geojson
+
         GeoJsonDataSource.load(data[0].geojson, {
           stroke: Color.BLUE,
           fill: Color.BLUE.withAlpha(1),
@@ -466,34 +492,26 @@ private loadCables(): void {
           credit: "Provided by Petters Cable measurement service",
         })
         .then((dataSource: GeoJsonDataSource) => {
-          this.viewer.dataSources.add(dataSource);
-
           // Add picking and moving functionality to cables
           dataSource.entities.values.forEach(entity => {
-            if (entity.polyline?.positions) {
-              const coordinates = entity.polyline.positions.getValue(JulianDate.now());
-              coordinates.forEach((position: any, index: any) => {
-                const pointEntity = new Entity({
-                  position,
-                  point: new PointGraphics({
-                    color: Color.BLUE,
-                    pixelSize: 10,
-                    outlineColor: Color.WHITE,
-                    outlineWidth: 2,
-                  }),
-                });
-                this.viewer.entities.add(pointEntity);
-              });
-            }
-            if (entity.position) {
+            console.log('entity',  entity)
+            console.log(entity.polyline);
+            if (!entity.polyline) {
               entity.point = new PointGraphics({
                 color: Color.BLUE,
                 pixelSize: 10,
                 outlineColor: Color.WHITE,
                 outlineWidth: 2,
+                show: new ConstantProperty(true),
               });
+              this.viewer.entities.add(entity);
             }
+
+         
           });
+          
+          
+         
         })
         .catch(error => {
           console.error('Failed to load GeoJSON data:', error);
@@ -504,11 +522,71 @@ private loadCables(): void {
   });
 }
 
+private loadCablepoints(): void {
+  this.CablePointService.getData(this.inquiryId).subscribe({
+    next: data => {
+      if (data) {
+        console.log('data received from service', data[0]);
+        const LineStringfeatures = data[0].geojson
+
+        LineStringfeatures.forEach(geojson => {
+          const allPositions: Cartesian3[] = [];
+
+          GeoJsonDataSource.load(geojson, {
+            stroke: Color.BLUEVIOLET,
+            fill: Color.BLUEVIOLET.withAlpha(1),
+            strokeWidth: 3,
+            markerSize: 1, // Size of the marker
+            credit: "Provided by Petters Cable measurement service",
+          }).then((dataSource: GeoJsonDataSource) => {
+            console.log('do we have datasource? ', dataSource)
+            this.viewer.dataSources.add(dataSource);
+  
+            // Add picking and moving functionality to cables
+            dataSource.entities.values.forEach(entity => {
+              if (entity.position) {
+                entity.point = new PointGraphics({
+                  color: Color.BLUE,
+                  pixelSize: 10,
+                  outlineColor: Color.WHITE,
+                  outlineWidth: 2,
+                  show: new ConstantProperty(false),
+                });
+                this.pointEntities.push(entity);
+                const position = entity.position.getValue(JulianDate.now());
+                if (position) {
+                  allPositions.push(position);
+                }
+              }
+            });
+            // Create a polyline that connects the points
+            if (allPositions.length > 1) {
+              this.viewer.entities.add({
+                polyline: {
+                  positions: allPositions,
+                  width: 3,
+                  material: Color.BLUEVIOLET,
+                }
+              });
+            }
+            })
+          .catch(error => {
+            console.error('Failed to load GeoJSON data:', error);
+          });
+          console.log('loadcables');
+        })
+    
+  
+      }
+    }
+  });
+}
+
 private loadWorkingArea(): void {
   this.workingAreaService.getArea(this.inquiryId).subscribe({
     next: data => {
       if (data) {
-        console.log('data received from service', data);
+        console.log('data received from service33', data);
         GeoJsonDataSource.load(data[0].geojson, {
           stroke: Color.BLUE,
           fill: Color.BLUE.withAlpha(0.3),
@@ -541,15 +619,18 @@ private loadWorkingArea(): void {
 
 public updateEntityPosition(cartesian: Cartesian3) {
   console.log('updateentityposition')
-  if (this.selectedEntity) {
+  if (this.selectedEntity?.polyline) {
+    console.log('before', this.selectedEntity.position)
       if (this.selectedEntity.polyline?.positions) {
           const positions = this.selectedEntity.polyline.positions.getValue(JulianDate.now());
+          console.log('before',positions)
           const offset = Cartesian3.subtract(cartesian, positions[0], new Cartesian3());
           const newPositions = positions.map((position: Cartesian3) => Cartesian3.add(position, offset, new Cartesian3()));
           this.selectedEntity.polyline.positions = new CallbackProperty(() => newPositions, false);
       } else if (this.selectedEntity.position) {
           this.selectedEntity.position = new CallbackProperty(() => cartesian, false) as unknown as PositionProperty;
-      }
+          console.log('after', this.selectedEntity.position)
+        }
   }
   console.log('updateentityposition')
 }
@@ -591,85 +672,4 @@ public updateEntityPosition(cartesian: Cartesian3) {
     console.log('seteditingmode')
   }
 
-  constructGeoTIFFUrl(bbox: any) {
-    const baseUrl = 'https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833';
-    const params = new URLSearchParams({
-        SERVICE: 'WCS',
-        VERSION: '1.0.0',
-        REQUEST: 'GetCoverage',
-        FORMAT: 'GeoTIFF',
-        COVERAGE: 'nhm_dtm_topo_25833',
-        BBOX: bbox.join(','),
-        CRS: 'EPSG:25833',
-        RESPONSE_CRS: 'EPSG:25833',
-        WIDTH: '440',
-        HEIGHT: '566'
-    });
-    return `${baseUrl}?${params.toString()}`;
 }
-async loadGeoTIFF(url: any) {
-  try {
-      // Fetch the GeoTIFF
-      const tiff = await fromUrl(url);
-      const image = await tiff.getImage();
-      
-      // Read the raster data
-      const raster = await image.readRasters();
-      const values = raster[0]; // Assuming single band GeoTIFF
-
-      // Get dimensions and bounding box
-      const width = image.getWidth();
-      const height = image.getHeight();
-      const bbox = image.getBoundingBox(); // Get bounding box from image
-
-      // Create a canvas to draw the raster data
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const context = canvas.getContext('2d');
-      if (context!==null) {
-      const imageData = context.createImageData(width, height);
-
-      if (Array.isArray(values) || values instanceof Float32Array || values instanceof Uint8Array) {
-        // Find min and max values for scaling
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        const range = max - min;
-
-        // Populate the image data
-        for (let i = 0; i < values.length; i++) {
-            const value = values[i];
-            const scaledValue = ((value - min) / range) * 255;
-            imageData.data[i * 4] = scaledValue; // Red
-            imageData.data[i * 4 + 1] = scaledValue; // Green
-            imageData.data[i * 4 + 2] = scaledValue; // Blue
-            imageData.data[i * 4 + 3] = 255; // Alpha
-        }
-
-        context.putImageData(imageData, 0, 0);
-
-        // Create an imagery provider from the canvas
-        const imageryProvider = new SingleTileImageryProvider({
-            url: canvas.toDataURL(),
-            rectangle: Rectangle.fromDegrees(
-                bbox[0], bbox[1], bbox[2], bbox[3]
-            )
-        });
-        // Add the imagery layer to the Cesium viewer
-      this.viewer.scene.imageryLayers.addImageryProvider(imageryProvider); }
-}
-
-      
-  } catch (error) {
-      console.error('Error loading GeoTIFF:', error);
-  }
-}
-}
-function convertDegreesToMeters(lon: any, lat: any) {
-  const proj4 = window.proj4;
-  const fromProj = 'EPSG:4326';
-  const toProj = 'EPSG:25833';
-  const [x, y] = proj4(fromProj, toProj, [lon, lat]);
-  return [x, y];
-}
-
