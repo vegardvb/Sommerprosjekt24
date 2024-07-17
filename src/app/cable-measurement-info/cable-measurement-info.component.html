@@ -1,9 +1,5 @@
 <div class="p-2">
-  <button
-    (click)="toggleEditMode()"
-    class="p-2"
-    id="editButton"
-  >
+  <button (click)="toggleEditMode()" class="p-2" id="editButton">
     {{ editMode ? 'Save changes' : 'Edit data' }}
   </button>
 
@@ -12,7 +8,7 @@
       *ngFor="let feature of features"
       [header]="getHeader(feature)"
     >
-    <div *ngIf="feature.geometry.type">
+      <div *ngIf="feature.geometry.type">
         <p>
           <strong>Type: </strong
           ><span
