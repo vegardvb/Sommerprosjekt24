@@ -1,16 +1,13 @@
-import { Entity } from "cesium";
-
 export interface ParsedGeometry {
   type: string;
   properties: {
     center: {
-      coordinates: number[]
+      coordinates: number[];
       type: string;
-    }
-  }
+    };
+  };
   geometry: {
     coordinates: number[][][];
-    type: string; 
+    type: string;
   };
-  
 }

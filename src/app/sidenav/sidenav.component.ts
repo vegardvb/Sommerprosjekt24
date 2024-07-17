@@ -1,9 +1,22 @@
-import { Component, EventEmitter, HostListener, Output, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Output,
+  ViewEncapsulation,
+} from '@angular/core';
 import { SidenavService } from './sidenav.service';
 import { SidenavLinkComponent } from './sidenav-link.component';
 // import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
-import { Entity, JulianDate, Cartographic, Math as CesiumMath, Cartesian3, ConstantPositionProperty} from 'cesium';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  Entity,
+  JulianDate,
+  Cartographic,
+  Math as CesiumMath,
+  Cartesian3,
+  ConstantPositionProperty,
+} from 'cesium';
+import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -23,7 +36,6 @@ export class SidenavComponent {
   height: number = 0;
   isEditing: boolean = false;
   @Output() editingToggled = new EventEmitter<boolean>();
-  
 
   get sidenavWidth(): number {
     return parseInt(
@@ -47,9 +59,7 @@ export class SidenavComponent {
     startingWidth: 0,
   };
 
-  constructor(public sidenavService: SidenavService) {
-
-  }
+  constructor(public sidenavService: SidenavService) {}
 
   startResizing(event: MouseEvent): void {
     this.resizingEvent = {
@@ -63,7 +73,7 @@ export class SidenavComponent {
     this.selectedEntity = entity;
     const position = this.selectedEntity.position?.getValue(JulianDate.now());
     if (position) {
-      console.log('before cond',position)
+      console.log('before cond', position);
       const cartographic = Cartographic.fromCartesian(position);
       this.longitude = CesiumMath.toDegrees(cartographic.longitude);
       this.latitude = CesiumMath.toDegrees(cartographic.latitude);
@@ -98,19 +108,20 @@ export class SidenavComponent {
 
   private updateEntityPosition() {
     if (this.selectedEntity) {
-      const newPosition = Cartesian3.fromDegrees(this.longitude, this.latitude, this.height);
+      const newPosition = Cartesian3.fromDegrees(
+        this.longitude,
+        this.latitude,
+        this.height
+      );
       this.selectedEntity.position = new ConstantPositionProperty(newPosition);
-      console.log('after text', this.selectedEntity.position)
-    
-
-      
+      console.log('after text', this.selectedEntity.position);
     }
   }
-  
+
   toggleEditing() {
     this.isEditing = !this.isEditing;
     this.editingToggled.emit(this.isEditing);
-    console.log('toggle dit sidenav', this.editingToggled)
+    console.log('toggle dit sidenav', this.editingToggled);
   }
 
   closeEditor() {
@@ -118,7 +129,6 @@ export class SidenavComponent {
     this.isEditing = false;
     this.editingToggled.emit(this.isEditing);
   }
-  
 
   @HostListener('window:mousemove', ['$event'])
   updateSidenavWidth(event: MouseEvent) {
@@ -141,7 +151,4 @@ export class SidenavComponent {
   stopResizing() {
     this.resizingEvent.isResizing = false;
   }
-
-  
-
 }

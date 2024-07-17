@@ -11,7 +11,8 @@ import { ParsedGeometry } from '../models/parsedgeometry-interface';
   providedIn: 'root',
 })
 export class GeometryService {
-  private apiUrl = 'http://127.0.0.1:8000/geometries/area/boundary/inquiry/{inquiry_id}';
+  private apiUrl =
+    'http://127.0.0.1:8000/geometries/area/boundary/inquiry/{inquiry_id}';
   private parsedGeometry!: ParsedGeometry;
 
   constructor(private http: HttpClient) {
@@ -25,10 +26,7 @@ export class GeometryService {
     const apiUrl = `http://127.0.0.1:8000/geometries/area/boundary/inquiry/${inquiry_id}`;
     return this.http.get<Array<Geometry>>(apiUrl).pipe(
       map((data: Array<Geometry>) => {
-        console.log(
-          'Processed geometry: ',
-          data
-        );
+        console.log('Processed geometry: ', data);
         return data;
       }),
       catchError(this.handleError)
