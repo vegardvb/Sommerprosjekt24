@@ -1,8 +1,8 @@
-<p-accordion [multiple]="true" [activeIndex]="[0]">
+<p-accordion [multiple]="true" [activeIndex]="[0]" >
   <p-accordionTab
     *ngFor="let info of cableInfo"
-    header="{{ info.feature_type }}"
-    class="p-1"
+    header ="{{ info.feature_type }}"
+    class="p-1 "
   >
     <p>Text: {{ info.metadata?.objectType?.text }}</p>
     <p>Value: {{ info.metadata?.objectType?.value }}</p>

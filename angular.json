@@ -52,7 +52,7 @@
               }
             ],
             "styles": [
-              "node_modules/primeng/resources/themes/tailwind-light/theme.css",
+              "node_modules/primeng/resources/themes/viva-light/theme.css",
               "node_modules/primeng/resources/primeng.min.css",
               "node_modules/primeng/resources/primeng.css",
               "src/styles.css",
