@@ -195,7 +195,7 @@ async def process_geotiff(file_path: str, logger) -> dict:
 
         # Running the terrain creation command
         container1 = client.containers.run(
-            "vegardvb/cesium-terrain-builder",
+            "cesium-terrain-builder",
             f"ctb-tile -f Mesh -C -N -o /data/output /data/input/{os.path.basename(file_path)}",
             volumes={
                 os.path.dirname(file_path): {"bind": "/data/input", "mode": "rw"},
@@ -212,7 +212,7 @@ async def process_geotiff(file_path: str, logger) -> dict:
 
         # Running the layer.json creation command
         container2 = client.containers.run(
-            "vegardvb/cesium-terrain-builder",
+            "cesium-terrain-builder",
             f"ctb-tile -f Mesh -C -N -l -o /data/output /data/input/{os.path.basename(file_path)}",
             volumes={
                 os.path.dirname(file_path): {"bind": "/data/input", "mode": "rw"},
