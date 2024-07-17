@@ -4,7 +4,6 @@ import { CesiumDirective } from '../cesium.directive';
 import { TerrainService } from '../services/terrain.service';
 import { Subscription, switchMap } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
-
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
@@ -15,13 +14,18 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
-  alpha = 1;
+  @ViewChild(SidenavComponent, { static: true })
+  sidenavComponent!: SidenavComponent;
+
+  alpha = 100;
   tilesetVisible: boolean = true;
   polygonsVisible: boolean = true;
   Math!: Math;
   inquiryId: number | undefined;
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
+  private entitySubscription: Subscription | undefined;
+  private editingSubscription: Subscription | undefined;
 
   constructor(
     private route: ActivatedRoute,
@@ -47,6 +51,12 @@ export class MapViewComponent implements OnInit, OnDestroy {
     }
     if (this.bboxSubscription) {
       this.bboxSubscription.unsubscribe();
+    }
+    if (this.entitySubscription) {
+      this.entitySubscription.unsubscribe();
+    }
+    if (this.editingSubscription) {
+      this.editingSubscription.unsubscribe();
     }
   }
 

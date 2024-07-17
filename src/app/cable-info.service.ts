@@ -8,7 +8,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 })
 export class CableInfoService {
   private apiUrl =
-    'http://127.0.0.1:8000/cable_measurements/inquiry/{inquiry_id}';
+    'http://127.0.0.1:8000/geometries/measurements/cable_points/inquiry/{inquiry_id}';
 
   constructor(private http: HttpClient) {}
 
@@ -16,6 +16,7 @@ export class CableInfoService {
     const url = this.apiUrl.replace('{inquiry_id}', inquiry_id);
     return this.http.get<CableInfo[]>(url).pipe(catchError(this.handleError));
   }
+
   private handleError(error: Error): Observable<never> {
     console.error('An error occurred:', error.message);
     return throwError(
