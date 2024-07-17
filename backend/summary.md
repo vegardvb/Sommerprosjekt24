@@ -49,12 +49,12 @@ Hovedsakling skal dette være "Measurement", "Measurement_Point" og "Point"
 ettersom de er utgangspunktet til de sentrale views som omhandler measurements og points 
 og trengs og refreshe.
 
-*Views Hiearki for measurements(geometries/measurements/inquiry/{inquiry_id}) endpoint*:
-measurement_geometry_by_inquiry (endpoint for alle measurements)
-    - "Measurements_by_inquiry"
-    - "Measurements_as_GeoJSON_3D"
-        - "Standalone_points_by_Measurement_as_GeoJSON"
-        - "Cables_as_GeoJSON_3D"
+        *Views Hiearki for measurements(geometries/measurements/inquiry/{inquiry_id}) endpoint*:
+        measurement_geometry_by_inquiry (endpoint for alle measurements)
+            - "Measurements_by_inquiry"
+            - "Measurements_as_GeoJSON_3D"
+                - "Standalone_points_by_Measurement_as_GeoJSON"
+                - "Cables_as_GeoJSON_3D"
 
 Ettersom normale views fungerer slik som queries *tror jeg i utganspunktet* at dette skal automatisk bli oppdatert dersom de tildligere nevnte relaterte materialized 
 views blir oppdatert. Altså "Measurement", "Measurement_Point" og "Point"
