@@ -29,6 +29,8 @@ import {
   CesiumTerrainProvider,
   GeoJsonDataSource,
   Cartesian2,
+  HeightReference,
+  Property,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
@@ -515,8 +517,8 @@ export class CesiumDirective implements OnInit {
         if (data) {
           console.log('data received from service33', data);
           GeoJsonDataSource.load(data[0].geojson, {
-            stroke: Color.BLUE,
-            fill: Color.BLUE.withAlpha(0.3),
+            stroke: Color.PALEVIOLETRED,
+            fill: Color.PALEVIOLETRED.withAlpha(0.1),
             strokeWidth: 2,
             markerSize: 1, // Size of the marker
             credit: 'Provided by Petters Cable measurement service',
@@ -526,8 +528,12 @@ export class CesiumDirective implements OnInit {
 
               // Add picking and moving functionality to cables
               dataSource.entities.values.forEach(entity => {
-                this.polygons.push(entity);
-                this.viewer.entities.add(entity);
+                if (entity.polygon) {
+                  entity.polygon.heightReference =
+                    HeightReference.CLAMP_TO_GROUND as unknown as Property;
+                  this.polygons.push(entity);
+                  this.viewer.entities.add(entity);
+                }
               });
             })
             .catch(error => {
