@@ -1,9 +1,8 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
-// import { TerrainService } from '../services/terrain.service';
-// import { GeoTiffService } from '../services/geo-tiff.service';
-import { Subscription } from 'rxjs';
+import { TerrainService } from '../services/terrain.service';
+import { Subscription, switchMap } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 import { Entity } from 'cesium';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
@@ -34,9 +33,8 @@ export class MapViewComponent implements OnInit, OnDestroy {
   private editingSubscription: Subscription | undefined;
 
   constructor(
-    private route: ActivatedRoute
-    // private terrainService: TerrainService,
-    // private geoTiffService: GeoTiffService
+    private route: ActivatedRoute,
+    private terrainService: TerrainService
   ) {}
 
   ngOnInit() {
@@ -45,12 +43,12 @@ export class MapViewComponent implements OnInit, OnDestroy {
       this.inquiryId = params['inquiryId'];
     });
 
-    // this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
-    //   bbox => {
-    //     console.log('bbox',bbox)
-    //     const { width, height } = this.calculateWidthHeight(bbox);
-    //     this.fetchTerrain(bbox, width, height);
-    //   });
+    this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
+      bbox => {
+        const { width, height } = this.calculateWidthHeight(bbox);
+        this.fetchAndProcessTerrain(bbox, width, height);
+      }
+    );
 
     this.entitySubscription =
       this.cesiumDirective.selectedEntityChanged.subscribe(entity => {
@@ -71,9 +69,9 @@ export class MapViewComponent implements OnInit, OnDestroy {
     if (this.queryParamsSubscription) {
       this.queryParamsSubscription.unsubscribe();
     }
-    // if (this.bboxSubscription) {
-    //   this.bboxSubscription.unsubscribe();
-    // }
+    if (this.bboxSubscription) {
+      this.bboxSubscription.unsubscribe();
+    }
     if (this.entitySubscription) {
       this.entitySubscription.unsubscribe();
     }
@@ -83,68 +81,66 @@ export class MapViewComponent implements OnInit, OnDestroy {
     console.log('destroymapview');
   }
 
-  // /**
-  //  * Calculates the width and height based on the bounding box coordinates.
-  //  */
-  // calculateWidthHeight(bbox: string): { width: number; height: number } {
-  //   const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
-  //   const width = Math.abs(maxX - minX);
-  //   const height = Math.abs(maxY - minY);
-  //   return { width, height };
-  // }
+  /**
+   * Calculates the width and height based on the bounding box coordinates.
+   */
+  calculateWidthHeight(bbox: string): { width: number; height: number } {
+    const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
+    const width = Math.abs(maxX - minX);
+    const height = Math.abs(maxY - minY);
+    return { width, height };
+  }
 
-  // /**
-  //  * Fetches the terrain data based on the provided bounding box, width, and height.
-  //  */
-  // fetchTerrain(bbox: string, width: number, height: number) {
-  //   this.terrainService.getTerrain(bbox, width, height).subscribe(blob => {
-  //     const reader = new FileReader();
-  //     reader.onload = async () => {
-  //       if (reader.result instanceof ArrayBuffer) {
-  //         try {
-  //           const arrayBuffer: ArrayBuffer = reader.result;
-  //           const decodedData =
-  //             await this.geoTiffService.decodeGeoTiff(arrayBuffer);
-  //           console.log('Decoded GeoTIFF Data:', decodedData);
-  //         } catch (error) {
-  //           console.error('Error decoding GeoTIFF file:', error);
-  //         }
-  //       } else {
-  //         console.error('Failed to read the file as an ArrayBuffer.');
-  //       }
-  //     };
-  //     reader.readAsArrayBuffer(blob);
-  //   });
-  // }
+  /**
+   * Fetches and processes the terrain data based on the provided bounding box, width, and height.
+   */
+  fetchAndProcessTerrain(bbox: string, width: number, height: number) {
+    this.terrainService
+      .fetchGeoTIFF(bbox, width, height)
+      .pipe(
+        switchMap(response => {
+          const filePath = response.file_path;
+          return this.terrainService.processGeoTIFF(filePath);
+        })
+      )
+      .subscribe({
+        next: async response => {
+          if (response && response.tilesetUrl) {
+            console.log(
+              `Loading terrain from tileset URL: ${response.tilesetUrl}`
+            );
+            await this.cesiumDirective.loadTerrainFromUrl(response.tilesetUrl);
+          } else {
+            console.error('Tileset URL not provided in the response', response);
+          }
+        },
+        error: (error: Error) => {
+          console.error('Error processing GeoTIFF file:', error);
+        },
+      });
+  }
 
   public updateAlpha(event: Event): void {
-    console.log('alphamapview');
     const inputElement = event.target as HTMLInputElement;
     this.alpha = inputElement.valueAsNumber;
     this.cesiumDirective.updateGlobeAlpha(this.alpha / 100);
-    console.log('alphamapview');
   }
 
   toggleTileset(event: Event): void {
-    console.log('toggletilesetmapview');
     const inputElement = event.target as HTMLInputElement;
     this.tilesetVisible = inputElement.checked;
     if (this.cesiumDirective) {
       this.cesiumDirective.setTilesetVisibility(this.tilesetVisible);
     }
-    console.log('toggletilesetmapview');
   }
 
   togglePolygons(event: Event): void {
-    console.log('togglepolygonsmapview');
     const inputElement = event.target as HTMLInputElement;
     this.polygonsVisible = inputElement.checked;
     if (this.cesiumDirective) {
       this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
-      console.log('togglepolygonsmapview');
     }
   }
-
   handleEntitySelected(entity: Entity) {
     console.log('handleentityselected');
     console.log('Handling selected entity:', entity); // Further verification

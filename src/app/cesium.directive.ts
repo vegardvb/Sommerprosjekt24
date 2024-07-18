@@ -2,8 +2,8 @@ import {
   Directive,
   ElementRef,
   EventEmitter,
-  Input,
   inject,
+  Input,
   OnInit,
   Output,
 } from '@angular/core';
@@ -18,8 +18,6 @@ import {
   Transforms,
   Math as CesiumMath,
   Entity,
-  GeoJsonDataSource,
-  Cartesian2,
   ScreenSpaceEventType,
   defined,
   ScreenSpaceEventHandler,
@@ -28,14 +26,22 @@ import {
   PositionProperty,
   PointGraphics,
   ConstantProperty,
+  CesiumTerrainProvider,
+  GeoJsonDataSource,
+  Cartesian2,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
-import * as turf from '@turf/turf';
+import proj4 from 'proj4';
 import { CableMeasurementService } from './services/cable-measurement.service';
+import { CablePointsService } from './services/cable_points.service';
 import { WorkingAreaService } from './services/workingarea.service';
-import { CablePointsService } from './services/cable-points.service';
+import * as turf from '@turf/turf';
+
+// Define the source and target projections
+proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
+proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
 @Directive({
   selector: '[appCesium]',
@@ -47,6 +53,7 @@ export class CesiumDirective implements OnInit {
   tileset!: Cesium3DTileset;
   polygons: Entity[] = [];
   @Output() bboxExtracted = new EventEmitter<string>();
+
   @Output() selectedEntityChanged = new EventEmitter<Entity>();
 
   inquiryId: number | undefined;
@@ -57,7 +64,6 @@ export class CesiumDirective implements OnInit {
   center!: Cartesian3;
   isEditing = false;
   private selectedEntity: Entity | null = null;
-
   private viewer!: Viewer;
   private handler!: ScreenSpaceEventHandler;
   tilesetClippingPlanes!: ClippingPlaneCollection;
@@ -79,7 +85,6 @@ export class CesiumDirective implements OnInit {
   private CablePointService: CablePointsService = inject(CablePointsService);
 
   async ngOnInit(): Promise<void> {
-    console.log('ngoninit');
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
     });
@@ -91,7 +96,7 @@ export class CesiumDirective implements OnInit {
     this.loadCablepoints();
 
     const cameraMoveEndListener = () => {
-      //this.extractBbox();
+      this.extractBbox();
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
@@ -109,15 +114,23 @@ export class CesiumDirective implements OnInit {
       },
       ScreenSpaceEventType.LEFT_CLICK
     );
+    this.viewer.screenSpaceEventHandler.setInputAction(
+      (movement: { position: Cartesian2 }) => {
+        const pickedObject = this.viewer.scene.pick(movement.position);
+        if (defined(pickedObject)) {
+          const entity = pickedObject.id;
+          this.viewer.selectedEntity = entity; // Set the selected entity
+        } else {
+          this.viewer.selectedEntity = undefined;
+        }
+      },
+      ScreenSpaceEventType.LEFT_CLICK
+    );
 
     this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
       if (defined(entity)) {
-        console.log('Entity selected: ', entity.id);
         this.selectedEntityChanged.emit(entity);
-        console.log('emitafterselect', this.selectedEntityChanged);
-
         if (entity.polyline) {
-          console.log(entity.point);
           this.pointEntities.forEach(pointEntity => {
             if (pointEntity.point) {
               pointEntity.point.show = new ConstantProperty(true);
@@ -125,7 +138,6 @@ export class CesiumDirective implements OnInit {
           });
         }
       } else {
-        console.log('No entity selected');
         // Hide points when no entity is selected
         this.pointEntities.forEach(pointEntity => {
           if (pointEntity.point) {
@@ -165,8 +177,6 @@ export class CesiumDirective implements OnInit {
     this.tileset = this.viewer.scene.primitives.add(
       await Cesium3DTileset.fromIonAssetId(96188)
     );
-
-    console.log(this.center);
 
     const globeClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
@@ -311,6 +321,7 @@ export class CesiumDirective implements OnInit {
       }
     );
   }
+
   private enableEntitySelection() {
     this.handler.setInputAction((movement: { position: Cartesian2 }) => {
       const pickedObject = this.viewer.scene.pick(movement.position);
@@ -395,7 +406,6 @@ export class CesiumDirective implements OnInit {
   }
 
   private disableEditing() {
-    console.log('disableediting');
     if (this.handler) {
       this.handler.destroy();
     }
@@ -408,7 +418,6 @@ export class CesiumDirective implements OnInit {
     this.viewer.scene.screenSpaceCameraController.enableTilt = true;
     this.viewer.scene.screenSpaceCameraController.enableLook = true;
     console.log('disableediting');
-    //fkpdofkp
   }
 
   private loadCables(): void {
@@ -539,14 +548,11 @@ export class CesiumDirective implements OnInit {
   }
 
   public updateEntityPosition(cartesian: Cartesian3) {
-    console.log('updateentityposition');
     if (this.selectedEntity?.polyline) {
-      console.log('before', this.selectedEntity.position);
       if (this.selectedEntity.polyline?.positions) {
         const positions = this.selectedEntity.polyline.positions.getValue(
           JulianDate.now()
         );
-        console.log('before', positions);
         const offset = Cartesian3.subtract(
           cartesian,
           positions[0],
@@ -564,45 +570,99 @@ export class CesiumDirective implements OnInit {
           () => cartesian,
           false
         ) as unknown as PositionProperty;
-        console.log('after', this.selectedEntity.position);
       }
     }
-    console.log('updateentityposition');
   }
 
   public updateGlobeAlpha(alpha: number): void {
-    console.log('updateglobealpha');
     // Adjust globe base color translucency
     this.viewer.scene.globe.translucency.enabled = true;
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue =
       alpha;
-    console.log('updateglobealpha');
   }
 
   setTilesetVisibility(visible: boolean) {
-    console.log('settilesetvisibility');
     if (this.tileset) {
       this.tileset.show = visible;
     }
-    console.log('settilesetvisibility');
   }
   setPolygonsVisibility(visible: boolean) {
-    console.log('setpolygonsetvisibility');
     this.polygons.forEach(polygon => {
       polygon.show = visible;
     });
-    console.log('setpolygonsetvisibility');
   }
 
-  setEditingMode(isEditing: boolean) {
-    console.log('seteditingmode');
+  public async loadTerrainFromUrl(url: string): Promise<void> {
+    try {
+      const terrainProvider = await CesiumTerrainProvider.fromUrl(url, {
+        requestVertexNormals: true,
+      });
+      this.viewer.terrainProvider = terrainProvider;
+    } catch (error) {
+      console.error('Error loading terrain into Cesium:', error);
+    }
+  }
+
+  public setEditingMode(isEditing: boolean) {
     this.isEditing = isEditing;
-    console.log('editign', isEditing);
     if (isEditing) {
       this.enableEditing();
     } else {
       this.disableEditing();
     }
-    console.log('seteditingmode');
+  }
+
+  private extractBbox(): void {
+    const clippingPlanes = this.viewer.scene.globe.clippingPlanes;
+    if (clippingPlanes) {
+      const eastPlane = clippingPlanes.get(0);
+      const westPlane = clippingPlanes.get(1);
+      const northPlane = clippingPlanes.get(2);
+      const southPlane = clippingPlanes.get(3);
+
+      const distanceEast = eastPlane.distance;
+      const distanceWest = westPlane.distance;
+      const distanceNorth = northPlane.distance;
+      const distanceSouth = southPlane.distance;
+
+      // Calculate the coordinates based on the clipping distances and center
+      const centerCartographic =
+        this.viewer.scene.globe.ellipsoid.cartesianToCartographic(this.center);
+      const centerLongitude = CesiumMath.toDegrees(
+        centerCartographic.longitude
+      );
+      const centerLatitude = CesiumMath.toDegrees(centerCartographic.latitude);
+
+      // Use proj4 to transform distances to geographic coordinates
+      const center = proj4('EPSG:4326', 'EPSG:25833', [
+        centerLongitude,
+        centerLatitude,
+      ]);
+
+      const west = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0] - distanceWest,
+        center[1],
+      ]);
+      const east = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0] + distanceEast,
+        center[1],
+      ]);
+      const south = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0],
+        center[1] - distanceSouth,
+      ]);
+      const north = proj4('EPSG:25833', 'EPSG:4326', [
+        center[0],
+        center[1] + distanceNorth,
+      ]);
+
+      const lowerLeft = proj4('EPSG:4326', 'EPSG:25833', [west[0], south[1]]);
+      const upperRight = proj4('EPSG:4326', 'EPSG:25833', [east[0], north[1]]);
+      const bbox = `${lowerLeft[0]},${lowerLeft[1]},${upperRight[0]},${upperRight[1]}`;
+
+      this.bboxExtracted.emit(bbox);
+    } else {
+      console.error('No clipping planes found.');
+    }
   }
 }
