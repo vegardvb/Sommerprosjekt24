@@ -7,6 +7,7 @@
  import { TreeTableModule } from 'primeng/treetable';
  import { AccordionModule } from 'primeng/accordion';
 import { GeojsonService } from '../geojson.service';
+import { Cartographic, Entity, Math as CesiumMath, Cartesian3, ConstantPositionProperty, JulianDate } from 'cesium';
 
 @Component({
   selector: 'app-cable-measurement-info',
@@ -31,6 +32,11 @@ export class CableMeasurementInfoComponent implements OnInit {
   metadata: Metadata[] = [];
   type: string[] = []
   features: Feature[] = [];
+  selectedEntity!: Entity | null;
+  longitude: number = 0;
+  latitude: number = 0;
+  height: number = 0;
+  isEditing: boolean = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -105,6 +111,58 @@ toggleEditMode(): void {
 
   } else {
     console.log('Edit mode enabled');
+  }
+}
+
+updateSelectedEntity(entity: Entity) {
+  this.selectedEntity = entity;
+  const position = this.selectedEntity.position?.getValue(JulianDate.now());
+  if (position) {
+    console.log('before cond',position)
+    const cartographic = Cartographic.fromCartesian(position);
+    this.longitude = CesiumMath.toDegrees(cartographic.longitude);
+    this.latitude = CesiumMath.toDegrees(cartographic.latitude);
+    this.height = cartographic.height;
+  }  }
+
+clearSelectedEntity() {
+  this.selectedEntity = null;
+  this.longitude = 0;
+  this.latitude = 0;
+  this.height = 0;
+}
+
+onLongitudeChange(event: Event) {
+  const inputElement = event.target as HTMLInputElement;
+  this.longitude = Number(inputElement.value);
+  this.updateEntityPosition();
+
+}
+
+onLatitudeChange(event: Event) {
+  const inputElement = event.target as HTMLInputElement;
+  this.latitude = Number(inputElement.value);
+  this.updateEntityPosition();
+  
+
+}
+
+onHeightChange(event: Event) {
+  const inputElement = event.target as HTMLInputElement;
+  this.height = Number(inputElement.value);
+  this.updateEntityPosition();
+}
+
+
+
+private updateEntityPosition() {
+  if (this.selectedEntity) {
+    const newPosition = Cartesian3.fromDegrees(this.longitude, this.latitude, this.height);
+    this.selectedEntity.position = new ConstantPositionProperty(newPosition);
+    console.log('after text', this.selectedEntity.position)
+  
+
+    
   }
 }
 

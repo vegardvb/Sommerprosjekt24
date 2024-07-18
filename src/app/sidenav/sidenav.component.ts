@@ -23,7 +23,6 @@ export class SidenavComponent {
   longitude: number = 0;
   latitude: number = 0;
   height: number = 0;
-  accuracy: string = "";
   isEditing: boolean = false;
   @Output() editingToggled = new EventEmitter<boolean>();
   

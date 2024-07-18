@@ -88,9 +88,13 @@
               id="lat"
               [class.editable]="editMode"
               [attr.contenteditable]="editMode"
-              >{{ feature.properties.metadata.lat }}</span
+              (input)="onLatitudeChange($event)"
             >
+              {{ feature.properties.metadata.lat }}
+            </span>
           </li>
+          
+
           <li>
             Longitude:
             <span

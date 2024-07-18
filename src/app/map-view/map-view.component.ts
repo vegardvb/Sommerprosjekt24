@@ -6,18 +6,21 @@ import { CesiumDirective } from '../cesium.directive';
 import { Subscription } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 import { Entity } from 'cesium';
+import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
   styleUrls: ['./map-view.component.css'],
   standalone: true,
-  imports: [CesiumDirective, SidenavComponent],
+  imports: [CesiumDirective, SidenavComponent, CableMeasurementInfoComponent],
 })
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
   @ViewChild(SidenavComponent, { static: true }) sidenavComponent!: SidenavComponent;
+  @ViewChild(CableMeasurementInfoComponent, { static: true }) cableMeasurementInfoComponent!: CableMeasurementInfoComponent;
+
 
   alpha = 100;
   tilesetVisible: boolean = true;
