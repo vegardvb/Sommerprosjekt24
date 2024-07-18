@@ -12,8 +12,8 @@
     transition: background-color 0.3s;
     margin:5px;
     position: fixed;
-    top: 9%; /* Adjust as needed */
-    left: 20%; /* Center the button horizontally */
+    bottom:2%; /* Adjust as needed */
+    left: 5%; /* Center the button horizontally */
     transform: translateX(-50%); /* Center alignment */
     z-index: 1000; /* Ensure it stays on top */
   }
