@@ -2,8 +2,8 @@ import {
   Directive,
   ElementRef,
   EventEmitter,
-  Input,
   inject,
+  Input,
   OnInit,
   Output,
 } from '@angular/core';
@@ -18,8 +18,6 @@ import {
   Transforms,
   Math as CesiumMath,
   Entity,
-  GeoJsonDataSource,
-  Cartesian2,
   ScreenSpaceEventType,
   defined,
   ScreenSpaceEventHandler,
@@ -28,14 +26,23 @@ import {
   PositionProperty,
   PointGraphics,
   ConstantProperty,
+  CesiumTerrainProvider,
+  GeoJsonDataSource,
+  Cartesian2,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
-import * as turf from '@turf/turf';
+import { ParsedGeometry } from '../models/parsedgeometry-interface';
+import proj4 from 'proj4';
 import { CableMeasurementService } from './services/cable-measurement.service';
+import { CablePointsService } from './services/cable_points.service';
 import { WorkingAreaService } from './services/workingarea.service';
-import { CablePointsService } from './services/cable-points.service';
+import * as turf from '@turf/turf';
+
+// Define the source and target projections
+proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
+proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
 
 @Directive({
   selector: '[appCesium]',
@@ -47,6 +54,7 @@ export class CesiumDirective implements OnInit {
   tileset!: Cesium3DTileset;
   polygons: Entity[] = [];
   @Output() bboxExtracted = new EventEmitter<string>();
+
   @Output() selectedEntityChanged = new EventEmitter<Entity>();
 
   inquiryId: number | undefined;
@@ -57,7 +65,6 @@ export class CesiumDirective implements OnInit {
   center!: Cartesian3;
   isEditing = false;
   private selectedEntity: Entity | null = null;
-
   private viewer!: Viewer;
   private handler!: ScreenSpaceEventHandler;
   tilesetClippingPlanes!: ClippingPlaneCollection;
@@ -67,7 +74,8 @@ export class CesiumDirective implements OnInit {
 
   constructor(
     private el: ElementRef,
-    private route: ActivatedRoute
+  
+    private route: ActivatedRoute,
   ) {}
 
   // Service for fetching data from the backend
@@ -79,7 +87,6 @@ export class CesiumDirective implements OnInit {
   private CablePointService: CablePointsService = inject(CablePointsService);
 
   async ngOnInit(): Promise<void> {
-    console.log('ngoninit');
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
     });
@@ -91,7 +98,7 @@ export class CesiumDirective implements OnInit {
     this.loadCablepoints();
 
     const cameraMoveEndListener = () => {
-      //this.extractBbox();
+      this.extractBbox();
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
@@ -109,15 +116,23 @@ export class CesiumDirective implements OnInit {
       },
       ScreenSpaceEventType.LEFT_CLICK
     );
+    this.viewer.screenSpaceEventHandler.setInputAction(
+      (movement: { position: Cartesian2 }) => {
+        const pickedObject = this.viewer.scene.pick(movement.position);
+        if (defined(pickedObject)) {
+          const entity = pickedObject.id;
+          this.viewer.selectedEntity = entity; // Set the selected entity
+        } else {
+          this.viewer.selectedEntity = undefined;
+        }
+      },
+      ScreenSpaceEventType.LEFT_CLICK
+    );
 
     this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
       if (defined(entity)) {
-        console.log('Entity selected: ', entity.id);
         this.selectedEntityChanged.emit(entity);
-        console.log('emitafterselect', this.selectedEntityChanged);
-
         if (entity.polyline) {
-          console.log(entity.point);
           this.pointEntities.forEach(pointEntity => {
             if (pointEntity.point) {
               pointEntity.point.show = new ConstantProperty(true);
@@ -125,7 +140,6 @@ export class CesiumDirective implements OnInit {
           });
         }
       } else {
-        console.log('No entity selected');
         // Hide points when no entity is selected
         this.pointEntities.forEach(pointEntity => {
           if (pointEntity.point) {
@@ -163,7 +177,19 @@ export class CesiumDirective implements OnInit {
       await Cesium3DTileset.fromIonAssetId(96188)
     );
 
-    console.log(this.center);
+    const globeClippingPlanes = new ClippingPlaneCollection({
+      modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
+      planes: [
+        new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), this.width),
+        new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), this.width),
+        new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), this.height),
+        new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), this.height),
+      ],
+      unionClippingRegions: true,
+      edgeWidth: 1,
+      edgeColor: Color.RED,
+      enabled: true,
+    });
 
     const globeClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
@@ -192,6 +218,7 @@ export class CesiumDirective implements OnInit {
       edgeColor: Color.RED,
       enabled: true,
     });
+     
 
     this.viewer.scene.globe.clippingPlanes = globeClippingPlanes;
     this.tileset.clippingPlanes = tilesetClippingPlanes;
@@ -304,6 +331,7 @@ export class CesiumDirective implements OnInit {
       }
     );
   }
+
   private enableEntitySelection() {
     this.handler.setInputAction((movement: { position: Cartesian2 }) => {
       const pickedObject = this.viewer.scene.pick(movement.position);
@@ -387,8 +415,8 @@ export class CesiumDirective implements OnInit {
     }, ScreenSpaceEventType.LEFT_UP);
   }
 
+
   private disableEditing() {
-    console.log('disableediting');
     if (this.handler) {
       this.handler.destroy();
     }
@@ -400,145 +428,141 @@ export class CesiumDirective implements OnInit {
     this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
     this.viewer.scene.screenSpaceCameraController.enableTilt = true;
     this.viewer.scene.screenSpaceCameraController.enableLook = true;
-    console.log('disableediting');
-    //fkpdofkp
-  }
+    console.log('disableediting')
+}
+private loadCables(): void {
+  this.cableMeasurementService.getData(this.inquiryId).subscribe({
+    next: data => {
+      if (data) {
+        GeoJsonDataSource.load(data[0].geojson, {
+          stroke: Color.BLUE,
+          fill: Color.BLUE.withAlpha(1),
+          strokeWidth: 3,
+          markerSize: 1, // Size of the marker
+          credit: 'Provided by Petters Cable measurement service',
+        })
+          .then((dataSource: GeoJsonDataSource) => {
+            // Add picking and moving functionality to cables
+            dataSource.entities.values.forEach(entity => {
+              console.log('entity', entity);
+              console.log(entity.polyline);
+              if (!entity.polyline) {
+                entity.point = new PointGraphics({
+                  color: Color.BLUE,
+                  pixelSize: 10,
+                  outlineColor: Color.WHITE,
+                  outlineWidth: 2,
+                  show: new ConstantProperty(true),
+                });
+                this.viewer.entities.add(entity);
+              }
+            });
+          })
+          .catch(error => {
+            console.error('Failed to load GeoJSON data:', error);
+          });
+        console.log('loadcables');
+      }
+    },
+  });
+}
 
-  private loadCables(): void {
-    this.cableMeasurementService.getData(this.inquiryId).subscribe({
-      next: data => {
-        if (data) {
-          GeoJsonDataSource.load(data[0].geojson, {
-            stroke: Color.BLUE,
-            fill: Color.BLUE.withAlpha(1),
+private loadCablepoints(): void {
+  this.CablePointService.getData(this.inquiryId).subscribe({
+    next: data => {
+      if (data) {
+        console.log('data received from service', data[0]);
+        const LineStringfeatures = data[0].geojson;
+
+        LineStringfeatures.forEach(geojson => {
+          const allPositions: Cartesian3[] = [];
+
+          GeoJsonDataSource.load(geojson, {
+            stroke: Color.BLUEVIOLET,
+            fill: Color.BLUEVIOLET.withAlpha(1),
             strokeWidth: 3,
             markerSize: 1, // Size of the marker
             credit: 'Provided by Petters Cable measurement service',
           })
             .then((dataSource: GeoJsonDataSource) => {
+              console.log('do we have datasource? ', dataSource);
+              this.viewer.dataSources.add(dataSource);
+
               // Add picking and moving functionality to cables
               dataSource.entities.values.forEach(entity => {
-                console.log('entity', entity);
-                console.log(entity.polyline);
-                if (!entity.polyline) {
+                if (entity.position) {
                   entity.point = new PointGraphics({
                     color: Color.BLUE,
                     pixelSize: 10,
                     outlineColor: Color.WHITE,
                     outlineWidth: 2,
-                    show: new ConstantProperty(true),
+                    show: new ConstantProperty(false),
                   });
-                  this.viewer.entities.add(entity);
-                }
-              });
-            })
-            .catch(error => {
-              console.error('Failed to load GeoJSON data:', error);
-            });
-          console.log('loadcables');
-        }
-      },
-    });
-  }
-
-  private loadCablepoints(): void {
-    this.CablePointService.getData(this.inquiryId).subscribe({
-      next: data => {
-        if (data) {
-          console.log('data received from service', data[0]);
-          const LineStringfeatures = data[0].geojson;
-
-          LineStringfeatures.forEach(geojson => {
-            const allPositions: Cartesian3[] = [];
-
-            GeoJsonDataSource.load(geojson, {
-              stroke: Color.BLUEVIOLET,
-              fill: Color.BLUEVIOLET.withAlpha(1),
-              strokeWidth: 3,
-              markerSize: 1, // Size of the marker
-              credit: 'Provided by Petters Cable measurement service',
-            })
-              .then((dataSource: GeoJsonDataSource) => {
-                console.log('do we have datasource? ', dataSource);
-                this.viewer.dataSources.add(dataSource);
-
-                // Add picking and moving functionality to cables
-                dataSource.entities.values.forEach(entity => {
-                  if (entity.position) {
-                    entity.point = new PointGraphics({
-                      color: Color.BLUE,
-                      pixelSize: 10,
-                      outlineColor: Color.WHITE,
-                      outlineWidth: 2,
-                      show: new ConstantProperty(false),
-                    });
-                    this.pointEntities.push(entity);
-                    const position = entity.position.getValue(JulianDate.now());
-                    if (position) {
-                      allPositions.push(position);
-                    }
+                  this.pointEntities.push(entity);
+                  const position = entity.position.getValue(JulianDate.now());
+                  if (position) {
+                    allPositions.push(position);
                   }
-                });
-                // Create a polyline that connects the points
-                if (allPositions.length > 1) {
-                  this.viewer.entities.add({
-                    polyline: {
-                      positions: allPositions,
-                      width: 3,
-                      material: Color.BLUEVIOLET,
-                    },
-                  });
                 }
-              })
-              .catch(error => {
-                console.error('Failed to load GeoJSON data:', error);
               });
-            console.log('loadcables');
-          });
-        }
-      },
-    });
-  }
-
-  private loadWorkingArea(): void {
-    this.workingAreaService.getArea(this.inquiryId).subscribe({
-      next: data => {
-        if (data) {
-          console.log('data received from service33', data);
-          GeoJsonDataSource.load(data[0].geojson, {
-            stroke: Color.BLUE,
-            fill: Color.BLUE.withAlpha(0.3),
-            strokeWidth: 2,
-            markerSize: 1, // Size of the marker
-            credit: 'Provided by Petters Cable measurement service',
-          })
-            .then((dataSource: GeoJsonDataSource) => {
-              this.viewer.dataSources.add(dataSource);
-
-              // Add picking and moving functionality to cables
-              dataSource.entities.values.forEach(entity => {
-                this.polygons.push(entity);
-                this.viewer.entities.add(entity);
-              });
+              // Create a polyline that connects the points
+              if (allPositions.length > 1) {
+                this.viewer.entities.add({
+                  polyline: {
+                    positions: allPositions,
+                    width: 3,
+                    material: Color.BLUEVIOLET,
+                  },
+                });
+              }
             })
             .catch(error => {
               console.error('Failed to load GeoJSON data:', error);
             });
           console.log('loadcables');
-        }
-      },
-    });
-  }
+        });
+      }
+    },
+  });
+}
+
+private loadWorkingArea(): void {
+  this.workingAreaService.getArea(this.inquiryId).subscribe({
+    next: data => {
+      if (data) {
+        console.log('data received from service33', data);
+        GeoJsonDataSource.load(data[0].geojson, {
+          stroke: Color.BLUE,
+          fill: Color.BLUE.withAlpha(0.3),
+          strokeWidth: 2,
+          markerSize: 1, // Size of the marker
+          credit: 'Provided by Petters Cable measurement service',
+        })
+          .then((dataSource: GeoJsonDataSource) => {
+            this.viewer.dataSources.add(dataSource);
+
+            // Add picking and moving functionality to cables
+            dataSource.entities.values.forEach(entity => {
+              this.polygons.push(entity);
+              this.viewer.entities.add(entity);
+            });
+          })
+          .catch(error => {
+            console.error('Failed to load GeoJSON data:', error);
+          });
+        console.log('loadcables');
+      }
+    },
+  });
+}
+
 
   public updateEntityPosition(cartesian: Cartesian3) {
-    console.log('updateentityposition');
     if (this.selectedEntity?.polyline) {
-      console.log('before', this.selectedEntity.position);
       if (this.selectedEntity.polyline?.positions) {
         const positions = this.selectedEntity.polyline.positions.getValue(
           JulianDate.now()
         );
-        console.log('before', positions);
         const offset = Cartesian3.subtract(
           cartesian,
           positions[0],
@@ -556,45 +580,45 @@ export class CesiumDirective implements OnInit {
           () => cartesian,
           false
         ) as unknown as PositionProperty;
-        console.log('after', this.selectedEntity.position);
       }
     }
-    console.log('updateentityposition');
   }
 
   public updateGlobeAlpha(alpha: number): void {
-    console.log('updateglobealpha');
     // Adjust globe base color translucency
     this.viewer.scene.globe.translucency.enabled = true;
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue =
       alpha;
-    console.log('updateglobealpha');
   }
 
   setTilesetVisibility(visible: boolean) {
-    console.log('settilesetvisibility');
     if (this.tileset) {
       this.tileset.show = visible;
     }
-    console.log('settilesetvisibility');
   }
   setPolygonsVisibility(visible: boolean) {
-    console.log('setpolygonsetvisibility');
     this.polygons.forEach(polygon => {
       polygon.show = visible;
     });
-    console.log('setpolygonsetvisibility');
   }
 
-  setEditingMode(isEditing: boolean) {
-    console.log('seteditingmode');
+  public async loadTerrainFromUrl(url: string): Promise<void> {
+    try {
+      const terrainProvider = await CesiumTerrainProvider.fromUrl(url, {
+        requestVertexNormals: true,
+      });
+      this.viewer.terrainProvider = terrainProvider;
+    } catch (error) {
+      console.error('Error loading terrain into Cesium:', error);
+    }
+  }
+
+  public setEditingMode(isEditing: boolean) {
     this.isEditing = isEditing;
-    console.log('editign', isEditing);
     if (isEditing) {
       this.enableEditing();
     } else {
       this.disableEditing();
     }
-    console.log('seteditingmode');
   }
 }

@@ -1,7 +1,7 @@
-<div class="w-100% m-10">
+<div class="w-100% m-10 h-screen">
   <span>
     <input
-      class="my-5 border p-2"
+      class="my-5 p-2"
       id="searchbar"
       pInputText
       type="text"
@@ -23,7 +23,7 @@
   >
     <ng-template pTemplate="header">
       <tr>
-        <th>ID</th>
+        <th id="id">ID</th>
         <th>Name</th>
         <th>Description</th>
         <th>Email</th>
@@ -32,7 +32,7 @@
         <th>Status</th>
         <th>Deadline</th>
         <th>Start Date</th>
-        <th>End Date</th>
+        <th id="end_date">End Date</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-product>

@@ -9,6 +9,11 @@ httpx = "*"
 sqlalchemy = "*"
 psycopg2 = "*"
 requests = "*"
+uvicorn = "*"
+python-dotenv = "*"
+docker = "*"
+psycopg2-binary = "*"
+
 
 [dev-packages]
 pytest = "*"

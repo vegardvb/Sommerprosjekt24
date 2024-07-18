@@ -18,6 +18,7 @@ import {
 } from 'cesium';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 
 @Component({
   selector: 'app-sidenav',
@@ -25,7 +26,7 @@ import { CommonModule } from '@angular/common';
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [SidenavLinkComponent, ReactiveFormsModule, CommonModule],
+  imports: [SidenavLinkComponent, CableMeasurementInfoComponent],
 })
 export class SidenavComponent {
   readonly sidenavMinWidth = 250;
@@ -60,6 +61,7 @@ export class SidenavComponent {
   };
 
   constructor(public sidenavService: SidenavService) {}
+
 
   startResizing(event: MouseEvent): void {
     this.resizingEvent = {
