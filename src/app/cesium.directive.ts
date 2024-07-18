@@ -344,6 +344,7 @@ export class CesiumDirective implements OnInit {
       console.error('No clipping planes found.');
     }
   }
+
   /**
    * Changes the home button view of the Cesium viewer.
    * @param viewer - The Cesium viewer instance.
@@ -395,11 +396,7 @@ export class CesiumDirective implements OnInit {
         this.selectedEntity = pickedObject.id as Entity;
         this.selectedEntityChanged.emit(pickedObject); // Emit the event
 
-        // Disable camera interactions
-        this.viewer.scene.screenSpaceCameraController.enableRotate = false;
-        this.viewer.scene.screenSpaceCameraController.enableZoom = false;
-        this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
-        this.viewer.scene.screenSpaceCameraController.enableLook = false;
+        this.disableCameraInteractions();
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
 
@@ -445,12 +442,7 @@ export class CesiumDirective implements OnInit {
       }
 
       if (!this.isDragging) {
-        // Re-enable camera interactions after dropping
-        this.viewer.scene.screenSpaceCameraController.enableRotate = true;
-        this.viewer.scene.screenSpaceCameraController.enableZoom = true;
-        this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
-        this.viewer.scene.screenSpaceCameraController.enableTilt = true;
-        this.viewer.scene.screenSpaceCameraController.enableLook = true;
+        this.enableCameraInteractions();
       }
     }, ScreenSpaceEventType.LEFT_UP);
   }
@@ -461,12 +453,7 @@ export class CesiumDirective implements OnInit {
     }
     this.isDragging = false;
     this.selectedEntity = null;
-    // Ensure camera interactions are re-enabled if editing is disabled
-    this.viewer.scene.screenSpaceCameraController.enableRotate = true;
-    this.viewer.scene.screenSpaceCameraController.enableZoom = true;
-    this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
-    this.viewer.scene.screenSpaceCameraController.enableTilt = true;
-    this.viewer.scene.screenSpaceCameraController.enableLook = true;
+    this.enableCameraInteractions();
   }
 
   /**
@@ -507,7 +494,8 @@ export class CesiumDirective implements OnInit {
   }
 
   /**
-   * Loads cable points data and visualizes them on the Cesium viewer.
+   * Loads the cable points data and visualizes it in Cesium.
+   * @returns A promise that resolves when the cable points data is loaded and visualized.
    */
   private async loadCablePoints(): Promise<void> {
     try {
@@ -648,6 +636,7 @@ export class CesiumDirective implements OnInit {
       this.tileset.show = visible;
     }
   }
+
   /**
    * Sets the visibility of all polygons in the directive.
    * @param visible - A boolean value indicating whether the polygons should be visible or not.
@@ -685,5 +674,26 @@ export class CesiumDirective implements OnInit {
     } else {
       this.disableEditing();
     }
+  }
+
+  /**
+   * Disables camera interactions.
+   */
+  private disableCameraInteractions() {
+    this.viewer.scene.screenSpaceCameraController.enableRotate = false;
+    this.viewer.scene.screenSpaceCameraController.enableZoom = false;
+    this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
+    this.viewer.scene.screenSpaceCameraController.enableLook = false;
+  }
+
+  /**
+   * Enables camera interactions.
+   */
+  private enableCameraInteractions() {
+    this.viewer.scene.screenSpaceCameraController.enableRotate = true;
+    this.viewer.scene.screenSpaceCameraController.enableZoom = true;
+    this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
+    this.viewer.scene.screenSpaceCameraController.enableTilt = true;
+    this.viewer.scene.screenSpaceCameraController.enableLook = true;
   }
 }
