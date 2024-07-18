@@ -17,9 +17,6 @@ export class MapViewComponent implements OnInit, OnDestroy {
   cesiumDirective!: CesiumDirective;
   @ViewChild(SidenavComponent, { static: true })
   sidenavComponent!: SidenavComponent;
-  @ViewChild(SidenavComponent, { static: true })
-  sidenavComponent!: SidenavComponent;
-
   alpha = 100;
   tilesetVisible: boolean = true;
   polygonsVisible: boolean = true;
@@ -63,7 +60,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log('destroymapview')
+    console.log('destroymapview');
     if (this.queryParamsSubscription) {
       this.queryParamsSubscription.unsubscribe();
     }
@@ -76,7 +73,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
     if (this.editingSubscription) {
       this.editingSubscription.unsubscribe();
     }
-    console.log('destroymapview')
+    console.log('destroymapview');
   }
 
   /**
@@ -151,4 +148,3 @@ export class MapViewComponent implements OnInit, OnDestroy {
     console.log('handleentitydeselected');
   }
 }
-

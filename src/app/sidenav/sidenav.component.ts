@@ -26,7 +26,12 @@ import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-m
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [SidenavLinkComponent, CableMeasurementInfoComponent],
+  imports: [
+    SidenavLinkComponent,
+    CableMeasurementInfoComponent,
+    CommonModule,
+    ReactiveFormsModule,
+  ],
 })
 export class SidenavComponent {
   readonly sidenavMinWidth = 250;
@@ -61,7 +66,6 @@ export class SidenavComponent {
   };
 
   constructor(public sidenavService: SidenavService) {}
-
 
   startResizing(event: MouseEvent): void {
     this.resizingEvent = {
