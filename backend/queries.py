@@ -146,8 +146,8 @@ def fetch_geotiff(bbox: str, width: float, height: float, logger) -> dict:
         "BBOX": bbox,
         "CRS": "EPSG:25833",
         "RESPONSE_CRS": "EPSG:4326",
-        "WIDTH": width,
-        "HEIGHT": height
+        "WIDTH": min(width, 2850),  # Hardcoded max due to limits on API
+        "HEIGHT": min(height, 2850)  # Hardcoded max due to limits on API
     }
     response = requests.get(wcs_url, params=params, timeout=10)
     if response.status_code == 200:
@@ -155,10 +155,10 @@ def fetch_geotiff(bbox: str, width: float, height: float, logger) -> dict:
         with open(file_path, "wb") as file:
             file.write(response.content)
         return {"file_path": file_path}
-    else:
-        logger.error(f"Failed to fetch terrain model: {response.text}")
-        raise HTTPException(
-            status_code=500, detail=f"Failed to fetch terrain model: {response.text}")
+
+    logger.error(f"Failed to fetch terrain model: {response.text}")
+    raise HTTPException(
+        status_code=500, detail=f"Failed to fetch terrain model: {response.text}")
 
 
 async def process_geotiff(file_path: str, logger) -> dict:
@@ -224,11 +224,9 @@ async def process_geotiff(file_path: str, logger) -> dict:
         tile_path = os.path.join(output_dir, "layer.json")
         if os.path.exists(tile_path):
             return {"tilesetUrl": "http://localhost:8080/tilesets/output"}
-        else:
-            logger.error(
-                "Failed to generate terrain tiles: layer.json not found.")
-            raise HTTPException(
-                status_code=500, detail="Failed to generate terrain tiles")
+        logger.error("Failed to generate terrain tiles: layer.json not found.")
+        raise HTTPException(
+            status_code=500, detail="Failed to generate terrain tiles")
 
     except Exception as e:
         logger.error(f"Error during terrain tile generation: {e}")
