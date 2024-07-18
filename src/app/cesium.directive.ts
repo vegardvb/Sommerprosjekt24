@@ -93,11 +93,13 @@ export class CesiumDirective implements OnInit {
       this.inquiryId = params['inquiryId'];
     });
 
-    this.initializeViewer();
-    this.extractCoordinates();
-    this.loadCables();
-    this.loadWorkingArea();
-    this.loadCablePoints();
+    await this.initializeViewer();
+    await this.extractCoordinates();
+    this.initializeGlobeClippingPlanes();
+    this.initializeTilesetClippingPlanes();
+    await this.loadCables();
+    await this.loadWorkingArea();
+    await this.loadCablePoints();
 
     const cameraMoveEndListener = () => {
       this.extractBbox();
@@ -170,12 +172,16 @@ export class CesiumDirective implements OnInit {
     } catch (error) {
       console.error('Error loading Cesium tileset:', error);
     }
-
-    this.initializeGlobeClippingPlanes();
-    this.initializeTilesetClippingPlanes();
   }
 
   private initializeGlobeClippingPlanes(): void {
+    if (!this.center) {
+      console.error(
+        'Center is not defined. Clipping planes initialization skipped.'
+      );
+      return;
+    }
+
     const globeClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
       planes: [
@@ -194,6 +200,13 @@ export class CesiumDirective implements OnInit {
   }
 
   private initializeTilesetClippingPlanes(): void {
+    if (!this.center) {
+      console.error(
+        'Center is not defined. Clipping planes initialization skipped.'
+      );
+      return;
+    }
+
     const tilesetClippingPlanes = new ClippingPlaneCollection({
       modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
       planes: [
@@ -506,7 +519,6 @@ export class CesiumDirective implements OnInit {
 
         for (const geojson of lineStringFeatures) {
           const allPositions: Cartesian3[] = [];
-
           const dataSource = await GeoJsonDataSource.load(geojson, {
             stroke: Color.BLUEVIOLET,
             fill: Color.BLUEVIOLET.withAlpha(1),
