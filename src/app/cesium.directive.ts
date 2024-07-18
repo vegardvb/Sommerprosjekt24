@@ -31,7 +31,6 @@ import {
   Viewer,
 } from 'cesium';
 import { ActivatedRoute } from '@angular/router';
-import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { CableMeasurementService } from './services/cable-measurement.service';
 import { CablePointsService } from './services/cable_points.service';
@@ -61,20 +60,15 @@ export class CesiumDirective implements OnInit {
 
   @Output() selectedEntityChanged = new EventEmitter<Entity>();
 
-  inquiryId: number | undefined;
-  products: Geometry[] = [];
-  coords: number[][][] = [];
-  bbox: number[] = [];
-  pointEntities: Entity[] = [];
-  center!: Cartesian3;
-  isEditing = false;
+  private inquiryId: number | undefined;
+  private pointEntities: Entity[] = [];
+  private center!: Cartesian3;
   private selectedEntity: Entity | null = null;
   private viewer!: Viewer;
   private handler!: ScreenSpaceEventHandler;
-  tilesetClippingPlanes!: ClippingPlaneCollection;
-  globeClippingPlanes!: ClippingPlaneCollection;
-  width!: number;
-  height!: number;
+  private width!: number;
+  private height!: number;
+  isEditing = false;
 
   constructor(
     private el: ElementRef,
@@ -465,130 +459,128 @@ export class CesiumDirective implements OnInit {
   /**
    * Loads the cables data and visualizes them on the Cesium viewer.
    */
-  private loadCables(): void {
-    this.cableMeasurementService.getData(this.inquiryId).subscribe({
-      next: data => {
-        if (data) {
-          GeoJsonDataSource.load(data[0].geojson, {
-            stroke: Color.BLUE,
-            fill: Color.BLUE.withAlpha(1),
-            strokeWidth: 3,
-            markerSize: 1, // Size of the marker
-            credit: "Provided by Petter's Cable measurement service",
-          })
-            .then((dataSource: GeoJsonDataSource) => {
-              // Add picking and moving functionality to cables
-              dataSource.entities.values.forEach(entity => {
-                if (!entity.polyline) {
-                  entity.point = new PointGraphics({
-                    color: Color.BLUE,
-                    pixelSize: 10,
-                    outlineColor: Color.WHITE,
-                    outlineWidth: 2,
-                    show: new ConstantProperty(true),
-                  });
-                  this.viewer.entities.add(entity);
-                }
-              });
-            })
-            .catch(error => {
-              console.error('Failed to load GeoJSON data:', error);
+  private async loadCables(): Promise<void> {
+    try {
+      const data = await lastValueFrom(
+        this.cableMeasurementService.getData(this.inquiryId)
+      );
+      if (data) {
+        const geoJson = data[0].geojson;
+        const dataSource = await GeoJsonDataSource.load(geoJson, {
+          stroke: Color.BLUE,
+          fill: Color.BLUE.withAlpha(1),
+          strokeWidth: 3,
+          markerSize: 1, // Size of the marker
+          credit: "Provided by Petter's Cable measurement service",
+        });
+
+        // Add picking and moving functionality to cables
+        dataSource.entities.values.forEach(entity => {
+          if (!entity.polyline) {
+            entity.point = new PointGraphics({
+              color: Color.BLUE,
+              pixelSize: 10,
+              outlineColor: Color.WHITE,
+              outlineWidth: 2,
+              show: new ConstantProperty(true),
             });
-        }
-      },
-    });
+            this.viewer.entities.add(entity);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load cables data:', error);
+    }
   }
 
   /**
    * Loads cable points data and visualizes them on the Cesium viewer.
-   * @private
-   * @returns {void}
    */
-  private loadCablePoints(): void {
-    this.cablePointService.getData(this.inquiryId).subscribe({
-      next: data => {
-        if (data) {
-          const lineStringFeatures = data[0].geojson;
+  private async loadCablePoints(): Promise<void> {
+    try {
+      const data = await lastValueFrom(
+        this.cablePointService.getData(this.inquiryId)
+      );
+      if (data) {
+        const lineStringFeatures = data[0].geojson;
 
-          lineStringFeatures.forEach(geojson => {
-            const allPositions: Cartesian3[] = [];
+        for (const geojson of lineStringFeatures) {
+          const allPositions: Cartesian3[] = [];
 
-            GeoJsonDataSource.load(geojson, {
-              stroke: Color.BLUEVIOLET,
-              fill: Color.BLUEVIOLET.withAlpha(1),
-              strokeWidth: 3,
-              markerSize: 1, // Size of the marker
-              credit: "Provided by Petter's Cable measurement service",
-            })
-              .then((dataSource: GeoJsonDataSource) => {
-                this.viewer.dataSources.add(dataSource);
-
-                // Add picking and moving functionality to cables
-                dataSource.entities.values.forEach(entity => {
-                  if (entity.position) {
-                    entity.point = new PointGraphics({
-                      color: Color.BLUE,
-                      pixelSize: 10,
-                      outlineColor: Color.WHITE,
-                      outlineWidth: 2,
-                      show: new ConstantProperty(false),
-                    });
-                    this.pointEntities.push(entity);
-                    const position = entity.position.getValue(JulianDate.now());
-                    if (position) {
-                      allPositions.push(position);
-                    }
-                  }
-                });
-                // Create a polyline that connects the points
-                if (allPositions.length > 1) {
-                  this.viewer.entities.add({
-                    polyline: {
-                      positions: allPositions,
-                      width: 3,
-                      material: Color.BLUEVIOLET,
-                    },
-                  });
-                }
-              })
-              .catch(error => {
-                console.error('Failed to load GeoJSON data:', error);
-              });
+          const dataSource = await GeoJsonDataSource.load(geojson, {
+            stroke: Color.BLUEVIOLET,
+            fill: Color.BLUEVIOLET.withAlpha(1),
+            strokeWidth: 3,
+            markerSize: 1, // Size of the marker
+            credit: "Provided by Petter's Cable measurement service",
           });
+
+          this.viewer.dataSources.add(dataSource);
+
+          // Add picking and moving functionality to cables
+          dataSource.entities.values.forEach(entity => {
+            if (entity.position) {
+              entity.point = new PointGraphics({
+                color: Color.BLUE,
+                pixelSize: 10,
+                outlineColor: Color.WHITE,
+                outlineWidth: 2,
+                show: new ConstantProperty(false),
+              });
+              this.pointEntities.push(entity);
+              const position = entity.position.getValue(JulianDate.now());
+              if (position) {
+                allPositions.push(position);
+              }
+            }
+          });
+
+          // Create a polyline that connects the points
+          if (allPositions.length > 1) {
+            this.viewer.entities.add({
+              polyline: {
+                positions: allPositions,
+                width: 3,
+                material: Color.BLUEVIOLET,
+              },
+            });
+          }
         }
-      },
-    });
+      }
+    } catch (error) {
+      console.error('Failed to load cable points data:', error);
+    }
   }
 
   /**
    * Loads the working area data and displays it on the Cesium viewer.
    */
-  private loadWorkingArea(): void {
-    this.workingAreaService.getArea(this.inquiryId).subscribe({
-      next: data => {
-        if (data) {
-          GeoJsonDataSource.load(data[0].geojson, {
-            stroke: Color.BLUE,
-            fill: Color.BLUE.withAlpha(0.3),
-            strokeWidth: 2,
-            markerSize: 1, // Size of the marker
-            credit: "Provided by Petter's Cable measurement service",
-          })
-            .then((dataSource: GeoJsonDataSource) => {
-              this.viewer.dataSources.add(dataSource);
+  private async loadWorkingArea(): Promise<void> {
+    try {
+      const data = await lastValueFrom(
+        this.workingAreaService.getArea(this.inquiryId)
+      );
+      if (data) {
+        const geoJson = data[0].geojson;
+        const dataSource = await GeoJsonDataSource.load(geoJson, {
+          stroke: Color.BLUE,
+          fill: Color.BLUE.withAlpha(0.3),
+          strokeWidth: 2,
+          markerSize: 1, // Size of the marker
+          credit: "Provided by Petter's Cable measurement service",
+        });
 
-              // Add picking and moving functionality to cables
-              dataSource.entities.values.forEach(entity => {
-                this.polygons.push(entity);
-                this.viewer.entities.add(entity);
-              });
-            })
-            .catch(error => {
-              console.error('Failed to load GeoJSON data:', error);
-            });
-        }
-      },
-    });
+        this.viewer.dataSources.add(dataSource);
+
+        // Add picking and moving functionality to cables
+        dataSource.entities.values.forEach(entity => {
+          this.polygons.push(entity);
+          this.viewer.entities.add(entity);
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load working area data:', error);
+    }
   }
 
   /**
