@@ -18,7 +18,8 @@ import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-m
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
-  @ViewChild(SidenavComponent, { static: true }) sidenavComponent!: SidenavComponent;
+  @ViewChild(SidenavComponent, { static: true })
+  sidenavComponent!: SidenavComponent;
   @ViewChild(CableMeasurementInfoComponent, { static: true }) cableMeasurementInfoComponent!: CableMeasurementInfoComponent;
 
 
@@ -33,13 +34,13 @@ export class MapViewComponent implements OnInit, OnDestroy {
   private editingSubscription: Subscription | undefined;
 
   constructor(
-    private route: ActivatedRoute,
+    private route: ActivatedRoute
     // private terrainService: TerrainService,
     // private geoTiffService: GeoTiffService
   ) {}
 
   ngOnInit() {
-    console.log('initmapview')
+    console.log('initmapview');
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
     });
@@ -51,23 +52,22 @@ export class MapViewComponent implements OnInit, OnDestroy {
     //     this.fetchTerrain(bbox, width, height);
     //   });
 
-    this.entitySubscription = this.cesiumDirective.selectedEntityChanged.subscribe(
-      entity => {
-        console.log('entity', entity)
+    this.entitySubscription =
+      this.cesiumDirective.selectedEntityChanged.subscribe(entity => {
+        console.log('entity', entity);
         this.handleEntitySelected(entity);
+      });
+    this.editingSubscription = this.sidenavComponent.editingToggled.subscribe(
+      isEditing => {
+        console.log('mapviewediting', isEditing);
+        this.cesiumDirective.setEditingMode(isEditing);
       }
     );
-    this.editingSubscription = this.sidenavComponent.editingToggled.subscribe(
-      isEditing => { 
-      console.log('mapviewediting', isEditing)
-      this.cesiumDirective.setEditingMode(isEditing);
-    });
-    console.log('initmapview')
-  
+    console.log('initmapview');
   }
 
   ngOnDestroy() {
-    console.log('destroymapview')
+    console.log('destroymapview');
     if (this.queryParamsSubscription) {
       this.queryParamsSubscription.unsubscribe();
     }
@@ -80,7 +80,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
     if (this.editingSubscription) {
       this.editingSubscription.unsubscribe();
     }
-    console.log('destroymapview')
+    console.log('destroymapview');
   }
 
   // /**
@@ -118,42 +118,42 @@ export class MapViewComponent implements OnInit, OnDestroy {
   // }
 
   public updateAlpha(event: Event): void {
-    console.log('alphamapview')
+    console.log('alphamapview');
     const inputElement = event.target as HTMLInputElement;
     this.alpha = inputElement.valueAsNumber;
     this.cesiumDirective.updateGlobeAlpha(this.alpha / 100);
-    console.log('alphamapview')
+    console.log('alphamapview');
   }
 
   toggleTileset(event: Event): void {
-    console.log('toggletilesetmapview')
+    console.log('toggletilesetmapview');
     const inputElement = event.target as HTMLInputElement;
     this.tilesetVisible = inputElement.checked;
     if (this.cesiumDirective) {
       this.cesiumDirective.setTilesetVisibility(this.tilesetVisible);
     }
-    console.log('toggletilesetmapview')
+    console.log('toggletilesetmapview');
   }
 
   togglePolygons(event: Event): void {
-    console.log('togglepolygonsmapview')
+    console.log('togglepolygonsmapview');
     const inputElement = event.target as HTMLInputElement;
     this.polygonsVisible = inputElement.checked;
     if (this.cesiumDirective) {
       this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
-      console.log('togglepolygonsmapview')
+      console.log('togglepolygonsmapview');
     }
   }
 
   handleEntitySelected(entity: Entity) {
-    console.log('handleentityselected')
+    console.log('handleentityselected');
     console.log('Handling selected entity:', entity); // Further verification
     this.sidenavComponent.updateSelectedEntity(entity);
-    console.log('handleentityselected')
+    console.log('handleentityselected');
   }
   handleEntityDeselection() {
-    console.log('handleentitydeselected')
+    console.log('handleentitydeselected');
     this.sidenavComponent.clearSelectedEntity();
-    console.log('handleentitydeselected')
+    console.log('handleentitydeselected');
   }
 }
