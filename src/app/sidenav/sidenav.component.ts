@@ -1,20 +1,55 @@
-import { Component, HostListener, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostListener,
+  Output,
+  ViewEncapsulation,
+} from '@angular/core';
 import { SidenavService } from './sidenav.service';
 import { SidenavLinkComponent } from './sidenav-link.component';
+// import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
+import {
+  Entity,
+  JulianDate,
+  Cartographic,
+  Math as CesiumMath,
+  Cartesian3,
+  ConstantPositionProperty,
+} from 'cesium';
+import { ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 
+/**
+ * Component for the side navigation bar.
+ */
 @Component({
   selector: 'app-sidenav',
   standalone: true,
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [SidenavLinkComponent, CableMeasurementInfoComponent],
+  imports: [
+    SidenavLinkComponent,
+    CableMeasurementInfoComponent,
+    CommonModule,
+    ReactiveFormsModule,
+  ],
 })
 export class SidenavComponent {
   readonly sidenavMinWidth = 250;
   readonly sidenavMaxWidth = window.innerWidth - 300;
+  selectedEntity!: Entity | null;
+  longitude: number = 0;
+  latitude: number = 0;
+  height: number = 0;
+  isEditing: boolean = false;
+  @Output() editingToggled = new EventEmitter<boolean>();
 
+  /**
+   * Gets the current width of the side navigation bar.
+   * @returns The width of the side navigation bar.
+   */
   get sidenavWidth(): number {
     return parseInt(
       getComputedStyle(document.body).getPropertyValue('--sidenav-width'),
@@ -22,7 +57,11 @@ export class SidenavComponent {
     );
   }
 
-  setSidenavWidth(width: number) {
+  /**
+   * Sets the width of the side navigation bar.
+   * @param width - The width to set.
+   */
+  setSidenavWidth(width: number): void {
     const clampedWidth = Math.min(
       Math.max(width, this.sidenavMinWidth),
       this.sidenavMaxWidth
@@ -39,6 +78,10 @@ export class SidenavComponent {
 
   constructor(public sidenavService: SidenavService) {}
 
+  /**
+   * Starts the resizing of the side navigation bar.
+   * @param event - The mouse event.
+   */
   startResizing(event: MouseEvent): void {
     this.resizingEvent = {
       isResizing: true,
@@ -47,8 +90,99 @@ export class SidenavComponent {
     };
   }
 
+  /**
+   * Updates the selected entity.
+   * @param entity - The entity to update.
+   */
+  updateSelectedEntity(entity: Entity): void {
+    this.selectedEntity = entity;
+    const position = this.selectedEntity.position?.getValue(JulianDate.now());
+    if (position) {
+      const cartographic = Cartographic.fromCartesian(position);
+      this.longitude = CesiumMath.toDegrees(cartographic.longitude);
+      this.latitude = CesiumMath.toDegrees(cartographic.latitude);
+      this.height = cartographic.height;
+    }
+  }
+
+  /**
+   * Clears the selected entity.
+   */
+  clearSelectedEntity(): void {
+    this.selectedEntity = null;
+    this.longitude = 0;
+    this.latitude = 0;
+    this.height = 0;
+  }
+
+  /**
+   * Handles the change event for the longitude input.
+   * @param event - The change event.
+   */
+  onLongitudeChange(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.longitude = Number(inputElement.value);
+    this.updateEntityPosition();
+  }
+
+  /**
+   * Handles the change event for the latitude input.
+   * @param event - The change event.
+   */
+  onLatitudeChange(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.latitude = Number(inputElement.value);
+    this.updateEntityPosition();
+  }
+
+  /**
+   * Handles the change event for the height input.
+   * @param event - The change event.
+   */
+  onHeightChange(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.height = Number(inputElement.value);
+    this.updateEntityPosition();
+  }
+
+  /**
+   * Updates the position of the selected entity.
+   * If there is a selected entity, it updates its position based on the longitude, latitude, and height values.
+   */
+  private updateEntityPosition(): void {
+    if (this.selectedEntity) {
+      const newPosition = Cartesian3.fromDegrees(
+        this.longitude,
+        this.latitude,
+        this.height
+      );
+      this.selectedEntity.position = new ConstantPositionProperty(newPosition);
+    }
+  }
+
+  /**
+   * Toggles the editing mode.
+   */
+  toggleEditing(): void {
+    this.isEditing = !this.isEditing;
+    this.editingToggled.emit(this.isEditing);
+  }
+
+  /**
+   * Closes the editor.
+   */
+  closeEditor(): void {
+    this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
+    this.isEditing = false;
+    this.editingToggled.emit(this.isEditing);
+  }
+
+  /**
+   * Updates the width of the side navigation bar during resizing.
+   * @param event - The mouse event.
+   */
   @HostListener('window:mousemove', ['$event'])
-  updateSidenavWidth(event: MouseEvent) {
+  updateSidenavWidth(event: MouseEvent): void {
     // No need to even continue if we're not resizing
     if (!this.resizingEvent.isResizing) {
       return;
@@ -64,8 +198,11 @@ export class SidenavComponent {
     this.sidenavService.setSidenavWidth(newWidth);
   }
 
+  /**
+   * Stops the resizing of the side navigation bar.
+   */
   @HostListener('window:mouseup')
-  stopResizing() {
+  stopResizing(): void {
     this.resizingEvent.isResizing = false;
   }
 }
