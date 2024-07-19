@@ -19,8 +19,8 @@ export class MapViewComponent implements OnInit, OnDestroy {
   cesiumDirective!: CesiumDirective;
   @ViewChild(SidenavComponent, { static: true })
   sidenavComponent!: SidenavComponent;
-  @ViewChild(CableMeasurementInfoComponent, { static: true }) cableMeasurementInfoComponent!: CableMeasurementInfoComponent;
-
+  @ViewChild(CableMeasurementInfoComponent, { static: true })
+  cableMeasurementInfoComponent!: CableMeasurementInfoComponent;
 
   alpha = 100;
   tilesetVisible: boolean = true;

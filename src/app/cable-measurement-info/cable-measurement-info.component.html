@@ -3,11 +3,14 @@
     {{ editMode ? 'Save changes' : 'Edit data' }}
   </button>-->
 
-  <p-accordion [multiple]="false" [activeIndex]="0">
-    <p-accordionTab
-      *ngFor="let feature of features"
-      [header]="getHeader(feature)"
-    >
+  <p-accordion [multiple]="false" [activeIndex]="activeIndex" (onTabOpen)="onTabOpen($event)">
+    <p-accordionTab *ngFor="let feature of features">
+      <ng-template pTemplate="header">
+        <div [ngStyle]="getHeaderStyle(feature)">
+          {{ getHeader(feature) }}
+        </div>
+      </ng-template>
+
       <div *ngIf="feature.geometry.type">
         <p>
           <strong>Type: </strong

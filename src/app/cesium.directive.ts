@@ -38,6 +38,7 @@ import { CableMeasurementService } from './services/cable-measurement.service';
 import { CablePointsService } from './services/cable_points.service';
 import { WorkingAreaService } from './services/workingarea.service';
 import * as turf from '@turf/turf';
+import { ClickedPointService } from './services/clickedpoint.service';
 
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
@@ -56,6 +57,8 @@ export class CesiumDirective implements OnInit {
 
   @Output() selectedEntityChanged = new EventEmitter<Entity>();
 
+  @Output() selectedPointId = new EventEmitter<number>();
+
   inquiryId: number | undefined;
   products: Geometry[] = [];
   coords: number[][][] = [];
@@ -70,10 +73,12 @@ export class CesiumDirective implements OnInit {
   globeClippingPlanes!: ClippingPlaneCollection;
   width!: number;
   height!: number;
+  clickedPointId!: number;
 
   constructor(
     private el: ElementRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private clickedPointService: ClickedPointService
   ) {}
 
   // Service for fetching data from the backend
@@ -120,6 +125,13 @@ export class CesiumDirective implements OnInit {
         if (defined(pickedObject)) {
           const entity = pickedObject.id;
           this.viewer.selectedEntity = entity; // Set the selected entity
+         
+          this.clickedPointId =
+            this.viewer.selectedEntity?.properties?.['point_id']._value;
+
+          if (this.clickedPointId) {
+            this.clickedPointService.setClickedPointId(this.clickedPointId);
+          }
         } else {
           this.viewer.selectedEntity = undefined;
         }
@@ -151,10 +163,9 @@ export class CesiumDirective implements OnInit {
   /**
    * Initializes the Cesium Viewer and adds the tileset and clipping planes.
    */
-  
+
   private async initializeViewer(): Promise<void> {
     this.viewer = new Viewer(this.el.nativeElement, {
-
       timeline: false,
       animation: false,
       sceneModePicker: false,
@@ -215,8 +226,6 @@ export class CesiumDirective implements OnInit {
       new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
   }
 
-  
-
   /**
    * Extracts coordinates from geometries.
    */
@@ -225,7 +234,7 @@ export class CesiumDirective implements OnInit {
       this.geometryService.getGeometry(this.inquiryId).subscribe({
         next: data => {
           if (data) {
-            console.log('data received from geometry', data);
+            //console.log('data received from geometry', data);
 
             const geoJson = data[0].geojson; // URL or object containing your GeoJSON data
 
@@ -262,7 +271,7 @@ export class CesiumDirective implements OnInit {
                   turf.distance(bottomLeft, topLeft, { units: 'meters' }) / 2 +
                   100;
 
-                console.log('Width:', this.width, 'Height:', this.height);
+                //console.log('Width:', this.width, 'Height:', this.height);
 
                 // Extract the center coordinates from the GeoJSON properties
                 const centerCoordinates =
@@ -276,7 +285,7 @@ export class CesiumDirective implements OnInit {
                   centerCoordinates[1],
                   700
                 );
-                console.log('Center coordinates:', this.center);
+               // console.log('Center coordinates:', this.center);
 
                 // Fly to the center coordinates
                 this.viewer.camera.flyTo({
@@ -290,7 +299,7 @@ export class CesiumDirective implements OnInit {
                 });
                 this.changeHomeButton(this.viewer, this.center);
 
-                console.log('Finished processing');
+                //console.log('Finished processing');
                 resolve();
               })
               .catch(error => reject(error));
@@ -303,7 +312,6 @@ export class CesiumDirective implements OnInit {
     });
   }
 
-  
   private changeHomeButton(viewer: Viewer, centerCoordinates: Cartesian3) {
     // Change the home button view
     viewer.homeButton.viewModel.command.beforeExecute.addEventListener(
@@ -335,7 +343,7 @@ export class CesiumDirective implements OnInit {
   private isDragging = false; // To keep track of the dragging state
 
   private enableEditing() {
-    console.log('enableediting');
+    //console.log('enableediting');
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
 
     this.handler.setInputAction((movement: { position: Cartesian2 }) => {
@@ -343,7 +351,7 @@ export class CesiumDirective implements OnInit {
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
         this.selectedEntityChanged.emit(pickedObject); // Emit the event
-        console.log('totitties', this.selectedEntityChanged);
+        //console.log('totitties', this.selectedEntityChanged);
 
         // Disable camera interactions
         this.viewer.scene.screenSpaceCameraController.enableRotate = false;
@@ -417,7 +425,7 @@ export class CesiumDirective implements OnInit {
     this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
     this.viewer.scene.screenSpaceCameraController.enableTilt = true;
     this.viewer.scene.screenSpaceCameraController.enableLook = true;
-    console.log('disableediting');
+    //('disableediting');
   }
 
   private loadCables(): void {
@@ -434,9 +442,8 @@ export class CesiumDirective implements OnInit {
             .then((dataSource: GeoJsonDataSource) => {
               // Add picking and moving functionality to cables
               dataSource.entities.values.forEach(entity => {
-
-                console.log('entity', entity);
-                console.log(entity.polyline);
+               // console.log('entity', entity);
+                //console.log(entity.polyline);
                 if (!entity.polyline) {
                   entity.point = new PointGraphics({
                     color: Color.BLUE,
@@ -452,7 +459,7 @@ export class CesiumDirective implements OnInit {
             .catch(error => {
               console.error('Failed to load GeoJSON data:', error);
             });
-          console.log('loadcables');
+          //console.log('loadcables');
         }
       },
     });
@@ -462,7 +469,7 @@ export class CesiumDirective implements OnInit {
     this.CablePointService.getData(this.inquiryId).subscribe({
       next: data => {
         if (data) {
-          console.log('data received from service', data[0]);
+          //console.log('data received from service', data[0]);
           const LineStringfeatures = data[0].geojson;
 
           LineStringfeatures.forEach(geojson => {
@@ -476,7 +483,7 @@ export class CesiumDirective implements OnInit {
               credit: 'Provided by Petters Cable measurement service',
             })
               .then((dataSource: GeoJsonDataSource) => {
-                console.log('do we have datasource? ', dataSource);
+               // console.log('do we have datasource? ', dataSource);
                 this.viewer.dataSources.add(dataSource);
 
                 // Add picking and moving functionality to cables
@@ -510,7 +517,7 @@ export class CesiumDirective implements OnInit {
               .catch(error => {
                 console.error('Failed to load GeoJSON data:', error);
               });
-            console.log('loadcables');
+            //console.log('loadcables');
           });
         }
       },
@@ -521,7 +528,7 @@ export class CesiumDirective implements OnInit {
     this.workingAreaService.getArea(this.inquiryId).subscribe({
       next: data => {
         if (data) {
-          console.log('data received from service33', data);
+          //console.log('data received from service33', data);
           GeoJsonDataSource.load(data[0].geojson, {
             stroke: Color.BLUE,
             fill: Color.BLUE.withAlpha(0.3),
@@ -541,7 +548,7 @@ export class CesiumDirective implements OnInit {
             .catch(error => {
               console.error('Failed to load GeoJSON data:', error);
             });
-          console.log('loadcables');
+         // console.log('loadcables');
         }
       },
     });

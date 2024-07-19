@@ -18,7 +18,7 @@ import {
 } from 'cesium';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { CableMeasurementInfoComponent } from "../cable-measurement-info/cable-measurement-info.component";
+import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 import { CesiumDirective } from '../cesium.directive';
 
 @Component({
@@ -27,7 +27,13 @@ import { CesiumDirective } from '../cesium.directive';
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
-  imports: [SidenavLinkComponent, ReactiveFormsModule, CommonModule, CableMeasurementInfoComponent, CesiumDirective],
+  imports: [
+    SidenavLinkComponent,
+    ReactiveFormsModule,
+    CommonModule,
+    CableMeasurementInfoComponent,
+    CesiumDirective,
+  ],
 })
 export class SidenavComponent {
   readonly sidenavMinWidth = 250;
@@ -80,7 +86,8 @@ export class SidenavComponent {
       this.longitude = CesiumMath.toDegrees(cartographic.longitude);
       this.latitude = CesiumMath.toDegrees(cartographic.latitude);
       this.height = cartographic.height;
-    }  }
+    }
+  }
 
   clearSelectedEntity() {
     this.selectedEntity = null;
@@ -93,14 +100,12 @@ export class SidenavComponent {
     const inputElement = event.target as HTMLInputElement;
     this.longitude = Number(inputElement.value);
     this.updateEntityPosition();
-
   }
 
   onLatitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.latitude = Number(inputElement.value);
     this.updateEntityPosition();
-
   }
 
   onHeightChange(event: Event) {
@@ -108,8 +113,6 @@ export class SidenavComponent {
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
   }
-
-  
 
   private updateEntityPosition() {
     if (this.selectedEntity) {
