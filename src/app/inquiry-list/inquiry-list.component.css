@@ -1,7 +1,32 @@
 th {
   color: white;
   background-color: #004b97;
- }
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+
+th:hover {
+  color: darkblue;
+}
+
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.page-title {
+  color: #004c97;
+  font-size: 2.5em; /* Increase the font size */
+  font-family: 'Arial', sans-serif; /* Change the font family */
+  font-weight: bold; /* Make the font bold */
+}
+
+.search-container p-dropdown {
+  margin-right: 10px; /* Add margin to the right of the dropdown */
+     }
 
  tr {
     background-color: #91b6ff09;
