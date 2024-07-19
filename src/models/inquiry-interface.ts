@@ -4,7 +4,7 @@ export interface Inquiry {
   description: string | null;
   mail: string;
   municipality: string | null;
-  adress: string;
+  address: string;
   status?: string | null;
   processing_deadline?: string | null;
   start_date?: string | null;
