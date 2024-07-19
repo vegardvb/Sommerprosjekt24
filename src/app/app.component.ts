@@ -15,7 +15,7 @@ import { NavbarComponent } from './navbar/navbar.component';
     CesiumDirective,
     InquiryListComponent,
     HomePageComponent,
-    NavbarComponent
+    NavbarComponent,
   ],
   templateUrl: './app.component.html',
   providers: [],

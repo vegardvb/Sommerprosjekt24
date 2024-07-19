@@ -3,5 +3,8 @@
  */
 export interface CableMeasurement {
   cable_measurement_id: number;
-  geometry: string;
+  cable_measurement_name: string;
+  geojson: string;
+  inquiry_cable_id: number;
+  metadata: JSON;
 }

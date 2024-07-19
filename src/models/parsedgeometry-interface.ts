@@ -1,10 +1,13 @@
 export interface ParsedGeometry {
   type: string;
-  crs: {
-    type: string;
-    properties: {
-      name: string;
+  properties: {
+    center: {
+      coordinates: number[];
+      type: string;
     };
   };
-  coordinates: number[][][][];
+  geometry: {
+    coordinates: number[][][];
+    type: string;
+  };
 }

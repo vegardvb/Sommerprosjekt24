@@ -1,12 +1,12 @@
 /*
-This query retrieves the number of cable measurements for each inquiry 
+ This query retrieves the number of cable measurements for each inquiry 
  */
 SELECT
-    cables.inquiry_id,
-    COUNT(cables.measurement_id) AS number_of_measurements
+    measurements.inquiry_id,
+    COUNT(measurements.measurement_id) AS number_of_measurements
 FROM
-    measurements_by_inquiry_and_inquiry_measurement AS cables
+    "Measurements_by_Inquiry" AS measurements
 GROUP BY
-    cables.inquiry_id
+    measurements.inquiry_id
 ORDER BY
-    cables.inquiry_id
+    measurements.inquiry_id

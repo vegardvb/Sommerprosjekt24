@@ -2,10 +2,12 @@ import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
 import { TerrainService } from '../services/terrain.service';
-import { GeoTiffService } from '../services/geo-tiff.service';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
-
+import { Entity } from 'cesium';
+/**
+ * Represents the map view component.
+ */
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
@@ -16,20 +18,32 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
-  alpha = 1;
+
+  @ViewChild(SidenavComponent, { static: true })
+  sidenavComponent!: SidenavComponent;
+
+  alpha = 100;
   tilesetVisible: boolean = true;
   polygonsVisible: boolean = true;
   Math!: Math;
   inquiryId: number | undefined;
+
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
+  private entitySubscription: Subscription | undefined;
+  private editingSubscription: Subscription | undefined;
 
+  /**
+   * Initializes the component.
+   */
   constructor(
     private route: ActivatedRoute,
-    private terrainService: TerrainService,
-    private geoTiffService: GeoTiffService
+    private terrainService: TerrainService
   ) {}
 
+  /**
+   * Lifecycle hook that is called after data-bound properties of the component are initialized.
+   */
   ngOnInit() {
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
@@ -38,11 +52,14 @@ export class MapViewComponent implements OnInit, OnDestroy {
     this.bboxSubscription = this.cesiumDirective.bboxExtracted.subscribe(
       bbox => {
         const { width, height } = this.calculateWidthHeight(bbox);
-        this.fetchTerrain(bbox, width, height);
+        this.fetchAndProcessTerrain(bbox, width, height);
       }
     );
   }
 
+  /**
+   * Lifecycle hook that is called when the component is destroyed.
+   */
   ngOnDestroy() {
     if (this.queryParamsSubscription) {
       this.queryParamsSubscription.unsubscribe();
@@ -50,10 +67,18 @@ export class MapViewComponent implements OnInit, OnDestroy {
     if (this.bboxSubscription) {
       this.bboxSubscription.unsubscribe();
     }
+    if (this.entitySubscription) {
+      this.entitySubscription.unsubscribe();
+    }
+    if (this.editingSubscription) {
+      this.editingSubscription.unsubscribe();
+    }
   }
 
   /**
    * Calculates the width and height based on the bounding box coordinates.
+   * @param bbox - The bounding box coordinates.
+   * @returns An object containing the width and height.
    */
   calculateWidthHeight(bbox: string): { width: number; height: number } {
     const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
@@ -63,35 +88,48 @@ export class MapViewComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Fetches the terrain data based on the provided bounding box, width, and height.
+   * Fetches and processes the terrain data based on the provided bounding box, width, and height.
+   * @param bbox - The bounding box coordinates.
+   * @param width - The width.
+   * @param height - The height.
    */
-  fetchTerrain(bbox: string, width: number, height: number) {
-    this.terrainService.getTerrain(bbox, width, height).subscribe(blob => {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        if (reader.result instanceof ArrayBuffer) {
-          try {
-            const arrayBuffer: ArrayBuffer = reader.result;
-            const decodedData =
-              await this.geoTiffService.decodeGeoTiff(arrayBuffer);
-            console.log('Decoded GeoTIFF Data:', decodedData);
-          } catch (error) {
-            console.error('Error decoding GeoTIFF file:', error);
+  fetchAndProcessTerrain(bbox: string, width: number, height: number) {
+    this.terrainService
+      .fetchGeoTIFF(bbox, width, height)
+      .pipe(
+        switchMap(response => {
+          const filePath = response.file_path;
+          return this.terrainService.processGeoTIFF(filePath);
+        })
+      )
+      .subscribe({
+        next: async response => {
+          if (response && response.tilesetUrl) {
+            await this.cesiumDirective.loadTerrainFromUrl(response.tilesetUrl);
+          } else {
+            console.error('Tileset URL not provided in the response', response);
           }
-        } else {
-          console.error('Failed to read the file as an ArrayBuffer.');
-        }
-      };
-      reader.readAsArrayBuffer(blob);
-    });
+        },
+        error: (error: Error) => {
+          console.error('Error processing GeoTIFF file:', error);
+        },
+      });
   }
 
+  /**
+   * Updates the alpha value.
+   * @param event - The event object.
+   */
   public updateAlpha(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.alpha = inputElement.valueAsNumber;
     this.cesiumDirective.updateGlobeAlpha(this.alpha / 100);
   }
 
+  /**
+   * Toggles the visibility of the tileset.
+   * @param event - The event object.
+   */
   toggleTileset(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.tilesetVisible = inputElement.checked;
@@ -100,11 +138,30 @@ export class MapViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Toggles the visibility of the polygons.
+   * @param event - The event object.
+   */
   togglePolygons(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.polygonsVisible = inputElement.checked;
     if (this.cesiumDirective) {
       this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
     }
+  }
+
+  /**
+   * Handles the selection of an entity.
+   * @param entity - The selected entity.
+   */
+  handleEntitySelected(entity: Entity) {
+    this.sidenavComponent.updateSelectedEntity(entity);
+  }
+
+  /**
+   * Handles the deselection of an entity.
+   */
+  handleEntityDeselection() {
+    this.sidenavComponent.clearSelectedEntity();
   }
 }

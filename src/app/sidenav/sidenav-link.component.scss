@@ -1,37 +1,112 @@
-a {
-  display: flex;
-  flex-direction: row;
-
-  align-items: center;
-  justify-content: flex-start;
-
-  gap: 8px;
-
-  min-width: 100px;
-
-  padding: 16px;
+.sidenav {
+  height: 100vh;
+  width: var(--sidenav-width);
 
   box-sizing: border-box;
+  position: sticky;
+  top: 0;
 
-  text-decoration: none;
-  color: #000;
+  background-color: rgb(63, 63, 63);
+}
+
+.coordinate-inputs {
+  margin-top: 2rem;
+}
+.edit-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #004c97;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.edit-btn:hover {
+  background-color: #0056b3;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  color: rgb(170, 170, 170);
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
   border-radius: 4px;
+  transition: border-color 0.2s;
+}
 
-  transition: background-color 75ms ease-out;
+.form-control:focus {
+  border-color: #80bdff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
+}
 
-  .text-container {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+.resize-handle {
+  height: 100%;
+
+  background-color: rgb(165, 165, 165);
+  width: 2px;
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  cursor: ew-resize;
+
+  // these prevent text selection while dragging
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  transition:
+    background-color 0.2s ease-out,
+    width 0.2s ease-out;
 
   &:hover {
-    background-color: #e62121;
+    width: 3px;
+    background-color: rgb(93, 159, 235);
+  }
+  &::after {
+    content: '';
+    display: block;
+
+    height: 100%;
+
+    width: 24px;
+
+    position: absolute;
+    right: -12px;
+    z-index: 1;
   }
 
-  &.active {
-    background-color: #004c97;
-    font-weight: bold;
-    color: rgb(9, 22, 63);
+  &.resizing::after {
+    width: 100px;
+    right: calc(-100px / 2);
   }
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(209, 209, 209);
+  border-radius: 10px;
+  border: 2px solid rgb(196, 194, 194);
 }

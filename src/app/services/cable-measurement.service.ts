@@ -1,9 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { FeatureCollection } from 'geojson';
-import { GeojsonParserService } from './geojson-parser.service';
+
 import { MeasurementGeometry } from '../../models/measurement_geometry';
 
 /**
@@ -14,7 +13,6 @@ import { MeasurementGeometry } from '../../models/measurement_geometry';
 })
 export class CableMeasurementService {
   // Parser service for converting JSON to GeoJSON
-  private geojsonParserService = inject(GeojsonParserService);
 
   constructor(private http: HttpClient) {}
 
@@ -24,15 +22,13 @@ export class CableMeasurementService {
    * @param inquiry_id - The ID of the inquiry.
    * @returns An Observable that emits a FeatureCollection.
    */
-  getData(inquiry_id: number | undefined): Observable<FeatureCollection> {
+  getData(
+    inquiry_id: number | undefined
+  ): Observable<Array<MeasurementGeometry>> {
     const apiUrl = `http://127.0.0.1:8000/geometries/measurements/inquiry/${inquiry_id}`;
     return this.http.get<Array<MeasurementGeometry>>(apiUrl).pipe(
       map((data: Array<MeasurementGeometry>) => {
-        console.log(
-          'Processed geometry: ',
-          this.geojsonParserService.filterJSONToGeoJSON(data)
-        );
-        return this.geojsonParserService.filterJSONToGeoJSON(data);
+        return data;
       }),
       catchError(this.handleError)
     );
