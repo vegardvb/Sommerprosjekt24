@@ -17,9 +17,9 @@ db_host = os.getenv("DB_HOST")
 db_port = os.getenv("DB_PORT")
 
 # Create connection to database
-DATABASE_URL = f"postgresql://{db_user}:{
-    db_password}@{db_host}:{db_port}/{db_name}"
-SCHEMA = "analytics_cable_measurement_inquiries"
+DATABASE_URL = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+SCHEMA = f"analytics_cable_measurement_inquiries"
+
 
 # Engine for executing queries
 engine = create_engine(DATABASE_URL, echo=True, future=True)

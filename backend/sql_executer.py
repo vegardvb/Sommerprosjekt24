@@ -1,35 +1,34 @@
-"""
-This module provides functions for executing SQL queries.
-"""
-
 from sqlalchemy import text
 
 
-def __load_sql__(path):
+def __load_sql__(path, subqueries=None):
     """Loads a query from a file.
 
     Args:
-        path (str): The path to the file.
+        path (String): The path to the file
 
     Returns:
-        str: The query file content.
+        File : The query file in byte form.
     """
-    with open(path, "r", encoding="utf-8") as file:
+    with open(path, "r") as file:
         query = file.read()
+
     return query
 
 
 def execute_sql(connection, main_file_path, placeholders=None, params=None):
-    """Executes SQL from a file with specified parameters and placeholders.
+    """Method for executing sql from a file based upon the specified parameters and
+    placeholders.
 
     Args:
-        connection (Connection): A connection to the database.
-        main_file_path (str): The relative path to the main query file.
-        placeholders (dict, optional): Dictionary containing the placeholder and path. Defaults to None.
-        params (dict, optional): Dictionary containing the parameters and their name to be injected into the query file. Defaults to None.
+        connection (Connection): A connection to the database to execute the query.
+        main_file_path (String): The relative path to the main query file.
+        placeholders (Dictonary<placeholder, Path> , optional): A dictonary containing the placeholder and path
+        params (Dictonary<String, Any>, optional): A dictonary containing the parameters and their
+        name to be injected into the query file. Defaults to None.
 
     Returns:
-        ResultProxy: The result of the query execution.
+        Dictonary<String,Any> : A dictonary contining the name and value of the query for each row and column.
     """
     statement = __load_sql__(main_file_path)
     if placeholders is not None:

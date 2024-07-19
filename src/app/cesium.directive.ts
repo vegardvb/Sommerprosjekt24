@@ -31,6 +31,7 @@ import {
   Cartesian2,
   HeightReference,
   Property,
+  Ellipsoid,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
@@ -104,18 +105,6 @@ export class CesiumDirective implements OnInit {
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
 
     // Set up a screen space event handler to select entities and create a popup
-    this.viewer.screenSpaceEventHandler.setInputAction(
-      (movement: { position: Cartesian2 }) => {
-        const pickedObject = this.viewer.scene.pick(movement.position);
-        if (defined(pickedObject)) {
-          const entity = pickedObject.id;
-          this.viewer.selectedEntity = entity; // Set the selected entity
-        } else {
-          this.viewer.selectedEntity = undefined;
-        }
-      },
-      ScreenSpaceEventType.LEFT_CLICK
-    );
     this.viewer.screenSpaceEventHandler.setInputAction(
       (movement: { position: Cartesian2 }) => {
         const pickedObject = this.viewer.scene.pick(movement.position);
@@ -210,6 +199,7 @@ export class CesiumDirective implements OnInit {
 
     this.viewer.scene.screenSpaceCameraController.enableCollisionDetection =
       false;
+
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
       new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
   }
@@ -328,6 +318,7 @@ export class CesiumDirective implements OnInit {
   }
 
   private isDragging = false; // To keep track of the dragging state
+  private isVerticalMovement = false;
 
   private enableEditing() {
     console.log('enableediting');
@@ -339,6 +330,9 @@ export class CesiumDirective implements OnInit {
         this.selectedEntity = pickedObject.id as Entity;
         this.selectedEntityChanged.emit(pickedObject); // Emit the event
         console.log('totitties', this.selectedEntityChanged);
+        if (defined(this.selectedEntity.position)) {
+          this.addZAxisLineFromScreenPosition(movement.position);
+        }
 
         // Disable camera interactions
         this.viewer.scene.screenSpaceCameraController.enableRotate = false;
@@ -354,25 +348,7 @@ export class CesiumDirective implements OnInit {
           movement.endPosition
         );
         if (defined(cartesian)) {
-          if (defined(this.selectedEntity.polyline?.positions)) {
-            const positions = this.selectedEntity.polyline.positions.getValue(
-              JulianDate.now()
-            );
-            if (positions && positions.length > 0) {
-              const offset = Cartesian3.subtract(
-                cartesian,
-                positions[0],
-                new Cartesian3()
-              );
-              const newPositions = positions.map((position: Cartesian3) =>
-                Cartesian3.add(position, offset, new Cartesian3())
-              );
-              this.selectedEntity.polyline.positions = new CallbackProperty(
-                () => newPositions,
-                false
-              );
-            }
-          } else if (defined(this.selectedEntity.position)) {
+          if (defined(this.selectedEntity.position)) {
             this.selectedEntity.position = new CallbackProperty(
               () => cartesian,
               false
@@ -415,7 +391,7 @@ export class CesiumDirective implements OnInit {
     console.log('disableediting');
   }
 
-  private loadCables(): void {
+  private async loadCables(): Promise<void> {
     this.cableMeasurementService.getData(this.inquiryId).subscribe({
       next: data => {
         if (data) {
@@ -662,5 +638,23 @@ export class CesiumDirective implements OnInit {
     } else {
       console.error('No clipping planes found.');
     }
+  }
+
+  private createZAxisLine(position: Cartesian3, length = 100000.0) {
+    const ellipsoid = Ellipsoid.WGS84;
+    const surfaceNormal = ellipsoid.geodeticSurfaceNormal(position);
+
+    // Create the end point of the Z-axis line
+    const endPoint = Cartesian3.add(
+      position,
+      Cesium.Cartesian3.multiplyByScalar(
+        surfaceNormal,
+        length,
+        new Cesium.Cartesian3()
+      ),
+      new Cartesian3()
+    );
+
+    return [position, endPoint];
   }
 }

@@ -9,3 +9,4 @@ SELECT jsonb_set(public.st_asgeojson(geom)::jsonb, '{0}', json_build_object('tes
 FROM "Point"
 
 
+

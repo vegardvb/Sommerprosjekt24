@@ -5,7 +5,7 @@ SELECT DISTINCT
     inquiry.description AS description,
     organization.name AS organization,
     municipality.name AS municipality,
-    inquiry.adress AS address,
+    inquiry.address AS address,
     inquiry.status,
     inquiry.start_date AS start_date,
     inquiry.end_date AS end_date,
