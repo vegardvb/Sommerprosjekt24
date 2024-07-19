@@ -5,15 +5,14 @@ import { catchError, map } from 'rxjs/operators';
 import { Geometry } from '../models/geometry-interface';
 
 import proj4 from 'proj4';
-import { ParsedGeometry } from '../models/parsedgeometry-interface';
 
+/**
+ * Service for handling geometry-related operations.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class GeometryService {
-  private apiUrl = 'http://127.0.0.1:8000/geometries/inquiry/{inquiry_id}';
-  private parsedGeometry!: ParsedGeometry;
-
   constructor(private http: HttpClient) {
     // Define the projection
     proj4.defs(
@@ -22,40 +21,30 @@ export class GeometryService {
     );
   }
 
-  getGeometry(inquiry_id: number): Observable<Geometry[]> {
-    const url = this.apiUrl.replace('{inquiry_id}', inquiry_id.toString());
-    return this.http.get<Geometry[]>(url).pipe(
-      map(geometries => this.parseAndConvertGeometries(geometries)),
+  /**
+   * Retrieves the geometry for a given inquiry ID.
+   * @param inquiry_id The ID of the inquiry.
+   * @returns An observable that emits an array of Geometry objects.
+   */
+  getGeometry(inquiry_id: number | undefined): Observable<Array<Geometry>> {
+    const apiUrl = `http://127.0.0.1:8000/geometries/area/boundary/inquiry/${inquiry_id}`;
+    return this.http.get<Array<Geometry>>(apiUrl).pipe(
+      map((data: Array<Geometry>) => {
+        return data;
+      }),
       catchError(this.handleError)
     );
   }
 
-  private parseAndConvertGeometries(geometries: Geometry[]): Geometry[] {
-    return geometries.map(geometry => {
-      this.parseGeoJSON(geometry);
-
-      if (this.parsedGeometry) {
-        geometry.geometry = this.parsedGeometry; // Replace geometry with parsed geometry
-      }
-      return geometry;
-    });
-  }
-
-  private parseGeoJSON(geometry: Geometry): ParsedGeometry | null {
-    try {
-      this.parsedGeometry = JSON.parse(
-        geometry.geometry as string
-      ) as ParsedGeometry;
-      return this.parsedGeometry;
-    } catch (error) {
-      console.error('Error parsing geojson:', error);
-      return null;
-    }
-  }
-
+  /**
+   * Handles any errors that occur during the HTTP request.
+   * @param error The error that occurred.
+   * @returns An observable that emits an error.
+   */
   private handleError(error: Error): Observable<never> {
     console.error('An error occurred', error);
-    return throwError('Something bad happened; please try again later.');
-    //TODO: Fix depricated error handling
+    return throwError(
+      () => new Error('Something bad happened; please try again later.')
+    );
   }
 }

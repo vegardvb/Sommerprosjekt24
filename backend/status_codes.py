@@ -1,3 +1,7 @@
+"""
+Module for defining status codes.
+"""
+
 henvendelse_status_dict = {
     -2: "Avventer system",
     1: "Registrert",
