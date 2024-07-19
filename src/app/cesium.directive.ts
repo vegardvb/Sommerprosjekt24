@@ -31,7 +31,8 @@ import {
   Cartesian2,
   HeightReference,
   Property,
-  Ellipsoid,
+  DebugModelMatrixPrimitive,
+  HeadingPitchRoll,
 } from 'cesium';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
@@ -317,71 +318,32 @@ export class CesiumDirective implements OnInit {
     }, ScreenSpaceEventType.LEFT_DOWN);
   }
 
-  private isDragging = false; // To keep track of the dragging state
-  private isVerticalMovement = false;
-
   private enableEditing() {
     console.log('enableediting');
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
 
-    this.handler.setInputAction((movement: { position: Cartesian2 }) => {
-      const pickedObject = this.viewer.scene.pick(movement.position);
-      if (defined(pickedObject)) {
-        this.selectedEntity = pickedObject.id as Entity;
-        this.selectedEntityChanged.emit(pickedObject); // Emit the event
-        console.log('totitties', this.selectedEntityChanged);
-        if (defined(this.selectedEntity.position)) {
-          this.addZAxisLineFromScreenPosition(movement.position);
-        }
+    // Remove existing event handlers if any
+    if (this.handler) {
+      this.handler.removeInputAction(ScreenSpaceEventType.LEFT_DOWN);
+      this.handler.removeInputAction(ScreenSpaceEventType.MOUSE_MOVE);
+      this.handler.removeInputAction(ScreenSpaceEventType.LEFT_UP);
+    }
 
-        // Disable camera interactions
-        this.viewer.scene.screenSpaceCameraController.enableRotate = false;
-        this.viewer.scene.screenSpaceCameraController.enableZoom = false;
-        this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
-        this.viewer.scene.screenSpaceCameraController.enableLook = false;
+    // Add new event handler for LEFT_DOWN to create DebugModelMatrixPrimitive
+    this.handler.setInputAction(() => {
+      const cartesian = this.selectedEntity?.position?.getValue(
+        JulianDate.now()
+      );
+      if (defined(cartesian)) {
+        this.createZAxisLine(cartesian);
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
-
-    this.handler.setInputAction((movement: { endPosition: Cartesian2 }) => {
-      if (this.isDragging && defined(this.selectedEntity)) {
-        const cartesian = this.viewer.camera.pickEllipsoid(
-          movement.endPosition
-        );
-        if (defined(cartesian)) {
-          if (defined(this.selectedEntity.position)) {
-            this.selectedEntity.position = new CallbackProperty(
-              () => cartesian,
-              false
-            ) as unknown as PositionProperty;
-          }
-        }
-      }
-    }, ScreenSpaceEventType.MOUSE_MOVE);
-
-    this.handler.setInputAction(() => {
-      if (this.isDragging) {
-        this.isDragging = false;
-      } else if (defined(this.selectedEntity)) {
-        this.isDragging = true;
-      }
-
-      if (!this.isDragging) {
-        // Re-enable camera interactions after dropping
-        this.viewer.scene.screenSpaceCameraController.enableRotate = true;
-        this.viewer.scene.screenSpaceCameraController.enableZoom = true;
-        this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
-        this.viewer.scene.screenSpaceCameraController.enableTilt = true;
-        this.viewer.scene.screenSpaceCameraController.enableLook = true;
-      }
-    }, ScreenSpaceEventType.LEFT_UP);
   }
-
   private disableEditing() {
     if (this.handler) {
       this.handler.destroy();
     }
-    this.isDragging = false;
-    this.selectedEntity = null;
+
     // Ensure camera interactions are re-enabled if editing is disabled
     this.viewer.scene.screenSpaceCameraController.enableRotate = true;
     this.viewer.scene.screenSpaceCameraController.enableZoom = true;
@@ -640,21 +602,21 @@ export class CesiumDirective implements OnInit {
     }
   }
 
-  private createZAxisLine(position: Cartesian3, length = 100000.0) {
-    const ellipsoid = Ellipsoid.WGS84;
-    const surfaceNormal = ellipsoid.geodeticSurfaceNormal(position);
+  private createZAxisLine(position: Cartesian3) {
+    const heading = CesiumMath.toRadians(0);
+    const pitch = CesiumMath.toRadians(0);
+    const roll = CesiumMath.toRadians(0);
 
-    // Create the end point of the Z-axis line
-    const endPoint = Cartesian3.add(
-      position,
-      Cesium.Cartesian3.multiplyByScalar(
-        surfaceNormal,
-        length,
-        new Cesium.Cartesian3()
-      ),
-      new Cartesian3()
+    const hpr = new HeadingPitchRoll(heading, pitch, roll);
+
+    const frame = Transforms.headingPitchRollToFixedFrame(position, hpr);
+
+    this.viewer.scene.primitives.add(
+      new DebugModelMatrixPrimitive({
+        modelMatrix: frame,
+        length: 10,
+        width: 3.0,
+      })
     );
-
-    return [position, endPoint];
   }
 }
