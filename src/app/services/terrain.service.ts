@@ -1,33 +1,37 @@
-// terrain-service.ts
-
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TerrainService {
-  private baseUrl = 'https://wcs.geonorge.no/skwms1/wcs.hoyde-dtm-nhm-25833';
+  private apiUrl = 'http://localhost:8000';
 
   constructor(private http: HttpClient) {}
 
-  getTerrain(bbox: string, width: number, height: number): Observable<Blob> {
-    const params = {
-      SERVICE: 'WCS',
-      VERSION: '1.0.0',
-      REQUEST: 'GetCoverage',
-      FORMAT: 'GeoTIFF',
-      COVERAGE: 'nhm_dtm_topo_25833',
-      BBOX: bbox,
-      CRS: 'EPSG:25833',
-      RESPONSE_CRS: 'EPSG:4326', // Change to EPSG:4326
-      WIDTH: width.toString(),
-      HEIGHT: height.toString(),
-    };
-    const queryParams = new URLSearchParams(params).toString();
-    const url = `${this.baseUrl}?${queryParams}`;
+  fetchGeoTIFF(
+    bbox: string,
+    width: number,
+    height: number
+  ): Observable<{ file_path: string }> {
+    const url = `${this.apiUrl}/fetch-geotiff?bbox=${bbox}&width=${width}&height=${height}`;
+    return this.http
+      .get<{ file_path: string }>(url)
+      .pipe(catchError(this.handleError));
+  }
 
-    return this.http.get(url, { responseType: 'blob' });
+  processGeoTIFF(filePath: string): Observable<{ tilesetUrl: string }> {
+    const url = `${this.apiUrl}/process-geotiff?file_path=${encodeURIComponent(filePath)}`;
+    return this.http
+      .get<{ tilesetUrl: string }>(url)
+      .pipe(catchError(this.handleError));
+  }
+
+  private handleError(error: Error): Observable<never> {
+    console.error('An error occurred:', error.message);
+    return throwError(
+      () => new Error('Something bad happened; please try again later.')
+    );
   }
 }

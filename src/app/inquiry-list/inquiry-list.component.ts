@@ -57,7 +57,7 @@ export class InquiryListComponent implements OnInit {
           description: inquiry.description,
           mail: inquiry.mail,
           municipality: inquiry.municipality,
-          adress: inquiry.adress,
+          address: inquiry.address,
           status: inquiry.status,
           processing_deadline: inquiry.processing_deadline,
           start_date: inquiry.start_date,
