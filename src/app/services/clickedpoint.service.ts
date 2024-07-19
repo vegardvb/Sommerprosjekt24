@@ -12,4 +12,9 @@ export class ClickedPointService {
   setClickedPointId(pointId: number) {
     this.clickedPointIdSource.next(pointId);
   }
+
+  setPointSidenav(pointId:number) {
+    this.clickedPointIdSource.next(pointId);
+
+  }
 }

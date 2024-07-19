@@ -18,6 +18,9 @@ import {
 import { CesiumDirective } from '../cesium.directive';
 import { ClickedPointService } from '../services/clickedpoint.service';
 
+
+
+
 @Component({
   selector: 'app-cable-measurement-info',
   standalone: true,
@@ -52,6 +55,8 @@ export class CableMeasurementInfoComponent implements OnInit {
   isEditing: boolean = false;
   clickedPointId: number | null = null;
   activeIndex: number = 0;
+  activeHeader: string = '';
+
 
 
   constructor(
@@ -95,21 +100,38 @@ export class CableMeasurementInfoComponent implements OnInit {
         ? `Point ID: ${feature.properties.point_id}`
         : 'ID Not Available';
   }
+
   getID(feature: Feature): string {
+    
     return feature.properties.point_id !== undefined
       ? `${feature.properties.point_id}`
       : 'ID Not Available';
   }
 
-  getHeaderStyle(feature: Feature): object {
+
+
+  getHeaderClass(feature: Feature): string {
     const header = this.getID(feature);
     const clickedPointIdStr = this.clickedPointId?.toString();
-
-    return header === clickedPointIdStr
-      ? { 'background-color': 'lightblue', padding: '10px' }
-      : {};
+    return header === clickedPointIdStr ? 'clicked-header' : 'default-header';
   }
 
+  captureHeader(headerId: string) {
+    console.log('Header clicked:', headerId);
+    const match = headerId.match(/(?:Measurement ID:|Point ID:)\s*(\d+)/);
+    if (match) {
+      const extractedID = match[1]; // Extract the ID from the match
+      console.log('Extracted ID:', extractedID);
+      
+      this.activeHeader = headerId;
+      console.log('Active tab header:', this.activeHeader);
+      this.clickedPointService.setPointSidenav(Number(extractedID));
+    } else {
+      console.log('Invalid header: ID Not Available');
+      this.activeHeader = '';
+    }
+  }
+  
 
   formatCoordinates(coordinates: number[] | number[][]): string[] {
     if (Array.isArray(coordinates[0])) {
@@ -193,9 +215,13 @@ export class CableMeasurementInfoComponent implements OnInit {
     }
   }
 
-  onTabOpen (event: any) {
-    console.log('Active tab index:', event.index);
-    console.log('Active tab header:', event.originalEvent.target.innerText);    
+  onTabChange(event:any) {
+    this.activeIndex = event.index;
   }
+
+ 
+
+
+  
 }
 
