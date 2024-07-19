@@ -3,6 +3,7 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  inject,
   OnInit,
   Output,
 } from '@angular/core';
@@ -20,12 +21,13 @@ import {
   HeadingPitchRange,
   PolygonHierarchy,
   Entity,
+  GeoJsonDataSource,
 } from 'cesium';
+import { CableMeasurementService } from './services/cable-measurement.service';
 import { Geometry } from '../models/geometry-interface';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
 import { ParsedGeometry } from '../models/parsedgeometry-interface';
-import { MapViewComponent } from './map-view/map-view.component';
 import proj4 from 'proj4';
 
 // Define the source and target projections
@@ -52,9 +54,13 @@ export class CesiumDirective implements OnInit {
   constructor(
     private el: ElementRef,
     private geometryService: GeometryService,
-    private route: ActivatedRoute,
-
+    private route: ActivatedRoute
   ) {}
+
+  // Service for fetching data from the backend
+  private cableMeasurementService: CableMeasurementService = inject(
+    CableMeasurementService
+  );
 
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(params => {
@@ -82,7 +88,49 @@ export class CesiumDirective implements OnInit {
       sceneModePicker: false,
     });
 
+    const scene = this.viewer.scene;
+    const globe = scene.globe;
+
+    //TODO Refactor to own service
+    this.cableMeasurementService.getData(this.inquiryId).subscribe({
+      next: data => {
+        if (data) {
+          console.log(data);
+          // Ensure data is not undefined or null
+          GeoJsonDataSource.load(data, {
+            stroke: Color.BLUE,
+            fill: Color.BLUE.withAlpha(1),
+            strokeWidth: 3,
+            credit: "Provided by Petter's Cable measurement service",
+          })
+            .then((dataSource: GeoJsonDataSource) => {
+              this.viewer.dataSources.add(dataSource);
+              this.viewer.zoomTo(dataSource);
+            })
+            .catch(error => {
+              console.error('Failed to load GeoJSON data:', error);
+            });
+        } else {
+          console.error('No data received from service');
+        }
+      },
+      error: err => {
+        console.error('Error fetching data:', err);
+      },
+    });
+
+    globe.translucency.frontFaceAlphaByDistance = new NearFarScalar(
+      1000.0,
+      0.0,
+      2000.0,
+      1.0
+    );
+
     const distance = 200.0;
+
+    this.tileset = this.viewer.scene.primitives.add(
+      await Cesium3DTileset.fromIonAssetId(96188)
+    );
 
     const tileset = await Cesium3DTileset.fromIonAssetId(96188);
     this.viewer.scene.primitives.add(tileset);
@@ -124,7 +172,6 @@ export class CesiumDirective implements OnInit {
       false;
     this.viewer.scene.globe.translucency.frontFaceAlphaByDistance =
       new NearFarScalar(1.0, 0.7, 5000.0, 0.7);
-    
   }
 
   /**
@@ -149,7 +196,6 @@ export class CesiumDirective implements OnInit {
             });
           }
           this.updateMap(this.viewer);
-          
         },
         error: error => {
           console.error('Error fetching geometries:', error);
@@ -274,8 +320,9 @@ export class CesiumDirective implements OnInit {
   public updateGlobeAlpha(alpha: number): void {
     if (this.viewer) {
       this.viewer.scene.globe.translucency.enabled = true;
-      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue = alpha;}
-    
+      this.viewer.scene.globe.translucency.frontFaceAlphaByDistance.nearValue =
+        alpha;
+    }
   }
 
   setTilesetVisibility(visible: boolean) {
@@ -286,8 +333,8 @@ export class CesiumDirective implements OnInit {
   setPolygonsVisibility(visible: boolean) {
     if (this.polygons) {
       this.polygons.forEach(polygon => {
-      polygon.show = visible;
-    });}
-    
+        polygon.show = visible;
+      });
+    }
   }
 }

@@ -24,6 +24,7 @@ import { AccordionModule } from 'primeng/accordion';
 export class CableMeasurementInfoComponent implements OnInit {
   cableInfo: CableInfo[] = [];
   inquiryId: string | null = null;
+  testvariabel: string = 'test';
 
   constructor(
     private cableInfoService: CableInfoService,

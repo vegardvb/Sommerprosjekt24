@@ -23,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def read_root():
     """Home endpoint for the FastAPI application.
@@ -31,6 +32,7 @@ def read_root():
         String : A greeting.
     """
     return {"Hello": "World"}
+
 
 @app.get("/inquiries")
 def get_inquiries(connection=Depends(get_db)):
@@ -47,14 +49,15 @@ def get_inquiries(connection=Depends(get_db)):
 
     return result
 
+
 @app.get("/geometries/inquiry/{inquiry_id}")
-def get_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
-    """Endpoint which returns a portion of all inquiries from the database.
+def get_geometry_by_inquiry(inquiry_id, connection=Depends(get_db)):
+    """Endpoint which returns the area_geometry for a given inquiry id.
 
-    Returns:
-        Dictonary: A Dictonary of inquiries attribuites
+    **Returns**:
+        Dictonary: A Dictonary of the inquiry geometry attribuites
     """
-    result = query_geometry_by_inquiry(inquiry_id, connection)
+    result = query_area_geometry_by_inquiry(inquiry_id, connection)
 
     if DEBUG:
         for row in result:
@@ -62,23 +65,27 @@ def get_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
 
     return result
 
-@app.get("/cable_measurements/inquiry/{inquiry_id}")
-def get_cable_measurements_by_inquiery(inquiry_id: int, connection=Depends(get_db)):
-    """
-    Endpoint for querying cable measurements by given inquiry id. \n
-    Args:
-        inquiry_id (int): The id of the inquiry to sort by.
 
-    Returns:
-        Dictonary: A Dictionary of cable measurements attribuites in the following format: \n
+@app.get("/geometries/measurements/inquiry/{inquiry_id}")
+def get_measurement_geometry_by_inquiery(inquiry_id: int, connection=Depends(get_db)):
     """
-    result = query_cable_measurements_by_inquiry(inquiry_id, connection)
+    Endpoint for measurement geometry by given inquiery id. \n
+
+    **Args**:
+        inquiry_id (int): The id of the inquiery to sort by.
+
+    **Returns**:
+        Dictonary: A Dictonary of measurement geometry attributes
+
+    """
+    result = query_measurement_geometry_by_inquiry(inquiry_id, connection)
 
     if DEBUG:
         for row in result:
             print(f"{row} | Type: {type(row)} ")
 
     return result
+
 
 @app.get("/terrain")
 def get_terrain(bbox: str, width: int, height: int):
@@ -105,14 +112,16 @@ def get_terrain(bbox: str, width: int, height: int):
         "CRS": "EPSG:25833",
         "RESPONSE_CRS": "EPSG:4326",
         "WIDTH": width,
-        "HEIGHT": height
+        "HEIGHT": height,
     }
     response = requests.get(wcs_url, params=params)
-    
+
     if response.status_code == 200:
         file_path = "terrain_model.tif"
         with open(file_path, "wb") as file:
             file.write(response.content)
         return FileResponse(file_path)
     else:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch terrain model: {response.text}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fetch terrain model: {response.text}"
+        )

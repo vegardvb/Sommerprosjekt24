@@ -9,7 +9,6 @@ import { DataService } from '../data.service';
 import { Inquiry } from '../../models/inquiry-interface';
 import { Router } from '@angular/router';
 import { DropdownModule } from 'primeng/dropdown';
-import { SelectItem } from 'primeng/api';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -42,7 +41,6 @@ export class InquiryListComponent implements OnInit {
     'processing_deadline',
     'start_date',
     'end_date',
-
   ];
   selectedProduct!: Inquiry;
   @ViewChild('dt1') dt1!: Table;
@@ -112,7 +110,7 @@ export class InquiryListComponent implements OnInit {
   }
 
   sortBy(field: keyof Inquiry): void {
-    if (!this.sortState.hasOwnProperty(field)) return;
+    if (!Object.prototype.hasOwnProperty.call(this.sortState, field)) return;
 
     this.sortState[field]++;
     if (this.sortState[field] > 2) {
@@ -121,10 +119,14 @@ export class InquiryListComponent implements OnInit {
 
     switch (this.sortState[field]) {
       case 1:
-        this.sortedProducts.sort((a, b) => (a[field] ?? '') > (b[field] ?? '') ? 1 : -1);
+        this.sortedProducts.sort((a, b) =>
+          (a[field] ?? '') > (b[field] ?? '') ? 1 : -1
+        );
         break;
       case 2:
-        this.sortedProducts.sort((a, b) => (a[field] ?? '') < (b[field] ?? '') ? 1 : -1);
+        this.sortedProducts.sort((a, b) =>
+          (a[field] ?? '') < (b[field] ?? '') ? 1 : -1
+        );
         break;
       default:
         this.sortedProducts = [...this.products];
@@ -132,4 +134,3 @@ export class InquiryListComponent implements OnInit {
     }
   }
 }
- 

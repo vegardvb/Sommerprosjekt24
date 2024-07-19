@@ -2,29 +2,48 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-
-import { CableMeasurement } from '../../models/cable_measurement';
 import { FeatureCollection } from 'geojson';
 import { GeojsonParserService } from './geojson-parser.service';
+import { MeasurementGeometry } from '../../models/measurement_geometry';
 
+/**
+ * Service for retrieving cable measurement data.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class CableMeasurementService {
-  private apiUrl = 'http://127.0.0.1:8000/cable_measurements/inquiry/5008686';
+  // Parser service for converting JSON to GeoJSON
   private geojsonParserService = inject(GeojsonParserService);
 
   constructor(private http: HttpClient) {}
 
-  getData(): Observable<FeatureCollection> {
-    return this.http.get<Array<CableMeasurement>>(this.apiUrl).pipe(
-      map((data: Array<CableMeasurement>) => {
+  /**
+   * Retrieves data for a specific inquiry ID.
+   *
+   * @param inquiry_id - The ID of the inquiry.
+   * @returns An Observable that emits a FeatureCollection.
+   */
+  getData(inquiry_id: number | undefined): Observable<FeatureCollection> {
+    const apiUrl = `http://127.0.0.1:8000/geometries/measurements/inquiry/${inquiry_id}`;
+    return this.http.get<Array<MeasurementGeometry>>(apiUrl).pipe(
+      map((data: Array<MeasurementGeometry>) => {
+        console.log(
+          'Processed geometry: ',
+          this.geojsonParserService.filterJSONToGeoJSON(data)
+        );
         return this.geojsonParserService.filterJSONToGeoJSON(data);
       }),
       catchError(this.handleError)
     );
   }
 
+  /**
+   * Handles the error occurred during the HTTP request.
+   *
+   * @param error - The error object.
+   * @returns An Observable that emits an error.
+   */
   private handleError(error: Error): Observable<never> {
     console.error('An error occurred:', error.message);
     return throwError(
