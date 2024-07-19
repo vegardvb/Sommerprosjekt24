@@ -24,8 +24,6 @@ build_frontend:
     policy: pull-push
   before_script:
     - echo "Running before_script"
-    - apt-get update && apt-get install -y ca-certificates
-    - npm install -g @angular/cli
     - npm ci --include=optional --cache .npm --prefer-offline
   script:
     - npm run build
@@ -33,3 +31,4 @@ build_frontend:
     paths:
       - dist
     expire_in: 1 week
+
