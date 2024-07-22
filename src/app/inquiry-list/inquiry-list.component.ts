@@ -84,9 +84,7 @@ export class InquiryListComponent implements OnInit {
       error: error => {
         console.error('Error fetching data:', error);
       },
-      complete: () => {
-        console.log('Data fetching completed.');
-      },
+      complete: () => {},
     });
   }
 
