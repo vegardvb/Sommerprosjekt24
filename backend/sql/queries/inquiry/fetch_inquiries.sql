@@ -19,5 +19,4 @@ FROM
     INNER JOIN "Organization" organization ON organization.id = inquiry.organization_id
     INNER JOIN "Municipality" municipality ON municipality.id = inquiry.municipality_id
     INNER JOIN "Geometry" geometry ON geometry.inquiry_id = inquiry.id
-ORDER BY
-    inquiry_id desc
+ORDER BY inquiry_id desc

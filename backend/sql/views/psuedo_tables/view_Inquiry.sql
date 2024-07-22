@@ -10,5 +10,4 @@ SELECT
     PUBLIC.henvendelse.gateadresse AS address,
     PUBLIC.henvendelse.kommune_id AS municipality_id,
     PUBLIC.henvendelse.organisasjon_id AS organization_id
-FROM
-    PUBLIC.henvendelse
+FROM PUBLIC.henvendelse
