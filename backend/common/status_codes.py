@@ -1,3 +1,7 @@
+"""
+Module for defining status codes and their descriptions.
+"""
+
 henvendelse_status_dict = {
     -2: "Avventer system",
     1: "Registrert",
@@ -16,3 +20,19 @@ henvendelse_status_dict = {
     15: "Testing",
     22: "Venter på tillatelse fra netteiere",
 }
+
+
+def get_henvendelse_status(status_code):
+    """
+    Get the status description for a given status code.
+
+    Args:
+        status_code (int): The status code.
+
+    Returns:
+        str: The status description.
+
+    Raises:
+        KeyError: If the status code is not found in the dictionary.
+    """
+    return henvendelse_status_dict[status_code]

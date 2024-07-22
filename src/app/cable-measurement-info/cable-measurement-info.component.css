@@ -30,12 +30,10 @@
   padding: 7px;
   border-radius: 5px;
   margin-bottom: 10px;
-
 }
 
 .clicked-header {
-  background-color: rgb(247, 191, 212); 
+  background-color: rgb(247, 191, 212);
   border-radius: 5px;
   padding: 10px;
 }
-

@@ -73,30 +73,8 @@ def get_inquiries(connection=Depends(get_db)):
 
 
 @app.get("/geometries/area/boundary/inquiry/{inquiry_id}")
-def get_area_geometry_by_inquiery(inquiry_id: int, connection=Depends(get_db)):
-    """
-    Endpoint for retrieving the boundary geometry by the given inquiery id. \n
-
-    **Args**:
-    \n *inquiry_id (int)*: The id of the inquiery to sort by.
-
-    **Returns**:
-    \n *Array<JSON>*: Array containing a JSON object which holds the area geometry for the inquiry.
-
-    """
-    result = query_boundary_geometry_by_inquiry(inquiry_id, connection)
-
-    if DEBUG:
-        for row in result:
-            print(f"{row} | Type: {type(row)} ")
-
-    return result
-
-
-@app.get("/geometries/area/working_area/inquiry/{inquiry_id}")
-def get_working_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
-    """
-    Endpoint for the geometry of the working area by given inquiery id. \n
+def get_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
+    """Endpoint for retrieving the boundary geometry by the given inquiry ID.
 
     Args:
         inquiry_id (int): The ID of the inquiry to sort by.
@@ -104,12 +82,21 @@ def get_working_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get
     Returns:
         list: Array containing a JSON object with the area geometry for the inquiry.
     """
+    result = query_boundary_geometry_by_inquiry(inquiry_id, connection)
+    return result
+
+
+@app.get("/geometries/area/working_area/inquiry/{inquiry_id}")
+def get_working_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
+    """Endpoint for retrieving the working area geometry by the given inquiry ID.
+
+    Args:
+        inquiry_id (int): The ID of the inquiry to sort by.
+
+    Returns:
+        list: Array containing a JSON object with the working area geometry for the inquiry.
+    """
     result = query_working_area_geometry_by_inquiry(inquiry_id, connection)
-
-    if DEBUG:
-        for row in result:
-            print(f"{row} | Type: {type(row)} ")
-
     return result
 
 
