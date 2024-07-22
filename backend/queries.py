@@ -71,6 +71,7 @@ def query_working_area_geometry_by_inquiry(inquiry_id, connection):
     Returns:
         list: List of working area geometry related to the inquiry.
     """
+
     result = execute_sql(
         connection=connection,
         main_file_path=f"{

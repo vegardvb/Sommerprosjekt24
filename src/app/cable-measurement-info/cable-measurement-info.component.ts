@@ -205,8 +205,4 @@ export class CableMeasurementInfoComponent implements OnInit {
       console.log('after text', this.selectedEntity.position);
     }
   }
-
-  onTabChange(event: any) {
-    this.activeIndex = event.index;
-  }
 }

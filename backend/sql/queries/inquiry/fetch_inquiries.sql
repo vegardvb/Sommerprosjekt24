@@ -1,4 +1,4 @@
-SELECT DISTINCT
+SELECT DISTINCT 
     inquiry.id AS inquiry_id,
     inquiry_measurement.id AS inquiry_measurement_id,
     inquiry.name AS name,

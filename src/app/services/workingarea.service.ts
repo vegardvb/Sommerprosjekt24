@@ -24,9 +24,9 @@ export class WorkingAreaService {
    */
   getArea(inquiry_id: number | undefined): Observable<Array<Geometry>> {
     const apiUrl = `http://127.0.0.1:8000/geometries/area/working_area/inquiry/${inquiry_id}`;
+
     return this.http.get<Array<Geometry>>(apiUrl).pipe(
       map((data: Array<Geometry>) => {
-        console.log('Processed geometry: ', data);
         return data;
       }),
       catchError(this.handleError)
@@ -42,7 +42,7 @@ export class WorkingAreaService {
   private handleError(error: Error): Observable<never> {
     console.error('An error occurred:', error.message);
     return throwError(
-      () => new Error('Something bad happened; please try again later.')
+      () => new Error('Something bad happened; please try again later.', error)
     );
   }
 }

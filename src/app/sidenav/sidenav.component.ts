@@ -19,7 +19,6 @@ import {
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
-import { CesiumDirective } from '../cesium.directive';
 
 /**
  * Component for the side navigation bar.
