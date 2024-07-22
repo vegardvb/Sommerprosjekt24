@@ -1,10 +1,7 @@
-CREATE
-OR REPLACE VIEW "Geometry_from_Measurement_by_Inquiry" AS
-SELECT
-    inquiry_id,
-    public.st_collect (
+CREATE OR REPLACE VIEW "Geometry_from_Measurement_by_Inquiry" AS
+SELECT inquiry_id, public.st_collect (
         public.st_geomfromgeojson (
-            point_geojson :: json ->> 'geometry'
+            point_geojson::json ->> 'geometry'
         )
     ) AS geometry
 FROM

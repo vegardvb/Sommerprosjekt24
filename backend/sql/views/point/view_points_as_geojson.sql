@@ -1,18 +1,8 @@
 -- CREATE VIEW
-SELECT
-    measurement.id,
-    json_build_object(
-        'type',
-        'Feature',
-        'properties',
-        json_build_object(
-            'point_id',
-            point.id,
-            'metadata',
-            point.metadata
-        ),
-        'geometry',
-        PUBLIC.st_asgeojson (point.geom)
+SELECT measurement.id, json_build_object(
+        'type', 'Feature', 'properties', json_build_object(
+            'point_id', point.id, 'metadata', point.metadata
+        ), 'geometry', PUBLIC.st_asgeojson (point.geom)
     ) AS point_geojson
 FROM
     "Measurement" measurement
@@ -20,8 +10,7 @@ FROM
     INNER JOIN "Point" point ON point.id = link.point_id
 WHERE
     measurement.id IN (
-        SELECT
-            measurement.id
+        SELECT measurement.id
         FROM
             "Point" point
             INNER JOIN "Measurement_Point" link ON link.point_id = point.id
@@ -31,5 +20,4 @@ WHERE
         HAVING
             COUNT(point.id) = 1
     )
-ORDER BY
-    point.id;
+ORDER BY point.id;

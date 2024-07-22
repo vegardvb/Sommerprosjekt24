@@ -1,7 +1,7 @@
 CREATE
 OR REPLACE VIEW "Points_by_Measurement_as_GeoJSON" AS
 SELECT
-    measurement.id AS measurement_id,
+    measurement.id    AS measurement_id,
     json_build_object (
         'type',
         'Feature',

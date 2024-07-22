@@ -1,5 +1,4 @@
-CREATE
-OR REPLACE VIEW "Points_of_Cables_as_GeoJSON_3D" AS
+CREATE OR REPLACE VIEW "Points_of_Cables_as_GeoJSON_3D" AS
 SELECT
     measurement_point.measurement_id AS cable_measurement_id,
     json_build_object(
