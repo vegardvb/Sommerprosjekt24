@@ -28,7 +28,6 @@ export class CableMeasurementService {
     const apiUrl = `http://127.0.0.1:8000/geometries/measurements/inquiry/${inquiry_id}`;
     return this.http.get<Array<MeasurementGeometry>>(apiUrl).pipe(
       map((data: Array<MeasurementGeometry>) => {
-        console.log('Processed geometry: ', data);
         return data;
       }),
       catchError(this.handleError)

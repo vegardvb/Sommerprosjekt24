@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { CablePoints } from '../../models/cable_points';
+
+import { Geometry } from '../../models/geometry-interface';
 
 /**
  * Service for retrieving cable measurement data.
@@ -10,7 +11,7 @@ import { CablePoints } from '../../models/cable_points';
 @Injectable({
   providedIn: 'root',
 })
-export class CablePointsService {
+export class WorkingAreaService {
   // Parser service for converting JSON to GeoJSON
 
   constructor(private http: HttpClient) {}
@@ -21,10 +22,10 @@ export class CablePointsService {
    * @param inquiry_id - The ID of the inquiry.
    * @returns An Observable that emits a FeatureCollection.
    */
-  getData(inquiry_id: number | undefined): Observable<Array<CablePoints>> {
-    const apiUrl = `http://127.0.0.1:8000/geometries/measurements/cable_points/inquiry/${inquiry_id}`;
-    return this.http.get<Array<CablePoints>>(apiUrl).pipe(
-      map((data: Array<CablePoints>) => {
+  getArea(inquiry_id: number | undefined): Observable<Array<Geometry>> {
+    const apiUrl = `http://127.0.0.1:8000/geometries/area/working_area/inquiry/${inquiry_id}`;
+    return this.http.get<Array<Geometry>>(apiUrl).pipe(
+      map((data: Array<Geometry>) => {
         return data;
       }),
       catchError(this.handleError)
