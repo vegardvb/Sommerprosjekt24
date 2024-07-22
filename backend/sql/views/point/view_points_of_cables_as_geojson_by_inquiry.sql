@@ -1,5 +1,8 @@
-CREATE OR REPLACE VIEW "Points_of_Cables_as_GeoJSON_by_Inquiry" AS
-SELECT inquiry_id, json_agg(
+CREATE
+OR REPLACE VIEW "Points_of_Cables_as_GeoJSON_by_Inquiry" AS
+SELECT
+    inquiry_id,
+    json_agg(
         point_cable_geojson.cable_points_geojson
     ) AS geojson
 FROM

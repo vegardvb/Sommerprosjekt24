@@ -1,5 +1,5 @@
-SELECT DISTINCT 
-    inquiry.id AS inquiry_id,
+SELECT
+    DISTINCT inquiry.id AS inquiry_id,
     inquiry_measurement.id AS inquiry_measurement_id,
     inquiry.name AS name,
     inquiry.description AS description,
@@ -19,4 +19,5 @@ FROM
     INNER JOIN "Organization" organization ON organization.id = inquiry.organization_id
     INNER JOIN "Municipality" municipality ON municipality.id = inquiry.municipality_id
     INNER JOIN "Geometry" geometry ON geometry.inquiry_id = inquiry.id
-ORDER BY inquiry_id desc
+ORDER BY
+    inquiry_id desc
