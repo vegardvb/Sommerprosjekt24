@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { Feature, Metadata } from '../../models/geojson.model';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -6,15 +6,8 @@ import { TableModule } from 'primeng/table';
 import { FieldsetModule } from 'primeng/fieldset';
 import { TreeTableModule } from 'primeng/treetable';
 import { AccordionModule } from 'primeng/accordion';
-import { GeojsonService } from '../geojson.service';
-import {
-  Cartographic,
-  Entity,
-  Math as CesiumMath,
-  Cartesian3,
-  ConstantPositionProperty,
-  JulianDate,
-} from 'cesium';
+import { GeojsonService } from '../services/geojson.service';
+import { Entity } from 'cesium';
 import { CesiumDirective } from '../cesium.directive';
 import { ClickedPointService } from '../services/clickedpoint.service';
 
@@ -51,13 +44,14 @@ export class CableMeasurementInfoComponent implements OnInit {
   height: number = 0;
   isEditing: boolean = false;
   clickedPointId: number | null = null;
-  activeIndex: number = 0;
+  activeIndex: number = -1;
   activeHeader: string = '';
 
   constructor(
     private route: ActivatedRoute,
     private geojsonService: GeojsonService,
-    private clickedPointService: ClickedPointService
+    private clickedPointService: ClickedPointService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   measurementTypeMap: { [key: number]: string } = {};
@@ -105,15 +99,16 @@ export class CableMeasurementInfoComponent implements OnInit {
   getHeaderClass(feature: Feature): string {
     const header = this.getID(feature);
     const clickedPointIdStr = this.clickedPointId?.toString();
+
     return header === clickedPointIdStr ? 'clicked-header' : 'default-header';
   }
 
   captureHeader(headerId: string) {
     const match = headerId.match(/(?:Measurement ID:|Point ID:)\s*(\d+)/);
     if (match) {
-      const extractedID = match[1]; // Extract the ID from the match
+      //const extractedID = match[1]; // Extract the ID from the match
       this.activeHeader = headerId;
-      this.clickedPointService.setPointSidenav(Number(extractedID));
+      //this.clickedPointService.setPointSidenav(Number(extractedID));
     } else {
       this.activeHeader = '';
     }
@@ -149,54 +144,6 @@ export class CableMeasurementInfoComponent implements OnInit {
       console.log('Edited features:', editedFeatures);
     } else {
       console.log('Edit mode enabled');
-    }
-  }
-
-  updateSelectedEntity(entity: Entity) {
-    this.selectedEntity = entity;
-    const position = this.selectedEntity.position?.getValue(JulianDate.now());
-    if (position) {
-      console.log('before cond', position);
-      const cartographic = Cartographic.fromCartesian(position);
-      this.longitude = CesiumMath.toDegrees(cartographic.longitude);
-      this.latitude = CesiumMath.toDegrees(cartographic.latitude);
-      this.height = cartographic.height;
-    }
-  }
-
-  clearSelectedEntity() {
-    this.selectedEntity = null;
-    this.longitude = 0;
-    this.latitude = 0;
-    this.height = 0;
-  }
-
-  onLongitudeChange(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    this.longitude = Number(inputElement.value);
-    this.updateEntityPosition();
-  }
-
-  onLatitudeChange(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    this.latitude = Number(inputElement.value);
-    this.updateEntityPosition();
-  }
-
-  onHeightChange(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    this.height = Number(inputElement.value);
-    this.updateEntityPosition();
-  }
-
-  private updateEntityPosition() {
-    if (this.selectedEntity) {
-      const newPosition = Cartesian3.fromDegrees(
-        this.longitude,
-        this.latitude,
-        this.height
-      );
-      this.selectedEntity.position = new ConstantPositionProperty(newPosition);
     }
   }
 }

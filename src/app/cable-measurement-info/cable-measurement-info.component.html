@@ -1,8 +1,4 @@
 <div class="p-2">
-  <!--<button (click)="toggleEditMode()" class="p-2" id="editButton">
-    {{ editMode ? 'Save changes' : 'Edit data' }}
-  </button>-->
-
   <p-accordion [multiple]="false">
     <p-accordionTab *ngFor="let feature of features">
       <ng-template pTemplate="header">
@@ -102,7 +98,6 @@
               id="lat"
               [class.editable]="editMode"
               [attr.contenteditable]="editMode"
-              (input)="onLatitudeChange($event)"
             >
               {{ feature.properties.metadata.lat }}
             </span>

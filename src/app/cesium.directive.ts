@@ -108,6 +108,8 @@ export class CesiumDirective implements OnInit {
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
+    const infobox = this.viewer.infoBox;
+    infobox.destroy();
 
     // Set up a screen space event handler to select entities and create a popup
     this.viewer.screenSpaceEventHandler.setInputAction(
