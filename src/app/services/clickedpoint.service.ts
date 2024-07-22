@@ -13,8 +13,7 @@ export class ClickedPointService {
     this.clickedPointIdSource.next(pointId);
   }
 
-  setPointSidenav(pointId:number) {
+  setPointSidenav(pointId: number) {
     this.clickedPointIdSource.next(pointId);
-
   }
 }
