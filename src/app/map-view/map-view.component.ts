@@ -5,6 +5,7 @@ import { TerrainService } from '../services/terrain.service';
 import { Subscription, switchMap } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 import { Entity } from 'cesium';
+import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 /**
  * Represents the map view component.
  */
@@ -13,7 +14,7 @@ import { Entity } from 'cesium';
   templateUrl: './map-view.component.html',
   styleUrls: ['./map-view.component.css'],
   standalone: true,
-  imports: [CesiumDirective, SidenavComponent],
+  imports: [CesiumDirective, SidenavComponent, CableMeasurementInfoComponent],
 })
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })

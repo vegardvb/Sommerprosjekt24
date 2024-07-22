@@ -8,23 +8,23 @@ import {
   Output,
 } from '@angular/core';
 import {
-  CallbackProperty,
   Cartesian2,
   Cartesian3,
   Cesium3DTileset,
-  CesiumTerrainProvider,
   Color,
-  ConstantProperty,
   ClippingPlane,
   ClippingPlaneCollection,
-  defined,
   Entity,
+  defined,
+  CallbackProperty,
+  PointGraphics,
+  ConstantProperty,
+  CesiumTerrainProvider,
   GeoJsonDataSource,
   JulianDate,
   Math as CesiumMath,
   NearFarScalar,
   PositionProperty,
-  PointGraphics,
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
   Transforms,
@@ -32,11 +32,12 @@ import {
 } from 'cesium';
 import { ActivatedRoute } from '@angular/router';
 import { GeometryService } from './geometry.service';
+import proj4 from 'proj4';
 import { CableMeasurementService } from './services/cable-measurement.service';
 import { CablePointsService } from './services/cable_points.service';
-import proj4 from 'proj4';
+import { WorkingAreaService } from './services/workingarea.service';
 import * as turf from '@turf/turf';
-import { WorkingAreaService } from './services/workingarea_service';
+import { ClickedPointService } from './services/clickedpoint.service';
 import { lastValueFrom } from 'rxjs';
 
 // Define the source and target projections
@@ -68,11 +69,12 @@ export class CesiumDirective implements OnInit {
   private handler!: ScreenSpaceEventHandler;
   private width!: number;
   private height!: number;
-  isEditing = false;
+  private clickedPointId!: number;
 
   constructor(
     private el: ElementRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private clickedPointService: ClickedPointService
   ) {}
 
   // Service for fetching data from the backend
@@ -106,6 +108,8 @@ export class CesiumDirective implements OnInit {
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
+    const infobox = this.viewer.infoBox;
+    infobox.destroy();
 
     // Set up a screen space event handler to select entities and create a popup
     this.viewer.screenSpaceEventHandler.setInputAction(
@@ -114,6 +118,12 @@ export class CesiumDirective implements OnInit {
         if (defined(pickedObject)) {
           const entity = pickedObject.id;
           this.viewer.selectedEntity = entity; // Set the selected entity
+          this.clickedPointId =
+            this.viewer.selectedEntity?.properties?.['point_id']._value;
+
+          if (this.clickedPointId) {
+            this.clickedPointService.setClickedPointId(this.clickedPointId);
+          }
         } else {
           this.viewer.selectedEntity = undefined;
         }
@@ -146,6 +156,7 @@ export class CesiumDirective implements OnInit {
    * Initializes the Cesium viewer and sets up the necessary configurations.
    * @returns A promise that resolves when the viewer is initialized.
    */
+
   private async initializeViewer(): Promise<void> {
     this.viewer = new Viewer(this.el.nativeElement, {
       timeline: false,
@@ -668,7 +679,6 @@ export class CesiumDirective implements OnInit {
    * @param isEditing - A boolean value indicating whether the editing mode should be enabled or disabled.
    */
   public setEditingMode(isEditing: boolean) {
-    this.isEditing = isEditing;
     if (isEditing) {
       this.enableEditing();
     } else {
