@@ -109,12 +109,17 @@ export class CableMeasurementInfoComponent implements OnInit {
   }
 
   captureHeader(headerId: string) {
+    console.log('Header clicked:', headerId);
     const match = headerId.match(/(?:Measurement ID:|Point ID:)\s*(\d+)/);
     if (match) {
       const extractedID = match[1]; // Extract the ID from the match
+      console.log('Extracted ID:', extractedID);
+
       this.activeHeader = headerId;
+      console.log('Active tab header:', this.activeHeader);
       this.clickedPointService.setPointSidenav(Number(extractedID));
     } else {
+      console.log('Invalid header: ID Not Available');
       this.activeHeader = '';
     }
   }
@@ -197,6 +202,7 @@ export class CableMeasurementInfoComponent implements OnInit {
         this.height
       );
       this.selectedEntity.position = new ConstantPositionProperty(newPosition);
+      console.log('after text', this.selectedEntity.position);
     }
   }
 }

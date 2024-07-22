@@ -18,6 +18,7 @@ export class GeojsonService {
     const url = this.apiUrl.replace('{inquiry_id}', inquiry_id);
     return this.http.get<Response>(url).pipe(
       map((response: Response) => {
+        //console.log('API Response:', response);
         if (
           Array.isArray(response) &&
           response.length > 0 &&

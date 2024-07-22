@@ -46,6 +46,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
    * Lifecycle hook that is called after data-bound properties of the component are initialized.
    */
   ngOnInit() {
+    console.log('initmapview');
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
     });
@@ -62,6 +63,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
    * Lifecycle hook that is called when the component is destroyed.
    */
   ngOnDestroy() {
+    console.log('destroymapview');
     if (this.queryParamsSubscription) {
       this.queryParamsSubscription.unsubscribe();
     }
