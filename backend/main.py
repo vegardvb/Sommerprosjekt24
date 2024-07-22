@@ -73,7 +73,7 @@ def get_inquiries(connection=Depends(get_db)):
 
 
 @app.get("/geometries/area/boundary/inquiry/{inquiry_id}")
-async def get_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
+def get_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
     """Endpoint for retrieving the boundary geometry by the given inquiry ID.
 
     Args:
