@@ -223,7 +223,7 @@ async def process_geotiff(file_path: str, logger) -> dict:
 
         tile_path = os.path.join(output_dir, "layer.json")
         if os.path.exists(tile_path):
-            return {"tilesetUrl": "http://localhost:8080/tilesets/output"}
+            return {"tileSetUrl": "http://localhost:8080/tilesets/output"}
         logger.error("Failed to generate terrain tiles: layer.json not found.")
         raise HTTPException(
             status_code=500, detail="Failed to generate terrain tiles")

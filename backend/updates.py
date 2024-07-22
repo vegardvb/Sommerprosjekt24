@@ -14,7 +14,7 @@ def query_inquiries(connection):
     Returns:
         Dictionary: A dictionary containing the inquiries and their attributes.
     """
-    result = execute_sql(
+    result = execute_sql( # TODO: unused variable result
         connection=connection,
         # TODO Refactor file path system to a more flexible approach
         main_file_path=f"{QUERY_PATH}/inquiry/fetch_inquiries.sql",

@@ -21,10 +21,10 @@ export class TerrainService {
       .pipe(catchError(this.handleError));
   }
 
-  processGeoTIFF(filePath: string): Observable<{ tilesetUrl: string }> {
+  processGeoTIFF(filePath: string): Observable<{ tileSetUrl: string }> {
     const url = `${this.apiUrl}/process-geotiff?file_path=${encodeURIComponent(filePath)}`;
     return this.http
-      .get<{ tilesetUrl: string }>(url)
+      .get<{ tileSetUrl: string }>(url)
       .pipe(catchError(this.handleError));
   }
 

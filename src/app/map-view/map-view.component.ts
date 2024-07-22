@@ -105,8 +105,8 @@ export class MapViewComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: async response => {
-          if (response && response.tilesetUrl) {
-            await this.cesiumDirective.loadTerrainFromUrl(response.tilesetUrl);
+          if (response && response.tileSetUrl) {
+            await this.cesiumDirective.loadTerrainFromUrl(response.tileSetUrl);
           } else {
             console.error('Tileset URL not provided in the response', response);
           }
