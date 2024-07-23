@@ -1,4 +1,3 @@
-
 import {
   Component,
   EventEmitter,
@@ -88,8 +87,6 @@ export class SidenavComponent {
     };
   }
 
- 
-
   updateSelectedEntity(entity: Entity) {
     this.selectedEntity = entity;
     const position = this.selectedEntity.position?.getValue(JulianDate.now());
@@ -150,7 +147,6 @@ export class SidenavComponent {
     this.isEditing = false;
     this.editingToggled.emit(this.isEditing);
   }
-
 
   /**
    * Updates the width of the side navigation bar during resizing.
