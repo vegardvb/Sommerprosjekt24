@@ -46,25 +46,5 @@
     "typescriptreact": "html"
   },
   "javascript.updateImportsOnFileMove.enabled": "always",
-  "typescript.updateImportsOnFileMove.enabled": "always",
-  "cSpell.language": "en,nb,nb-NO",
-  "cSpell.words": [
-    "asgeojson",
-    "dotenv",
-    "fastapi",
-    "Geomatikk",
-    "geomfromgeojson",
-    "geotiff",
-    "innmaaling",
-    "inquirymeasurement",
-    "Kompletert",
-    "ledningsmaaling",
-    "levelname",
-    "miim",
-    "påvisningsdato",
-    "plpgsql",
-    "sqlalchemy",
-    "subpoint",
-    "topo"
-  ]
+  "typescript.updateImportsOnFileMove.enabled": "always"
 }
