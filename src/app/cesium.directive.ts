@@ -31,7 +31,7 @@ import {
   Transforms,
   Viewer,
 } from 'cesium';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { GeometryService } from './geometry.service';
 import proj4 from 'proj4';
 import { CableMeasurementService } from './services/cable-measurement.service';
