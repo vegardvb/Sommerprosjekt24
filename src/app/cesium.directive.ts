@@ -511,15 +511,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
       } else if (defined(this.selectedEntity)) {
         this.isDragging = true;
       }
-
-      if (!this.isDragging) {
-        // Re-enable camera interactions after dropping
-        this.viewer.scene.screenSpaceCameraController.enableRotate = true;
-        this.viewer.scene.screenSpaceCameraController.enableZoom = true;
-        this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
-        this.viewer.scene.screenSpaceCameraController.enableTilt = true;
-        this.viewer.scene.screenSpaceCameraController.enableLook = true;
-      }
     }, ScreenSpaceEventType.LEFT_UP);
   }
 
