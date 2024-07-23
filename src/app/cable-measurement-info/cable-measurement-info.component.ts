@@ -106,14 +106,34 @@ export class CableMeasurementInfoComponent implements OnInit {
   captureHeader(headerId: string) {
     const match = headerId.match(/(?:Measurement ID:|Point ID:)\s*(\d+)/);
     if (match) {
-      //const extractedID = match[1]; // Extract the ID from the match
+      const extractedID = match[1];
+
       this.activeHeader = headerId;
-      //this.clickedPointService.setPointSidenav(Number(extractedID));
+      const tab = document
+        .querySelector(`#measurement-${extractedID}`)
+        ?.closest('p-accordionTab');
+      if (tab) {
+        const latElement = tab.querySelector('#lat');
+        const lonElement = tab.querySelector('#lon');
+
+        if (latElement && lonElement) {
+          const latitude = latElement.textContent?.trim() || 'Unknown';
+          const longitude = lonElement.textContent?.trim() || 'Unknown';
+
+          this.clickedPointService.setClickedPointId(Number(extractedID));
+          this.clickedPointService.setLatitude(latitude);
+          this.clickedPointService.setLongitude(longitude);
+          this.clickedPointService.triggerZoom();
+        } else {
+          console.warn('Latitude or Longitude element not found.');
+        }
+      } else {
+        console.warn('Tab not found.');
+      }
     } else {
       this.activeHeader = '';
     }
   }
-
   formatCoordinates(coordinates: number[] | number[][]): string[] {
     if (Array.isArray(coordinates[0])) {
       return (coordinates as number[][]).map(coord => `[${coord.join(', ')}]`);

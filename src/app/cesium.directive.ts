@@ -6,6 +6,7 @@ import {
   Input,
   OnInit,
   Output,
+  OnDestroy,
 } from '@angular/core';
 import {
   Cartesian2,
@@ -30,7 +31,7 @@ import {
   Transforms,
   Viewer,
 } from 'cesium';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { GeometryService } from './geometry.service';
 import proj4 from 'proj4';
 import { CableMeasurementService } from './services/cable-measurement.service';
@@ -38,7 +39,7 @@ import { CablePointsService } from './services/cable_points.service';
 import { WorkingAreaService } from './services/workingarea.service';
 import * as turf from '@turf/turf';
 import { ClickedPointService } from './services/clickedpoint.service';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
@@ -52,7 +53,7 @@ proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
  * Represents a Cesium directive that provides a Cesium viewer for 3D visualization of a cable network.
  * This directive initializes the Cesium viewer, loads the necessary data, and handles user interactions.
  */
-export class CesiumDirective implements OnInit {
+export class CesiumDirective implements OnInit, OnDestroy {
   @Input()
   alpha!: number;
   tileset!: Cesium3DTileset;
@@ -69,7 +70,10 @@ export class CesiumDirective implements OnInit {
   private handler!: ScreenSpaceEventHandler;
   private width!: number;
   private height!: number;
-  private clickedPointId!: number;
+  private clickedPointId: number | null = null;
+  private latitude: string | null = null;
+  private longitude: string | null = null;
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private el: ElementRef,
@@ -142,7 +146,6 @@ export class CesiumDirective implements OnInit {
           });
         }
       } else {
-        // Hide points when no entity is selected
         this.pointEntities.forEach(pointEntity => {
           if (pointEntity.point) {
             pointEntity.point.show = new ConstantProperty(false);
@@ -150,6 +153,47 @@ export class CesiumDirective implements OnInit {
         });
       }
     });
+
+    this.subscriptions.add(
+      this.clickedPointService.latitude$.subscribe(lat => {
+        this.latitude = lat;
+      })
+    );
+
+    this.subscriptions.add(
+      this.clickedPointService.longitude$.subscribe(lon => {
+        this.longitude = lon;
+      })
+    );
+
+    this.subscriptions.add(
+      this.clickedPointService.zoomTrigger$.subscribe(trigger => {
+        if (trigger) {
+          this.zoomToCoordinates();
+          this.clickedPointService.resetCoordinates();
+          this.clickedPointService.resetZoomTrigger();
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+  private zoomToCoordinates() {
+    if (this.latitude && this.longitude) {
+      const position = Cartesian3.fromDegrees(
+        parseFloat(this.longitude),
+        parseFloat(this.latitude),
+        130
+      );
+      this.viewer.camera.flyTo({
+        destination: position,
+        duration: 3,
+      });
+    } else {
+      console.warn('Latitude or longitude is not defined');
+    }
   }
 
   /**
