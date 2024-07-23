@@ -9,7 +9,7 @@
           {{ getHeader(feature) }}
         </div>
       </ng-template>
- 
+
       <button
         *ngIf="feature.properties.point_id"
         (click)="captureHeader(getHeader(feature))"
@@ -17,7 +17,7 @@
       >
         Go to point
       </button>
- 
+
       <div *ngIf="feature.geometry.type">
         <p>
           <strong>Type: </strong
@@ -102,7 +102,7 @@
               {{ feature.properties.metadata.lat }}
             </span>
           </li>
- 
+
           <li>
             Longitude:
             <span
