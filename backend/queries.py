@@ -1,18 +1,14 @@
-
+"""
+This module contains functions for querying the database.
+"""
 import os
 import tempfile
 import docker
 from fastapi import HTTPException
 import requests
-from sqlalchemy import text
 from sql_executer import execute_sql
 from common.status_codes import henvendelse_status_dict
 
-"""
-This script serves as a collection of frequently used queries that extracts data from the database.
-
-"""
-# TODO Refactor file path system to a more flexible approach
 QUERY_PATH = "./sql/queries/"
 
 
@@ -30,7 +26,8 @@ def query_inquiries(connection):
         # TODO Refactor file path system to a more flexible approach
         main_file_path=f"{QUERY_PATH}/inquiry/fetch_inquiries.sql",
         placeholders={
-            "/*cable_measurements*/": f"{QUERY_PATH}/inquiry/fetch_number_of_measurements_per_inquiry.sql"
+            "/*cable_measurements*/":
+                f"{QUERY_PATH}/inquiry/fetch_number_of_measurements_per_inquiry.sql"
         },
     )
 
@@ -106,16 +103,14 @@ def query_measurement_geometry_by_inquiry(inquiry_id, connection):
 
 
 def query_points_of_cables_by_inquiry(inquiry_id, connection):
-    """
-    Query the points of cables associated with a specific inquiry.
+    """Query the points of cables associated with a specific inquiry.
 
     Args:
         inquiry_id (int): The ID of the inquiry.
-        connection: The database connection object.
+        connection: The database connection.
 
     Returns:
-        list: A list of dictionaries representing the points of cables.
-
+        list: List of points of cables.
     """
     result = execute_sql(
         connection=connection,
@@ -152,8 +147,8 @@ def fetch_geotiff(bbox: str, width: float, height: float, logger) -> dict:
         "BBOX": bbox,
         "CRS": "EPSG:25833",
         "RESPONSE_CRS": "EPSG:4326",
-        "WIDTH": width,
-        "HEIGHT": height
+        "WIDTH": min(width, 2850),  # Hardcoded max due to limits on API
+        "HEIGHT": min(height, 2850)  # Hardcoded max due to limits on API
     }
     response = requests.get(wcs_url, params=params, timeout=10)
     if response.status_code == 200:
@@ -161,10 +156,10 @@ def fetch_geotiff(bbox: str, width: float, height: float, logger) -> dict:
         with open(file_path, "wb") as file:
             file.write(response.content)
         return {"file_path": file_path}
-    else:
-        logger.error(f"Failed to fetch terrain model: {response.text}")
-        raise HTTPException(
-            status_code=500, detail=f"Failed to fetch terrain model: {response.text}")
+
+    logger.error(f"Failed to fetch terrain model: {response.text}")
+    raise HTTPException(
+        status_code=500, detail=f"Failed to fetch terrain model: {response.text}")
 
 
 async def process_geotiff(file_path: str, logger) -> dict:
@@ -230,11 +225,9 @@ async def process_geotiff(file_path: str, logger) -> dict:
         tile_path = os.path.join(output_dir, "layer.json")
         if os.path.exists(tile_path):
             return {"tilesetUrl": "http://localhost:8080/tilesets/output"}
-        else:
-            logger.error(
-                "Failed to generate terrain tiles: layer.json not found.")
-            raise HTTPException(
-                status_code=500, detail="Failed to generate terrain tiles")
+        logger.error("Failed to generate terrain tiles: layer.json not found.")
+        raise HTTPException(
+            status_code=500, detail="Failed to generate terrain tiles")
 
     except Exception as e:
         logger.error(f"Error during terrain tile generation: {e}")

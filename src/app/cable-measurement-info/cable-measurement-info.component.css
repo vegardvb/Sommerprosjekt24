@@ -1,3 +1,13 @@
-.p-accordion-header {
-  background-color: brown;
+#goToPointButton {
+  background-color:#004b97a1;
+  padding: 7px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  color: white;
+}
+ 
+.clicked-header {
+  background-color: #004b9732;
+  border-radius: 5px;
+  padding: 10px;
 }

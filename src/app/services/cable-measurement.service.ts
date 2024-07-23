@@ -22,13 +22,13 @@ export class CableMeasurementService {
    * @param inquiry_id - The ID of the inquiry.
    * @returns An Observable that emits a FeatureCollection.
    */
+ 
   getData(
     inquiry_id: number | undefined
   ): Observable<Array<MeasurementGeometry>> {
     const apiUrl = `http://127.0.0.1:8000/geometries/measurements/inquiry/${inquiry_id}`;
     return this.http.get<Array<MeasurementGeometry>>(apiUrl).pipe(
       map((data: Array<MeasurementGeometry>) => {
-        console.log('Processed geometry: ', data);
         return data;
       }),
       catchError(this.handleError)

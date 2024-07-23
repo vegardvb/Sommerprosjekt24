@@ -1,3 +1,4 @@
+
 import {
   Component,
   EventEmitter,
@@ -20,12 +21,16 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 
+/**
+ * Component for the side navigation bar.
+ */
 @Component({
   selector: 'app-sidenav',
   standalone: true,
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
+
   imports: [
     SidenavLinkComponent,
     CableMeasurementInfoComponent,
@@ -50,7 +55,11 @@ export class SidenavComponent {
     );
   }
 
-  setSidenavWidth(width: number) {
+  /**
+   * Sets the width of the side navigation bar.
+   * @param width - The width to set.
+   */
+  setSidenavWidth(width: number): void {
     const clampedWidth = Math.min(
       Math.max(width, this.sidenavMinWidth),
       this.sidenavMaxWidth
@@ -67,6 +76,10 @@ export class SidenavComponent {
 
   constructor(public sidenavService: SidenavService) {}
 
+  /**
+   * Starts the resizing of the side navigation bar.
+   * @param event - The mouse event.
+   */
   startResizing(event: MouseEvent): void {
     this.resizingEvent = {
       isResizing: true,
@@ -74,6 +87,8 @@ export class SidenavComponent {
       startingWidth: this.sidenavService.sidenavWidth,
     };
   }
+
+ 
 
   updateSelectedEntity(entity: Entity) {
     this.selectedEntity = entity;
@@ -136,8 +151,13 @@ export class SidenavComponent {
     this.editingToggled.emit(this.isEditing);
   }
 
+
+  /**
+   * Updates the width of the side navigation bar during resizing.
+   * @param event - The mouse event.
+   */
   @HostListener('window:mousemove', ['$event'])
-  updateSidenavWidth(event: MouseEvent) {
+  updateSidenavWidth(event: MouseEvent): void {
     // No need to even continue if we're not resizing
     if (!this.resizingEvent.isResizing) {
       return;
@@ -153,8 +173,11 @@ export class SidenavComponent {
     this.sidenavService.setSidenavWidth(newWidth);
   }
 
+  /**
+   * Stops the resizing of the side navigation bar.
+   */
   @HostListener('window:mouseup')
-  stopResizing() {
+  stopResizing(): void {
     this.resizingEvent.isResizing = false;
   }
 }

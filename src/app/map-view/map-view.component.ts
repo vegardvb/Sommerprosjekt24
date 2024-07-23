@@ -5,35 +5,47 @@ import { TerrainService } from '../services/terrain.service';
 import { Subscription, switchMap } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
 import { Entity } from 'cesium';
+import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
+/**
+ * Represents the map view component.
+ */
 @Component({
   selector: 'app-map-view',
   templateUrl: './map-view.component.html',
   styleUrls: ['./map-view.component.css'],
   standalone: true,
-  imports: [CesiumDirective, SidenavComponent],
+  imports: [CesiumDirective, SidenavComponent, CableMeasurementInfoComponent],
 })
 export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
+
   @ViewChild(SidenavComponent, { static: true })
   sidenavComponent!: SidenavComponent;
+
   alpha = 100;
   tilesetVisible: boolean = true;
   polygonsVisible: boolean = true;
   Math!: Math;
   inquiryId: number | undefined;
+
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
   private entitySubscription: Subscription | undefined;
   private editingSubscription: Subscription | undefined;
 
+  /**
+   * Initializes the component.
+   */
   constructor(
     private route: ActivatedRoute,
     private terrainService: TerrainService
   ) {}
 
+  /**
+   * Lifecycle hook that is called after data-bound properties of the component are initialized.
+   */
   ngOnInit() {
-    console.log('initmapview');
     this.queryParamsSubscription = this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
     });
@@ -44,7 +56,6 @@ export class MapViewComponent implements OnInit, OnDestroy {
         this.fetchAndProcessTerrain(bbox, width, height);
       }
     );
-
     this.entitySubscription =
       this.cesiumDirective.selectedEntityChanged.subscribe(entity => {
         console.log('entity', entity);
@@ -56,11 +67,12 @@ export class MapViewComponent implements OnInit, OnDestroy {
         this.cesiumDirective.setEditingMode(isEditing);
       }
     );
-    console.log('initmapview');
   }
 
+  /**
+   * Lifecycle hook that is called when the component is destroyed.
+   */
   ngOnDestroy() {
-    console.log('destroymapview');
     if (this.queryParamsSubscription) {
       this.queryParamsSubscription.unsubscribe();
     }
@@ -73,11 +85,12 @@ export class MapViewComponent implements OnInit, OnDestroy {
     if (this.editingSubscription) {
       this.editingSubscription.unsubscribe();
     }
-    console.log('destroymapview');
   }
 
   /**
    * Calculates the width and height based on the bounding box coordinates.
+   * @param bbox - The bounding box coordinates.
+   * @returns An object containing the width and height.
    */
   calculateWidthHeight(bbox: string): { width: number; height: number } {
     const [minX, minY, maxX, maxY] = bbox.split(',').map(Number);
@@ -88,6 +101,9 @@ export class MapViewComponent implements OnInit, OnDestroy {
 
   /**
    * Fetches and processes the terrain data based on the provided bounding box, width, and height.
+   * @param bbox - The bounding box coordinates.
+   * @param width - The width.
+   * @param height - The height.
    */
   fetchAndProcessTerrain(bbox: string, width: number, height: number) {
     this.terrainService
@@ -101,9 +117,6 @@ export class MapViewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async response => {
           if (response && response.tilesetUrl) {
-            console.log(
-              `Loading terrain from tileset URL: ${response.tilesetUrl}`
-            );
             await this.cesiumDirective.loadTerrainFromUrl(response.tilesetUrl);
           } else {
             console.error('Tileset URL not provided in the response', response);
@@ -115,12 +128,20 @@ export class MapViewComponent implements OnInit, OnDestroy {
       });
   }
 
+  /**
+   * Updates the alpha value.
+   * @param event - The event object.
+   */
   public updateAlpha(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.alpha = inputElement.valueAsNumber;
     this.cesiumDirective.updateGlobeAlpha(this.alpha / 100);
   }
 
+  /**
+   * Toggles the visibility of the tileset.
+   * @param event - The event object.
+   */
   toggleTileset(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.tilesetVisible = inputElement.checked;
@@ -129,6 +150,10 @@ export class MapViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Toggles the visibility of the polygons.
+   * @param event - The event object.
+   */
   togglePolygons(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.polygonsVisible = inputElement.checked;
@@ -136,15 +161,19 @@ export class MapViewComponent implements OnInit, OnDestroy {
       this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
     }
   }
+
+  /**
+   * Handles the selection of an entity.
+   * @param entity - The selected entity.
+   */
   handleEntitySelected(entity: Entity) {
-    console.log('handleentityselected');
-    console.log('Handling selected entity:', entity); // Further verification
     this.sidenavComponent.updateSelectedEntity(entity);
-    console.log('handleentityselected');
   }
+
+  /**
+   * Handles the deselection of an entity.
+   */
   handleEntityDeselection() {
-    console.log('handleentitydeselected');
     this.sidenavComponent.clearSelectedEntity();
-    console.log('handleentitydeselected');
   }
 }

@@ -1,3 +1,6 @@
+/**
+ * Represents the cable points data structure.
+ */
 export interface CablePoints {
   inquiry_id: number;
   geojson: {

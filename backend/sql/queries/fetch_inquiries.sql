@@ -1,12 +1,21 @@
-select h.id as inquiry_id, hl.id as inquiry_measurement_id, h.navn as name, h.beskrivelse as description,  
-    o.navn as organization, h.kunde_epost as mail, 
-    k.navn as municipality, h.gateadresse as address, h.status, 
-    h.behandlingsfrist as processing_deadline, h.fra_dato as start_date, h.til_dato as end_date
-from henvendelse h
-inner join henvendelse_ledningsmaaling hl ON hl.henvendelse_id = h.id
--- Include the number of measurements related to the inquiry as a sub-query
-inner join organisasjon o ON o.id = h.organisasjon_id
-inner join kommune k ON k.id = h.kommune_id
-inner join geometri g ON g.henvendelse_id = h.id
-order by inquiry_id desc
- 
+SELECT
+    h.id AS inquiry_id,
+    hl.id AS inquiry_measurement_id,
+    h.navn AS name,
+    h.beskrivelse AS description,
+SELECT
+    o.navn AS organization,
+    h.kunde_epost AS mail,
+    k.navn AS municipality,
+    h.gateadresse AS address,
+    h.status,
+    h.behandlingsfrist AS processing_deadline,
+    h.fra_dato AS start_date,
+    h.til_dato AS end_date
+FROM
+    henvendelse h
+    INNER JOIN henvendelse_ledningsmaaling hl ON hl.henvendelse_id = h.id -- Include the number of measurements related to the inquiry as a sub-query
+    INNER JOIN organisasjon o ON o.id = h.organisasjon_id
+    INNER JOIN kommune k ON k.id = h.kommune_id
+    INNER JOIN geometri g ON g.henvendelse_id = h.id
+ORDER BY inquiry_id DESC

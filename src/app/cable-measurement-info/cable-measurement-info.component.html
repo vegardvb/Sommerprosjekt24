@@ -1,11 +1,174 @@
-<p-accordion [multiple]="true" [activeIndex]="[0]">
-  <p-accordionTab
-    *ngFor="let info of cableInfo"
-    header="{{ info.feature_type }}"
-    class="p-1"
-  >
-    <p>Text: {{ info.metadata?.objectType?.text }}</p>
-    <p>Value: {{ info.metadata?.objectType?.value }}</p>
-    <p>Geometry type: {{ info.metadata?.objectType?.geomType }}</p>
-  </p-accordionTab>
-</p-accordion>
+<div class="p-2">
+  <p-accordion [multiple]="false">
+    <p-accordionTab *ngFor="let feature of features">
+      <ng-template pTemplate="header">
+        <div
+          id="measurement-{{ feature.properties.point_id }}"
+          [ngClass]="getHeaderClass(feature)"
+        >
+          {{ getHeader(feature) }}
+        </div>
+      </ng-template>
+ 
+      <button
+        *ngIf="feature.properties.point_id"
+        (click)="captureHeader(getHeader(feature))"
+        id="goToPointButton"
+      >
+        Go to point
+      </button>
+ 
+      <div *ngIf="feature.geometry.type">
+        <p>
+          <strong>Type: </strong
+          ><span
+            id="type"
+            [class.editable]="editMode"
+            [attr.contenteditable]="editMode"
+            >{{ feature.geometry.type }}</span
+          >
+        </p>
+        <div class="flex flex-wrap">
+          <p><strong>Coordinates:</strong></p>
+          <div class="flex flex-wrap">
+            <span
+              *ngFor="
+                let coord of formatCoordinates(feature.geometry.coordinates);
+                let i = index
+              "
+              class="mr-2"
+              ><span
+                id="coordinate-{{ i }}"
+                [class.editable]="editMode"
+                [attr.contenteditable]="editMode"
+                >{{ coord }}</span
+              ></span
+            >
+          </div>
+        </div>
+      </div>
+      <div
+        *ngIf="
+          feature.properties.point_id !== undefined &&
+          feature.properties.metadata
+        "
+      >
+        <strong>Metadata:</strong>
+        <ul>
+          <li>
+            Accuracy:
+            <span
+              id="accuracy"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+            >
+              {{ feature.properties.metadata.accuracy }}
+            </span>
+          </li>
+          <li>
+            Antenna Height:
+            <span
+              id="antennaHeight"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.antennaHeight }}</span
+            >
+          </li>
+          <li>
+            Fix Type:
+            <span
+              id="fixType"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.fixType }}</span
+            >
+          </li>
+          <li>
+            Height:
+            <span
+              id="height"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.height }}</span
+            >
+          </li>
+          <li>
+            Latitude:
+            <span
+              id="lat"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+            >
+              {{ feature.properties.metadata.lat }}
+            </span>
+          </li>
+ 
+          <li>
+            Longitude:
+            <span
+              id="lon"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.lon }}</span
+            >
+          </li>
+          <li>
+            Number of Measurements:
+            <span
+              id="numMeasurements"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.numMeasurements }}</span
+            >
+          </li>
+          <li>
+            Number of Satellites:
+            <span
+              id="numSatellites"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.numSatellites }}</span
+            >
+          </li>
+          <li>
+            Timestamp:
+            <span
+              id="timestamp"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+            >
+              {{ feature.properties.metadata.timestamp }}</span
+            >
+          </li>
+          <li>
+            Vertical Accuracy:
+            <span
+              id="verticalAccuracy"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.verticalAccuracy }}</span
+            >
+          </li>
+          <li>
+            X:
+            <span
+              id="x"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.x }}</span
+            >
+          </li>
+          <li>
+            Y:
+            <span
+              id="y"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature.properties.metadata.y }}</span
+            >
+          </li>
+        </ul>
+      </div>
+    </p-accordionTab>
+  </p-accordion>
+</div>
