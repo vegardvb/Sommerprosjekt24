@@ -25,6 +25,7 @@
           id="longitude"
           [(value)]="longitude"
           (input)="onLongitudeChange($event)"
+          (keydown.enter)="onLongitudeChange($event)"
           [readonly]="!isEditing"
           class="form-control mb-2"
         />
@@ -36,6 +37,7 @@
           id="latitude"
           [(value)]="latitude"
           (input)="onLatitudeChange($event)"
+          (keydown.enter)="onLatitudeChange($event)"
           [readonly]="!isEditing"
           class="form-control mb-2"
         />
@@ -47,6 +49,7 @@
           id="height"
           [(value)]="height"
           (input)="onHeightChange($event)"
+          (keydown.enter)="onHeightChange($event)"
           [readonly]="!isEditing"
           class="form-control mb-2"
         />

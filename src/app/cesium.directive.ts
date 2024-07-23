@@ -318,27 +318,84 @@ export class CesiumDirective implements OnInit {
     }, ScreenSpaceEventType.LEFT_DOWN);
   }
 
+  private isDragging = false; // To keep track of the dragging state
+
   private enableEditing() {
-    console.log('enableediting');
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
+    // let originalCoordinates: Cartographic | undefined;
 
-    // Remove existing event handlers if any
-    if (this.handler) {
-      this.handler.removeInputAction(ScreenSpaceEventType.LEFT_DOWN);
-      this.handler.removeInputAction(ScreenSpaceEventType.MOUSE_MOVE);
-      this.handler.removeInputAction(ScreenSpaceEventType.LEFT_UP);
-    }
+    this.handler.setInputAction((movement: { position: Cartesian2 }) => {
+      const pickedObject = this.viewer.scene.pick(movement.position);
+      if (defined(pickedObject)) {
+        this.selectedEntity = pickedObject.id as Entity;
+        this.selectedEntityChanged.emit(pickedObject); // Emit the event
+        console.log(
+          'totitties',
+          this.selectedEntity.position?.getValue(JulianDate.now())
+        );
 
-    // Add new event handler for LEFT_DOWN to create DebugModelMatrixPrimitive
-    this.handler.setInputAction(() => {
-      const cartesian = this.selectedEntity?.position?.getValue(
-        JulianDate.now()
-      );
-      if (defined(cartesian)) {
-        this.createZAxisLine(cartesian);
+        // if (defined(this.selectedEntity.position)) {
+        //   const originalCoordinatesCartesian =
+        //     this.selectedEntity.position.getValue(
+        //       JulianDate.now()
+        //     ) as Cartesian3;
+        //   originalCoordinates = Cartographic.fromCartesian(
+        //     originalCoordinatesCartesian
+        //   );
+        //   //console.log('Original Coordinates:', originalCoordinates);
+        // }
+
+        // Disable camera interactions
+        this.viewer.scene.screenSpaceCameraController.enableRotate = false;
+        this.viewer.scene.screenSpaceCameraController.enableZoom = false;
+        this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
+        this.viewer.scene.screenSpaceCameraController.enableLook = false;
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
+
+    this.handler.setInputAction((movement: { endPosition: Cartesian2 }) => {
+      if (this.isDragging && defined(this.selectedEntity)) {
+        const cartesian = this.viewer.camera.pickEllipsoid(
+          movement.endPosition
+        );
+        // if (originalCoordinates && cartesian) {
+        //   const cartographic = Cartographic.fromCartesian(cartesian);
+        //   cartographic.height = originalCoordinates.height;
+        //   cartesian = Cartesian3.fromRadians(
+        //     cartographic.latitude,
+        //     cartographic.longitude,
+        //     cartographic.height
+        //   );
+        // }
+        if (defined(cartesian)) {
+          if (defined(this.selectedEntity.position)) {
+            this.selectedEntity.position = new CallbackProperty(
+              () => cartesian,
+              false
+            ) as unknown as PositionProperty;
+          }
+        }
+      }
+    }, ScreenSpaceEventType.MOUSE_MOVE);
+
+    this.handler.setInputAction(() => {
+      if (this.isDragging) {
+        this.isDragging = false;
+      } else if (defined(this.selectedEntity)) {
+        this.isDragging = true;
+      }
+
+      if (!this.isDragging) {
+        // Re-enable camera interactions after dropping
+        this.viewer.scene.screenSpaceCameraController.enableRotate = true;
+        this.viewer.scene.screenSpaceCameraController.enableZoom = true;
+        this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
+        this.viewer.scene.screenSpaceCameraController.enableTilt = true;
+        this.viewer.scene.screenSpaceCameraController.enableLook = true;
+      }
+    }, ScreenSpaceEventType.LEFT_UP);
   }
+
   private disableEditing() {
     if (this.handler) {
       this.handler.destroy();
@@ -484,29 +541,11 @@ export class CesiumDirective implements OnInit {
   }
 
   public updateEntityPosition(cartesian: Cartesian3) {
-    if (this.selectedEntity?.polyline) {
-      if (this.selectedEntity.polyline?.positions) {
-        const positions = this.selectedEntity.polyline.positions.getValue(
-          JulianDate.now()
-        );
-        const offset = Cartesian3.subtract(
-          cartesian,
-          positions[0],
-          new Cartesian3()
-        );
-        const newPositions = positions.map((position: Cartesian3) =>
-          Cartesian3.add(position, offset, new Cartesian3())
-        );
-        this.selectedEntity.polyline.positions = new CallbackProperty(
-          () => newPositions,
-          false
-        );
-      } else if (this.selectedEntity.position) {
-        this.selectedEntity.position = new CallbackProperty(
-          () => cartesian,
-          false
-        ) as unknown as PositionProperty;
-      }
+    if (this.selectedEntity?.position) {
+      this.selectedEntity.position = new CallbackProperty(
+        () => cartesian,
+        false
+      ) as unknown as PositionProperty;
     }
   }
 
