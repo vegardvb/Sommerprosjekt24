@@ -1,39 +1,13 @@
-#editButton {
-  padding: 10px 20px;
-  background-color: #91ce93;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 16px;
-  transition: background-color 0.3s;
-  margin: 5px;
-  position: fixed;
-  bottom: 2%; /* Adjust as needed */
-  left: 5%; /* Center the button horizontally */
-  transform: translateX(-50%); /* Center alignment */
-  z-index: 1000; /* Ensure it stays on top */
-}
-
-#editButton:hover {
-  background-color: #45a049;
-}
-
-.editable {
-  border: 1px solid #ccc;
-  padding: 1px;
-  background-color: #f0f0f0;
-}
-
 #goToPointButton {
-  background-color: rgb(158, 217, 247);
+  background-color:#004b97a1;
   padding: 7px;
   border-radius: 5px;
   margin-bottom: 10px;
+  color: white;
 }
 
 .clicked-header {
-  background-color: rgb(247, 191, 212);
+  background-color: #004b9732;
   border-radius: 5px;
   padding: 10px;
 }
