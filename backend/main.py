@@ -60,6 +60,7 @@ def read_root():
     return {"Hello": "World"}
 
 
+# * GET Requests
 @app.get("/inquiries")
 def get_inquiries(connection=Depends(get_db)):
     """Endpoint which returns all inquiries with registered measurements.

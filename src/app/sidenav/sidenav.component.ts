@@ -29,6 +29,7 @@ import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-m
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
+
   imports: [
     SidenavLinkComponent,
     CableMeasurementInfoComponent,
@@ -94,7 +95,7 @@ export class SidenavComponent {
    * Updates the selected entity.
    * @param entity - The entity to update.
    */
-  updateSelectedEntity(entity: Entity): void {
+  updateSelectedEntity(entity: Entity) {
     this.selectedEntity = entity;
     const position = this.selectedEntity.position?.getValue(JulianDate.now());
     if (position) {
@@ -108,7 +109,7 @@ export class SidenavComponent {
   /**
    * Clears the selected entity.
    */
-  clearSelectedEntity(): void {
+  clearSelectedEntity() {
     this.selectedEntity = null;
     this.longitude = 0;
     this.latitude = 0;
@@ -119,7 +120,7 @@ export class SidenavComponent {
    * Handles the change event for the longitude input.
    * @param event - The change event.
    */
-  onLongitudeChange(event: Event): void {
+  onLongitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.longitude = Number(inputElement.value);
     this.updateEntityPosition();
@@ -129,7 +130,7 @@ export class SidenavComponent {
    * Handles the change event for the latitude input.
    * @param event - The change event.
    */
-  onLatitudeChange(event: Event): void {
+  onLatitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.latitude = Number(inputElement.value);
     this.updateEntityPosition();
@@ -139,17 +140,16 @@ export class SidenavComponent {
    * Handles the change event for the height input.
    * @param event - The change event.
    */
-  onHeightChange(event: Event): void {
+  onHeightChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
   }
-
   /**
    * Updates the position of the selected entity.
    * If there is a selected entity, it updates its position based on the longitude, latitude, and height values.
    */
-  private updateEntityPosition(): void {
+  private updateEntityPosition() {
     if (this.selectedEntity) {
       const newPosition = Cartesian3.fromDegrees(
         this.longitude,
@@ -159,19 +159,17 @@ export class SidenavComponent {
       this.selectedEntity.position = new ConstantPositionProperty(newPosition);
     }
   }
-
   /**
    * Toggles the editing mode.
    */
-  toggleEditing(): void {
+  toggleEditing() {
     this.isEditing = !this.isEditing;
     this.editingToggled.emit(this.isEditing);
   }
-
   /**
    * Closes the editor.
    */
-  closeEditor(): void {
+  closeEditor() {
     this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
     this.isEditing = false;
     this.editingToggled.emit(this.isEditing);

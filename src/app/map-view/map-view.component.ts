@@ -56,6 +56,15 @@ export class MapViewComponent implements OnInit, OnDestroy {
         this.fetchAndProcessTerrain(bbox, width, height);
       }
     );
+    this.entitySubscription =
+      this.cesiumDirective.selectedEntityChanged.subscribe(entity => {
+        this.handleEntitySelected(entity);
+      });
+    this.editingSubscription = this.sidenavComponent.editingToggled.subscribe(
+      isEditing => {
+        this.cesiumDirective.setEditingMode(isEditing);
+      }
+    );
   }
 
   /**
