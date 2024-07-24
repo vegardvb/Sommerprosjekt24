@@ -614,37 +614,36 @@ export class CesiumDirective implements OnInit, OnDestroy {
    * Loads the working area data and displays it on the Cesium viewer.
    */
   private async loadWorkingArea(): Promise<void> {
-    this.workingAreaService.getArea(this.inquiryId).subscribe({
-      next: data => {
-        if (data) {
-          GeoJsonDataSource.load(data[0].geojson, {
-            stroke: Color.PALEVIOLETRED,
-            fill: Color.PALEVIOLETRED.withAlpha(0.1),
-            strokeWidth: 2,
-            markerSize: 1, // Size of the marker
-            credit: "Provided by Petter's Cable measurement service",
-          })
-            .then((dataSource: GeoJsonDataSource) => {
-              this.viewer.dataSources.add(dataSource);
+    try {
+      const data = await lastValueFrom(
+        this.workingAreaService.getArea(this.inquiryId)
+      );
+      if (data) {
+        const geoJson = data[0].geojson;
+        const dataSource = await GeoJsonDataSource.load(geoJson, {
+          stroke: Color.PALEVIOLETRED,
+          fill: Color.PALEVIOLETRED.withAlpha(0.1),
+          strokeWidth: 2,
+          markerSize: 1, // Size of the marker
+          credit: "Provided by Petter's Cable measurement service",
+        });
 
-              // Add picking and moving functionality to cables
-              dataSource.entities.values.forEach(entity => {
-                if (entity.polygon) {
-                  entity.polygon.heightReference =
-                    HeightReference.CLAMP_TO_GROUND as unknown as Property;
-                  this.polygons.push(entity);
-                  this.viewer.entities.add(entity);
-                }
-              });
-            })
-            .catch(error => {
-              console.error('Failed to load GeoJSON data:', error);
-            });
-        }
-      },
-    });
+        this.viewer.dataSources.add(dataSource);
+
+        // Add picking and moving functionality to cables
+        dataSource.entities.values.forEach(entity => {
+          if (entity.polygon) {
+            entity.polygon.heightReference =
+              HeightReference.CLAMP_TO_GROUND as unknown as Property;
+            this.polygons.push(entity);
+            this.viewer.entities.add(entity);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load working area data:', error);
+    }
   }
-
   /**
    * Updates the position of the selected entity.
    * If the selected entity has a polyline, it updates the positions of the polyline based on the provided cartesian coordinates.
