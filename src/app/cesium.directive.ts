@@ -456,10 +456,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
         this.selectedEntityChanged.emit(pickedObject); // Emit the event
-        console.log(
-          'totitties',
-          this.selectedEntity.position?.getValue(JulianDate.now())
-        );
 
         // if (defined(this.selectedEntity.position)) {
         //   const originalCoordinatesCartesian =
@@ -626,7 +622,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
     this.workingAreaService.getArea(this.inquiryId).subscribe({
       next: data => {
         if (data) {
-          console.log('data received from service33', data);
           GeoJsonDataSource.load(data[0].geojson, {
             stroke: Color.PALEVIOLETRED,
             fill: Color.PALEVIOLETRED.withAlpha(0.1),
@@ -650,7 +645,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
             .catch(error => {
               console.error('Failed to load GeoJSON data:', error);
             });
-          console.log('loadcables');
         }
       },
     });

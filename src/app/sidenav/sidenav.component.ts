@@ -47,6 +47,10 @@ export class SidenavComponent {
   isEditing: boolean = false;
   @Output() editingToggled = new EventEmitter<boolean>();
 
+  /**
+   * Gets the current width of the side navigation bar.
+   * @returns The width of the side navigation bar.
+   */
   get sidenavWidth(): number {
     return parseInt(
       getComputedStyle(document.body).getPropertyValue('--sidenav-width'),
@@ -87,11 +91,14 @@ export class SidenavComponent {
     };
   }
 
+  /**
+   * Updates the selected entity.
+   * @param entity - The entity to update.
+   */
   updateSelectedEntity(entity: Entity) {
     this.selectedEntity = entity;
     const position = this.selectedEntity.position?.getValue(JulianDate.now());
     if (position) {
-      console.log('before cond', position);
       const cartographic = Cartographic.fromCartesian(position);
       this.longitude = CesiumMath.toDegrees(cartographic.longitude);
       this.latitude = CesiumMath.toDegrees(cartographic.latitude);
@@ -99,6 +106,9 @@ export class SidenavComponent {
     }
   }
 
+  /**
+   * Clears the selected entity.
+   */
   clearSelectedEntity() {
     this.selectedEntity = null;
     this.longitude = 0;
@@ -106,24 +116,39 @@ export class SidenavComponent {
     this.height = 0;
   }
 
+  /**
+   * Handles the change event for the longitude input.
+   * @param event - The change event.
+   */
   onLongitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.longitude = Number(inputElement.value);
     this.updateEntityPosition();
   }
 
+  /**
+   * Handles the change event for the latitude input.
+   * @param event - The change event.
+   */
   onLatitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.latitude = Number(inputElement.value);
     this.updateEntityPosition();
   }
 
+  /**
+   * Handles the change event for the height input.
+   * @param event - The change event.
+   */
   onHeightChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
   }
-
+  /**
+   * Updates the position of the selected entity.
+   * If there is a selected entity, it updates its position based on the longitude, latitude, and height values.
+   */
   private updateEntityPosition() {
     if (this.selectedEntity) {
       const newPosition = Cartesian3.fromDegrees(
@@ -132,16 +157,18 @@ export class SidenavComponent {
         this.height
       );
       this.selectedEntity.position = new ConstantPositionProperty(newPosition);
-      console.log('after text', this.selectedEntity.position);
     }
   }
-
+  /**
+   * Toggles the editing mode.
+   */
   toggleEditing() {
     this.isEditing = !this.isEditing;
     this.editingToggled.emit(this.isEditing);
-    console.log('toggle dit sidenav', this.editingToggled);
   }
-
+  /**
+   * Closes the editor.
+   */
   closeEditor() {
     this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
     this.isEditing = false;

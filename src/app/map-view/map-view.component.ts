@@ -58,12 +58,10 @@ export class MapViewComponent implements OnInit, OnDestroy {
     );
     this.entitySubscription =
       this.cesiumDirective.selectedEntityChanged.subscribe(entity => {
-        console.log('entity', entity);
         this.handleEntitySelected(entity);
       });
     this.editingSubscription = this.sidenavComponent.editingToggled.subscribe(
       isEditing => {
-        console.log('mapviewediting', isEditing);
         this.cesiumDirective.setEditingMode(isEditing);
       }
     );

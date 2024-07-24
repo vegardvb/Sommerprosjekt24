@@ -35,7 +35,11 @@ export class GeometryService {
       catchError(this.handleError)
     );
   }
-
+  /**
+   * Handles any errors that occur during the HTTP request.
+   * @param error The error that occurred.
+   * @returns An observable that emits an error.
+   */
   private handleError(error: Error): Observable<never> {
     console.error('An error occurred', error);
     return throwError(
