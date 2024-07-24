@@ -76,8 +76,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
   private latitude: string | null = null;
   private longitude: string | null = null;
   private subscriptions: Subscription = new Subscription();
-  tilesetClippingPlanes!: ClippingPlaneCollection;
-  globeClippingPlanes!: ClippingPlaneCollection;
   isEditing = false;
 
   constructor(
@@ -469,10 +467,7 @@ export class CesiumDirective implements OnInit, OnDestroy {
         // }
 
         // Disable camera interactions
-        this.viewer.scene.screenSpaceCameraController.enableRotate = false;
-        this.viewer.scene.screenSpaceCameraController.enableZoom = false;
-        this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
-        this.viewer.scene.screenSpaceCameraController.enableLook = false;
+        this.disableCameraInteractions();
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
 
@@ -618,7 +613,7 @@ export class CesiumDirective implements OnInit, OnDestroy {
   /**
    * Loads the working area data and displays it on the Cesium viewer.
    */
-  private loadWorkingArea(): void {
+  private async loadWorkingArea(): Promise<void> {
     this.workingAreaService.getArea(this.inquiryId).subscribe({
       next: data => {
         if (data) {
@@ -627,7 +622,7 @@ export class CesiumDirective implements OnInit, OnDestroy {
             fill: Color.PALEVIOLETRED.withAlpha(0.1),
             strokeWidth: 2,
             markerSize: 1, // Size of the marker
-            credit: 'Provided by Petters Cable measurement service',
+            credit: "Provided by Petter's Cable measurement service",
           })
             .then((dataSource: GeoJsonDataSource) => {
               this.viewer.dataSources.add(dataSource);

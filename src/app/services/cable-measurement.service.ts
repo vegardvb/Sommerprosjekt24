@@ -22,7 +22,6 @@ export class CableMeasurementService {
    * @param inquiry_id - The ID of the inquiry.
    * @returns An Observable that emits a FeatureCollection.
    */
-
   getData(
     inquiry_id: number | undefined
   ): Observable<Array<MeasurementGeometry>> {
