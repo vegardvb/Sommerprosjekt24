@@ -23,6 +23,7 @@ def query_inquiries(connection):
     """
     result = execute_sql(
         connection=connection,
+        # TODO Refactor file path system to a more flexible approach
         main_file_path=f"{QUERY_PATH}/inquiry/fetch_inquiries.sql",
         placeholders={
             "/*cable_measurements*/":
