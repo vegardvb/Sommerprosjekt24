@@ -112,7 +112,7 @@ $border-radius: 5px;
   -ms-user-select: none;
   user-select: none;
 
-  @include transition(background-color 0.2s ease-out, width 0.2s ease-out);
+  @include transition(background-color, 0.2s ease-out, width 0.2s ease-out);
 
   &:hover {
     width: 3px;
