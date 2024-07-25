@@ -9,6 +9,6 @@
     "ms-python.autopep8",
     "ms-python.pylint",
     "ms-azuretools.vscode-docker",
-    
+    "adpyke.vscode-sql-formatter"
   ]
 }
