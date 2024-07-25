@@ -18,4 +18,5 @@ FROM
     INNER JOIN organisasjon o ON o.id = h.organisasjon_id
     INNER JOIN kommune k ON k.id = h.kommune_id
     INNER JOIN geometri g ON g.henvendelse_id = h.id
-ORDER BY inquiry_id DESC
+ORDER BY
+    inquiry_id DESC

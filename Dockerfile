@@ -10,7 +10,7 @@ RUN set -x && apt-get update && \
 # Fetch
 RUN set -x && \
   git clone -b master-quantized-mesh --depth 1 \
-    https://github.com/ahuarte47/cesium-terrain-builder.git && \
+  https://github.com/ahuarte47/cesium-terrain-builder.git && \
   cd cesium-terrain-builder
 
 # Build stage #################################################################

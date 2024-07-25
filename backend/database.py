@@ -20,13 +20,14 @@ db_port = os.getenv("DB_PORT")
 DATABASE_URL = f"postgresql://{db_user}:{
     db_password}@{db_host}:{db_port}/{db_name}"
 SCHEMA = "analytics_cable_measurement_inquiries"
+SCHEMA_PUBLIC = "public"
 
 # Engine for executing queries
 engine = create_engine(DATABASE_URL, echo=True, future=True)
 
 
 def get_db():
-    """Establishes a connection to the database.
+    """Establishes a connection to the database within folder analytics_cable_measurement_inquiries.
 
     Yields:
         Connection: High-level API for interacting with the database.
@@ -34,4 +35,16 @@ def get_db():
     with engine.connect() as connection:
         connection = connection.execution_options(mapper=ResultProxy.mappings)
         connection.execute(text(f"SET search_path TO {SCHEMA}"))
+        yield connection
+
+
+def get_db_public():
+    """Establishes a connection to the database within folder public.
+
+    Yields:
+        Connection: High-level API for interacting with the database.
+    """
+    with engine.connect() as connection:
+        connection = connection.execution_options(mapper=ResultProxy.mappings)
+        connection.execute(text(f"SET search_path TO {SCHEMA_PUBLIC}"))
         yield connection

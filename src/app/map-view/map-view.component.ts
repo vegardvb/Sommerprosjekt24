@@ -4,8 +4,9 @@ import { CesiumDirective } from '../cesium.directive';
 import { TerrainService } from '../services/terrain.service';
 import { Subscription, switchMap } from 'rxjs';
 import { SidenavComponent } from '../sidenav/sidenav.component';
-import { Entity } from 'cesium';
+import { Entity, Viewer } from 'cesium';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
+import { CesiumImageService } from '../services/image/cesium-image.service';
 /**
  * Represents the map view component.
  */
@@ -29,17 +30,20 @@ export class MapViewComponent implements OnInit, OnDestroy {
   Math!: Math;
   inquiryId: number | undefined;
 
+  private viewer!: Viewer;
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
   private entitySubscription: Subscription | undefined;
   private editingSubscription: Subscription | undefined;
+  public billboardsVisible: boolean = true;
 
   /**
    * Initializes the component.
    */
   constructor(
     private route: ActivatedRoute,
-    private terrainService: TerrainService
+    private terrainService: TerrainService,
+    private cesiumImageService: CesiumImageService
   ) {}
 
   /**
@@ -114,8 +118,8 @@ export class MapViewComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: async response => {
-          if (response && response.tilesetUrl) {
-            await this.cesiumDirective.loadTerrainFromUrl(response.tilesetUrl);
+          if (response && response.tileSetUrl) {
+            await this.cesiumDirective.loadTerrainFromUrl(response.tileSetUrl);
           } else {
             console.error('Tileset URL not provided in the response', response);
           }
@@ -158,6 +162,15 @@ export class MapViewComponent implements OnInit, OnDestroy {
     if (this.cesiumDirective) {
       this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
     }
+  }
+
+  toggleBillboards(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    this.billboardsVisible = inputElement.checked;
+    this.cesiumImageService.setBillboardsVisibility(
+      this.viewer,
+      this.billboardsVisible
+    );
   }
 
   /**
