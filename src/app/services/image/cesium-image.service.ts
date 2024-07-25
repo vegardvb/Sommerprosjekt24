@@ -5,20 +5,17 @@ import {
   VerticalOrigin,
   Math as CesiumMath,
   HeightReference,
+  Entity,
 } from 'cesium';
 import { ImageService } from './image.service';
 import { lastValueFrom } from 'rxjs';
 
-/**
- * Loads billboards onto the Cesium viewer based on the given inquiry ID.
- * @param viewer - The Cesium viewer.
- * @param inquiryId - The ID of the inquiry.
- * @returns A promise that resolves when the images are loaded.
- */
 @Injectable({
   providedIn: 'root',
 })
 export class CesiumImageService {
+  private billboards: Entity[] = [];
+
   constructor(private imageService: ImageService) {}
 
   async loadImages(
@@ -36,7 +33,7 @@ export class CesiumImageService {
         const coordinates = geom.coordinates;
         const position = Cartesian3.fromDegrees(coordinates[0], coordinates[1]);
 
-        viewer.entities.add({
+        const entity = viewer.entities.add({
           position: position,
           billboard: {
             image: 'assets/images/Image_bearing_logo.png',
@@ -52,9 +49,17 @@ export class CesiumImageService {
             filnavn: image.filnavn,
           },
         });
+
+        this.billboards.push(entity);
       });
     } catch (error) {
       console.error('Error loading images:', error);
     }
+  }
+
+  setBillboardsVisibility(viewer: Viewer, visible: boolean): void {
+    this.billboards.forEach(billboard => {
+      billboard.show = visible;
+    });
   }
 }
