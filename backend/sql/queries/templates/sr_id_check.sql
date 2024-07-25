@@ -1,1 +1,4 @@
-select st_srid(geom) from geometri
+select
+    st_srid(geom)
+from
+    geometri

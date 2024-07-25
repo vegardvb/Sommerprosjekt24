@@ -1,4 +1,4 @@
-/*Create views for all psuedo tables */
+/*Create views for all pseudo tables */
 CREATE MATERIALIZED VIEW "Inquiry" AS
 SELECT
     PUBLIC.henvendelse.id AS id,
@@ -10,4 +10,5 @@ SELECT
     PUBLIC.henvendelse.gateadresse AS address,
     PUBLIC.henvendelse.kommune_id AS municipality_id,
     PUBLIC.henvendelse.organisasjon_id AS organization_id
-FROM PUBLIC.henvendelse
+FROM
+    PUBLIC.henvendelse

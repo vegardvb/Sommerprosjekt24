@@ -8,6 +8,7 @@ import json
 import os
 import sys
 from queries import (
+    query_images_by_inquiry_id,
     query_inquiries,
     query_boundary_geometry_by_inquiry,
     query_working_area_geometry_by_inquiry,
@@ -17,6 +18,7 @@ from queries import (
     process_geotiff, 
     query_updateViews
 )
+from database import get_db, get_db_public
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -147,8 +149,31 @@ def fetch_geotiff_endpoint(bbox: str, width: float, height: float):
 @app.get("/process-geotiff")
 async def process_geotiff_endpoint(file_path: str):
     """Process GeoTIFF to generate terrain tiles."""
-    return await process_geotiff(file_path, logger)
- 
+    return await process_geotiff(file_path, logger) 
+
+
+@app.get("/images/inquiry/{inquiry_id}")
+def get_images_by_inquiry(inquiry_id: int, connection=Depends(get_db_public)):
+    """Endpoint for retrieving images by the given inquiry ID.
+
+    Args:
+        inquiry_id (int): The ID of the inquiry to filter by.
+
+    Returns:
+        list: Array containing a JSON object with image details for the inquiry.
+    """
+    try:
+        result = query_images_by_inquiry_id(inquiry_id, logger, connection)
+        logger.info("API call to fetch images for inquiry %s",
+                    inquiry_id)  # Log API call
+        return result
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error("Unexpected error: %s", e)
+        raise HTTPException(
+            status_code=500, detail="Internal Server Error") from e
+
  
 class CoordinateUpdate(BaseModel):
     """ Data model for height update."""

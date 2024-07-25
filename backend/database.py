@@ -24,8 +24,8 @@ engine = create_engine(DATABASE_URL, echo=True, future=True)
  
  
 def get_db():
-    """Establishes a connection to the database.
- 
+    """Establishes a connection to the database within folder analytics_cable_measurement_inquiries.
+
     Yields:
         Connection: High-level API for interacting with the database.
     """
@@ -36,8 +36,8 @@ def get_db():
  
  
 def get_db_public():
-    """Establishes a connection to the database.
- 
+    """Establishes a connection to the database within folder public.
+
     Yields:
         Connection: High-level API for interacting with the database.
     """

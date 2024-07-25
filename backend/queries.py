@@ -227,7 +227,7 @@ async def process_geotiff(file_path: str, logger) -> dict:
 
         tile_path = os.path.join(output_dir, "layer.json")
         if os.path.exists(tile_path):
-            return {"tilesetUrl": "http://localhost:8080/tilesets/output"}
+            return {"tileSetUrl": "http://localhost:8080/tilesets/output"}
         logger.error("Failed to generate terrain tiles: layer.json not found.")
         raise HTTPException(
             status_code=500, detail="Failed to generate terrain tiles")
@@ -236,6 +236,34 @@ async def process_geotiff(file_path: str, logger) -> dict:
         logger.error(f"Error during terrain tile generation: {e}")
         raise HTTPException(
             status_code=500, detail=f"Error processing GeoTIFF: {e}") from e
+
+
+def query_images_by_inquiry_id(inquiry_id, logger, connection):
+    """Query images related to a specific inquiry.
+
+    Args:
+        inquiry_id (int): The ID of the inquiry.
+        connection: The database connection.
+
+    Returns:
+        list: List of images related to the inquiry.
+    """
+    try:
+        result = execute_sql(
+            connection=connection,
+            main_file_path=f"{QUERY_PATH}/fetch_images_by_inquiry_id.sql",
+            params={"inquiry_id": inquiry_id},
+        )
+        logger.info(f"main file path: {
+                    QUERY_PATH}/fetch_images_by_inquiry_id.sql")
+        images = [dict(row) for row in result.mappings()]
+        logger.info(f"Fetched images for inquiry {inquiry_id}: {
+                    images}")  # Log fetched images
+        return images
+    except Exception as e:
+        logger.error(f"Error querying images for inquiry {inquiry_id}: {e}")
+        raise HTTPException(
+            status_code=500, detail="Internal Server Error, Can't get images by inquiry id") from e
 
 
 def query_updateViews(connection):

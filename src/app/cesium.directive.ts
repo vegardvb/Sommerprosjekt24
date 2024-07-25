@@ -2,7 +2,6 @@ import {
   Directive,
   ElementRef,
   EventEmitter,
-  inject,
   Input,
   OnInit,
   Output,
@@ -43,6 +42,8 @@ import { Subscription, lastValueFrom } from 'rxjs';
 import { CablePointsService } from './services/cable_points.service';
 import { ClickedPointService } from './services/clickedpoint.service';
 import { WorkingAreaService } from './services/workingarea.service';
+import { CesiumImageService } from './services/image/cesium-image.service';
+import { CesiumInteractionService } from './services/cesium.interaction.service';
 
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
@@ -77,22 +78,21 @@ export class CesiumDirective implements OnInit, OnDestroy {
   private latitude: string | null = null;
   private longitude: string | null = null;
   private subscriptions: Subscription = new Subscription();
+  private isDragging = false; // To keep track of the dragging state
   isEditing = false;
 
   constructor(
     private el: ElementRef,
     private route: ActivatedRoute,
     @Inject(ClickedPointService)
-    private clickedPointService: ClickedPointService
+    private clickedPointService: ClickedPointService,
+    private cesiumInteractionService: CesiumInteractionService,
+    private cesiumImageService: CesiumImageService,
+    private cableMeasurementService: CableMeasurementService,
+    private geometryService: GeometryService,
+    private workingAreaService: WorkingAreaService,
+    private cablePointService: CablePointsService
   ) {}
-
-  // Service for fetching data from the backend
-  private cableMeasurementService: CableMeasurementService = inject(
-    CableMeasurementService
-  );
-  private geometryService: GeometryService = inject(GeometryService);
-  private workingAreaService: WorkingAreaService = inject(WorkingAreaService);
-  private cablePointService: CablePointsService = inject(CablePointsService);
 
   /**
    * Initializes the component after Angular has initialized all data-bound properties.
@@ -111,6 +111,8 @@ export class CesiumDirective implements OnInit, OnDestroy {
     await this.loadCables();
     await this.loadWorkingArea();
     await this.loadCablePoints();
+    this.cesiumImageService.loadImages(this.viewer, this.inquiryId);
+    this.cesiumInteractionService.setupClickHandler(this.viewer);
 
     const cameraMoveEndListener = () => {
       this.extractBbox();
@@ -185,7 +187,9 @@ export class CesiumDirective implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+    this.cesiumInteractionService.dispose();
   }
+
   private zoomToCoordinates() {
     if (this.latitude && this.longitude) {
       const position = Cartesian3.fromDegrees(
@@ -444,8 +448,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
   }
-
-  private isDragging = false; // To keep track of the dragging state
 
   /**
    * Enables editing functionality for the Cesium viewer.
