@@ -149,7 +149,6 @@ export class SidenavComponent {
     const inputElement = event.target as HTMLInputElement;
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
-    console.log(this.height);
   }
   /**
    * Updates the position of the selected entity.
@@ -209,7 +208,6 @@ export class SidenavComponent {
 
     if (this.selectedEntity?.properties) {
       const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
-      console.log(this.selectedEntity);
       this.sidenavService.updateHeight(id, hoyde, lat, lon).subscribe(
         response => {
           console.log('Height updated successfully', response);

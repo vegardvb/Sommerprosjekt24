@@ -137,7 +137,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
           }
         } else {
           this.viewer.selectedEntity = undefined;
-          console.log('deselected');
         }
       },
       ScreenSpaceEventType.LEFT_CLICK
@@ -441,7 +440,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
       const pickedObject = this.viewer.scene.pick(movement.position);
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
-        console.log(this.selectedEntity?.properties?.['point_id']._value);
         this.clickedPointId =
           this.selectedEntity?.properties?.['point_id']._value;
         this.selectedEntityChanged.emit(this.selectedEntity);

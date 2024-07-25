@@ -36,7 +36,6 @@ export class SidenavService {
     lon: number
   ): Observable<unknown> {
     const payload = { hoyde, lat, lon };
-    console.log('Payload being sent:', payload); // Log the payload to the console
     return this.http
       .put(`${this.apiUrl}/update-coordinates/${id}`, payload)
       .pipe(catchError(this.handleError));
