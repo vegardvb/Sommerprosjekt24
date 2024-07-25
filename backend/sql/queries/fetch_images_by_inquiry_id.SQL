@@ -63,16 +63,24 @@ SELECT
     ST_AsGeoJSON(
         ST_Transform(ledningsmaaling_innmaaling_bilde.geom, 4326)
     ) AS geom,
+    ledningsmaaling_innmaaling_bilde.tidspunkt,
     vedlegg.bra_arkiv_id,
     vedlegg.beskrivelse,
-    vedlegg.bearing
+    vedlegg.bearing,
+    vedlegg.filnavn
+    
 FROM
     ledningsmaaling_innmaaling_bilde
     JOIN vedlegg ON ledningsmaaling_innmaaling_bilde.bra_arkiv_id = vedlegg.bra_arkiv_id
 WHERE
-    ledningsmaaling_innmaaling_bilde.innmaaling_punkt_id IN (
+    ledningsmaaling_innmaaling_bilde.ledningsmaaling_innmaaling_punkt_id IN (
         SELECT
             id
         FROM
             punkt_data
-    );
+    )
+    AND (
+        vedlegg.filnavn ILIKE '%.png'
+        OR vedlegg.filnavn ILIKE '%.jpg'
+        OR vedlegg.filnavn ILIKE '%.jpeg'
+    )
