@@ -105,7 +105,7 @@ export class CesiumDirective implements OnInit, OnDestroy {
     await this.initializeViewer();
     await this.extractCoordinates();
     this.initializeGlobeClippingPlanes();
-    this.initializeTilesetClippingPlanes();
+    //this.initializeTilesetClippingPlanes();
     await this.loadCables();
     await this.loadWorkingArea();
     await this.loadCablePoints();
@@ -133,6 +133,7 @@ export class CesiumDirective implements OnInit, OnDestroy {
           }
         } else {
           this.viewer.selectedEntity = undefined;
+          console.log('deselected');
         }
       },
       ScreenSpaceEventType.LEFT_CLICK
@@ -224,12 +225,12 @@ export class CesiumDirective implements OnInit, OnDestroy {
       1.0
     );
 
-    try {
-      this.tileset = await Cesium3DTileset.fromIonAssetId(96188);
-      this.viewer.scene.primitives.add(this.tileset);
-    } catch (error) {
-      console.error('Error loading Cesium tileset:', error);
-    }
+    // try {
+    //   this.tileset = await Cesium3DTileset.fromIonAssetId(96188);
+    //   this.viewer.scene.primitives.add(this.tileset);
+    // } catch (error) {
+    //   console.error('Error loading Cesium tileset:', error);
+    // }
   }
 
   private initializeGlobeClippingPlanes(): void {
@@ -434,6 +435,9 @@ export class CesiumDirective implements OnInit, OnDestroy {
       const pickedObject = this.viewer.scene.pick(movement.position);
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
+        console.log(this.selectedEntity?.properties?.['point_id']._value);
+        this.clickedPointId =
+          this.selectedEntity?.properties?.['point_id']._value;
         this.selectedEntityChanged.emit(this.selectedEntity);
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
@@ -453,7 +457,8 @@ export class CesiumDirective implements OnInit, OnDestroy {
       const pickedObject = this.viewer.scene.pick(movement.position);
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
-        this.selectedEntityChanged.emit(pickedObject); // Emit the event
+
+        this.selectedEntityChanged.emit(this.selectedEntity); // Emit the event
 
         // if (defined(this.selectedEntity.position)) {
         //   const originalCoordinatesCartesian =

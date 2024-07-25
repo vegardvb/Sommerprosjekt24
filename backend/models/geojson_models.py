@@ -114,3 +114,8 @@ class FeatureCollection(BaseModel):
             "type": self.type,
             "features": [feature.__geo_interface__ for feature in self.features],
         }
+
+# Pydantic model for the request body
+class UpdateHeight(BaseModel):
+    id: int
+    hoyde: float

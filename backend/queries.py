@@ -6,6 +6,7 @@ import tempfile
 import docker
 from fastapi import HTTPException
 import requests
+from sqlalchemy import text
 from sql_executer import execute_sql
 from common.status_codes import henvendelse_status_dict
 
@@ -122,6 +123,8 @@ def query_points_of_cables_by_inquiry(inquiry_id, connection):
     return [dict(row) for row in result.mappings()]
 
 
+
+
 def fetch_geotiff(bbox: str, width: float, height: float, logger) -> dict:
     """Fetch a GeoTIFF file based on the bounding box and dimensions.
 
@@ -233,3 +236,24 @@ async def process_geotiff(file_path: str, logger) -> dict:
         logger.error(f"Error during terrain tile generation: {e}")
         raise HTTPException(
             status_code=500, detail=f"Error processing GeoTIFF: {e}") from e
+
+
+def query_updateViews(connection):
+    """Query measurement geometry by inquiry.
+
+    Args:
+        inquiry_id (int): The ID of the inquiry.
+        connection: The database connection.
+
+    Returns:
+        list: List of measurement geometry related to the inquiry.
+    """
+    result = execute_sql(
+        connection=connection,
+        main_file_path=f"{
+            QUERY_PATH}refresh_materialized_views.sql",
+        params={},
+    )
+    return result 
+
+

@@ -19,6 +19,7 @@ import {
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 /**
  * Component for the side navigation bar.
@@ -35,6 +36,7 @@ import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-m
     CableMeasurementInfoComponent,
     CommonModule,
     ReactiveFormsModule,
+    MatSnackBarModule,
   ],
 })
 export class SidenavComponent {
@@ -77,7 +79,10 @@ export class SidenavComponent {
     startingWidth: 0,
   };
 
-  constructor(public sidenavService: SidenavService) {}
+  constructor(
+    public sidenavService: SidenavService,
+    private snackBar: MatSnackBar
+  ) {}
 
   /**
    * Starts the resizing of the side navigation bar.
@@ -144,6 +149,7 @@ export class SidenavComponent {
     const inputElement = event.target as HTMLInputElement;
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
+    console.log(this.height);
   }
   /**
    * Updates the position of the selected entity.
@@ -194,6 +200,37 @@ export class SidenavComponent {
 
     // 3. Set the new width
     this.sidenavService.setSidenavWidth(newWidth);
+  }
+
+  saveChanges() {
+    const hoyde = this.height as unknown as number;
+    const lat = this.latitude as unknown as number;
+    const lon = this.longitude as unknown as number;
+
+    if (this.selectedEntity?.properties) {
+      const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
+      console.log(this.selectedEntity);
+      this.sidenavService.updateHeight(id, hoyde, lat, lon).subscribe(
+        response => {
+          console.log('Height updated successfully', response);
+          this.snackBar.open('Changes saved successfully', '', {
+            duration: 3000,
+
+            panelClass: ['custom-snackbar'],
+          });
+          window.location.reload();
+        },
+        error => {
+          console.error('Error updating height', error);
+          this.snackBar.open('Error saving changes', '', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+            panelClass: ['custom-snackbar'],
+          });
+        }
+      );
+    }
   }
 
   /**
