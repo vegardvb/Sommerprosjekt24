@@ -1,4 +1,3 @@
-//variabler
 $color-sidenav-bg: rgb(63, 63, 63);
 $color-edit-btn-bg: #004c97;
 $color-edit-btn-hover-bg: #0056b3;
@@ -10,65 +9,102 @@ $color-resize-handle: rgb(165, 165, 165);
 $color-resize-handle-hover: rgb(93, 159, 235);
 $color-scrollbar-thumb: rgb(209, 209, 209);
 $color-scrollbar-thumb-border: rgb(196, 194, 194);
+$white: #ffffff;
+$spacing-small: 0.5rem;
+$spacing-medium: 1rem;
+$spacing-large: 2rem;
+$border-radius: 5px;
+$color-save-btn: rgb(110, 172, 113);
+$color-hover-save: rgba(149, 255, 152, 0.753);
+$color-hover-close: #f83b3b;
 
+// Mixin for transitions
+@mixin transition($property, $duration, $ease) {
+  transition: $property $duration $ease;
+}
+
+// Sidenav
 .sidenav {
   height: 100vh;
   width: var(--sidenav-width);
-
   box-sizing: border-box;
   position: sticky;
   top: 0;
-
   background-color: $color-sidenav-bg;
 }
 
+// Coordinate Inputs
 .coordinate-inputs {
-  margin-top: 2rem;
+  margin-top: $spacing-large;
 }
+
+// Edit Button
 .edit-btn {
   display: inline-block;
   padding: 10px 20px;
   font-size: 16px;
   font-weight: bold;
-  color: #ffffff;
+  color: $white;
   background-color: $color-edit-btn-bg;
   border: none;
-  border-radius: 5px;
+  border-radius: $border-radius;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  @include transition(background-color, 0.3s, ease);
+
   &:hover {
     background-color: $color-edit-btn-hover-bg;
   }
 }
 
+// Close Button
 .close-btn {
   display: inline-block;
   padding: 10px 20px;
   font-size: 16px;
   font-weight: bold;
-  color: #ffffff;
+  color: $white;
   background-color: $color-close-btn-bg;
   border: none;
-  border-radius: 5px;
+  border-radius: $border-radius;
+  &:hover {
+    background-color: $color-hover-close;
+  }
 }
 
+.save-btn {
+  background-color: $color-save-btn;
+  padding: 10px 20px;
+  border-radius: $border-radius;
+  color: white;
+  margin: 20px;
+  font-weight: bold;
+
+  &:hover {
+    background-color: $color-hover-save;
+  }
+}
+
+// Form Group
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: $spacing-medium;
 }
 
+// Form Label
 .form-label {
   display: block;
   color: $color-form-label;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: $spacing-small;
 }
 
+// Form Control
 .form-control {
   width: 100%;
-  padding: 0.5rem;
+  padding: $spacing-small;
   border: 1px solid $color-form-border;
-  border-radius: 4px;
-  transition: border-color 0.2s;
+  border-radius: $border-radius - 1px;
+  @include transition(border-color, 0.2s, ease);
+
   &:focus {
     border-color: $color-form-focus-border;
     outline: none;
@@ -76,19 +112,17 @@ $color-scrollbar-thumb-border: rgb(196, 194, 194);
   }
 }
 
+// Resize Handle
 .resize-handle {
   height: 100%;
-
   background-color: $color-resize-handle;
   width: 2px;
-
   position: absolute;
   top: 0;
   right: 0;
-
   cursor: ew-resize;
 
-  // these prevent text selection while dragging
+  // Prevent text selection while dragging
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -96,22 +130,18 @@ $color-scrollbar-thumb-border: rgb(196, 194, 194);
   -ms-user-select: none;
   user-select: none;
 
-  transition:
-    background-color 0.2s ease-out,
-    width 0.2s ease-out;
+  @include transition(background-color, 0.2s ease-out, width 0.2s ease-out);
 
   &:hover {
     width: 3px;
     background-color: $color-resize-handle-hover;
   }
+
   &::after {
     content: '';
     display: block;
-
     height: 100%;
-
     width: 24px;
-
     position: absolute;
     right: -12px;
     z-index: 1;
@@ -123,6 +153,7 @@ $color-scrollbar-thumb-border: rgb(196, 194, 194);
   }
 }
 
+// Scrollbar
 *::-webkit-scrollbar {
   width: 12px;
 }
@@ -131,4 +162,16 @@ $color-scrollbar-thumb-border: rgb(196, 194, 194);
   background-color: $color-scrollbar-thumb;
   border-radius: 10px;
   border: 2px solid $color-scrollbar-thumb-border;
+}
+
+.custom-snackbar {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  min-width: 300px;
+  text-align: center;
+  background-color: $color-save-btn;
+  font-size: 16px;
 }

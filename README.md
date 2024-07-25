@@ -53,6 +53,7 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
    - Run the FastAPI server:
 
      ```sh
+     cd backend
      uvicorn main:app --reload
      ```
 

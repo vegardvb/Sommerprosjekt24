@@ -18,7 +18,6 @@
 <app-sidenav class="sidenav"></app-sidenav>
 <div class="map" id="cesiumContainer" appCesium>
   <div class="controls">
-    <label for="translucencySlider">Opacity:</label>
     <input
       type="range"
       id="translucencySlider"
@@ -44,6 +43,14 @@
         (change)="togglePolygons($event)"
       />
       View Workarea
+    </label>
+    <label>
+      <input
+        type="checkbox"
+        [checked]="billboardsVisible"
+        (change)="toggleBillboards($event)"
+      />
+      View Images
     </label>
   </div>
 </div>

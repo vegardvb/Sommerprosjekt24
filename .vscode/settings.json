@@ -1,25 +1,50 @@
 {
   "editor.formatOnSave": true,
-
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "always"
+    "source.fixAll.eslint": "always",
+    "source.fixAll": "always",
+    "source.fixAll.markdownlint": "always"
   },
-
   "files.eol": "\r\n",
-
   "eslint.options": {
-    "extensions": [".js", ".jsx", ".ts", ".tsx"]
+    "extensions": [".js", ".jsx", ".ts", ".tsx", ".html"]
   },
-
   "eslint.validate": [
     "javascript",
-
     "javascriptreact",
-
     "typescript",
-
-    "typescriptreact"
+    "typescriptreact",
+    "html"
   ],
-
-  "prettier.requireConfig": true
+  "prettier.requireConfig": true,
+  "prettier.withNodeModules": true,
+  "prettier.singleQuote": true,
+  "prettier.singleAttributePerLine": true,
+  "prettier.endOfLine": "crlf",
+  "prettier.jsxSingleQuote": true,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8",
+    "editor.formatOnSave": true
+  },
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "adpyke.vscode-sql-formatter",
+    "editor.formatOnSave": true
+  },
+  "tailwindCSS.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "typescript.updateImportsOnFileMove.enabled": "always"
 }

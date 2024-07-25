@@ -19,6 +19,7 @@ import {
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 /**
  * Component for the side navigation bar.
@@ -29,11 +30,13 @@ import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-m
   templateUrl: './sidenav.component.html',
   styleUrl: './sidenav.component.scss',
   encapsulation: ViewEncapsulation.None,
+
   imports: [
     SidenavLinkComponent,
     CableMeasurementInfoComponent,
     CommonModule,
     ReactiveFormsModule,
+    MatSnackBarModule,
   ],
 })
 export class SidenavComponent {
@@ -76,7 +79,10 @@ export class SidenavComponent {
     startingWidth: 0,
   };
 
-  constructor(public sidenavService: SidenavService) {}
+  constructor(
+    public sidenavService: SidenavService,
+    private snackBar: MatSnackBar
+  ) {}
 
   /**
    * Starts the resizing of the side navigation bar.
@@ -94,7 +100,7 @@ export class SidenavComponent {
    * Updates the selected entity.
    * @param entity - The entity to update.
    */
-  updateSelectedEntity(entity: Entity): void {
+  updateSelectedEntity(entity: Entity) {
     this.selectedEntity = entity;
     const position = this.selectedEntity.position?.getValue(JulianDate.now());
     if (position) {
@@ -108,7 +114,7 @@ export class SidenavComponent {
   /**
    * Clears the selected entity.
    */
-  clearSelectedEntity(): void {
+  clearSelectedEntity() {
     this.selectedEntity = null;
     this.longitude = 0;
     this.latitude = 0;
@@ -119,7 +125,7 @@ export class SidenavComponent {
    * Handles the change event for the longitude input.
    * @param event - The change event.
    */
-  onLongitudeChange(event: Event): void {
+  onLongitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.longitude = Number(inputElement.value);
     this.updateEntityPosition();
@@ -129,7 +135,7 @@ export class SidenavComponent {
    * Handles the change event for the latitude input.
    * @param event - The change event.
    */
-  onLatitudeChange(event: Event): void {
+  onLatitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.latitude = Number(inputElement.value);
     this.updateEntityPosition();
@@ -139,17 +145,17 @@ export class SidenavComponent {
    * Handles the change event for the height input.
    * @param event - The change event.
    */
-  onHeightChange(event: Event): void {
+  onHeightChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
+    console.log(this.height);
   }
-
   /**
    * Updates the position of the selected entity.
    * If there is a selected entity, it updates its position based on the longitude, latitude, and height values.
    */
-  private updateEntityPosition(): void {
+  private updateEntityPosition() {
     if (this.selectedEntity) {
       const newPosition = Cartesian3.fromDegrees(
         this.longitude,
@@ -159,19 +165,17 @@ export class SidenavComponent {
       this.selectedEntity.position = new ConstantPositionProperty(newPosition);
     }
   }
-
   /**
    * Toggles the editing mode.
    */
-  toggleEditing(): void {
+  toggleEditing() {
     this.isEditing = !this.isEditing;
     this.editingToggled.emit(this.isEditing);
   }
-
   /**
    * Closes the editor.
    */
-  closeEditor(): void {
+  closeEditor() {
     this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
     this.isEditing = false;
     this.editingToggled.emit(this.isEditing);
@@ -196,6 +200,37 @@ export class SidenavComponent {
 
     // 3. Set the new width
     this.sidenavService.setSidenavWidth(newWidth);
+  }
+
+  saveChanges() {
+    const hoyde = this.height as unknown as number;
+    const lat = this.latitude as unknown as number;
+    const lon = this.longitude as unknown as number;
+
+    if (this.selectedEntity?.properties) {
+      const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
+      console.log(this.selectedEntity);
+      this.sidenavService.updateHeight(id, hoyde, lat, lon).subscribe(
+        response => {
+          console.log('Height updated successfully', response);
+          this.snackBar.open('Changes saved successfully', '', {
+            duration: 3000,
+
+            panelClass: ['custom-snackbar'],
+          });
+          window.location.reload();
+        },
+        error => {
+          console.error('Error updating height', error);
+          this.snackBar.open('Error saving changes', '', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+            panelClass: ['custom-snackbar'],
+          });
+        }
+      );
+    }
   }
 
   /**

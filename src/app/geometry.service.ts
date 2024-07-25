@@ -35,7 +35,6 @@ export class GeometryService {
       catchError(this.handleError)
     );
   }
-
   /**
    * Handles any errors that occur during the HTTP request.
    * @param error The error that occurred.
