@@ -7,6 +7,7 @@ import {
   OnInit,
   Output,
   OnDestroy,
+  Inject,
 } from '@angular/core';
 import {
   Cartesian2,
@@ -81,6 +82,7 @@ export class CesiumDirective implements OnInit, OnDestroy {
   constructor(
     private el: ElementRef,
     private route: ActivatedRoute,
+    @Inject(ClickedPointService)
     private clickedPointService: ClickedPointService
   ) {}
 
