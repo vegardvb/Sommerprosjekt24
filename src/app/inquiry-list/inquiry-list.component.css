@@ -30,6 +30,7 @@ body {
 tr {
   background-color: #91b6ff09;
 }
+
 tr:hover {
   background-color: #004e9c3f;
 }
@@ -57,4 +58,23 @@ tr:hover {
 #end_date {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
+}
+
+a.inline-block,
+a.no-pointer {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  cursor: default; /* Ensures standard cursor */
+}
+
+img.block {
+  display: block;
+  width: 50px; /* Reduced width */
+  height: auto;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
 }
