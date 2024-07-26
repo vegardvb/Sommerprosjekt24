@@ -29,19 +29,19 @@ export class SidenavService {
     document.body.style.setProperty('--sidenav-width', `${clampedWidth}px`);
   }
 
-  updateHeight(
-    id: number,
+  updateCoordinates(
+    edited_point_id: number,
     hoyde: number,
     lat: number,
     lon: number
   ): Observable<unknown> {
     const payload = { hoyde, lat, lon };
     return this.http
-      .put(`${this.apiUrl}/update-coordinates/${id}`, payload)
+      .put(`${this.apiUrl}/update-coordinates/${edited_point_id}`, payload)
       .pipe(catchError(this.handleError));
   }
   private handleError(error: Error): Observable<never> {
-    console.error('An error occurred:', error.message);
+    console.error('Error with updating coordinates:', error.message);
     return throwError(
       () => new Error('Something bad happened; please try again later.')
     );

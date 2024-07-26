@@ -20,7 +20,6 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { GeojsonDropComponent } from '../geojson-drop/geojson-drop.component';
 
 /**
  * Component for the side navigation bar.
@@ -38,7 +37,6 @@ import { GeojsonDropComponent } from '../geojson-drop/geojson-drop.component';
     CommonModule,
     ReactiveFormsModule,
     MatSnackBarModule,
-    GeojsonDropComponent,
   ],
 })
 export class SidenavComponent {
@@ -49,7 +47,10 @@ export class SidenavComponent {
   latitude: number = 0;
   height: number = 0;
   isEditing: boolean = false;
+  allowDrop = false;
+  geoJsonText = '';
   @Output() editingToggled = new EventEmitter<boolean>();
+  @Output() geoJsonUpload = new EventEmitter<object>();
 
   /**
    * Gets the current width of the side navigation bar.
@@ -152,6 +153,7 @@ export class SidenavComponent {
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
   }
+
   /**
    * Updates the position of the selected entity.
    * If there is a selected entity, it updates its position based on the longitude, latitude, and height values.
@@ -182,6 +184,42 @@ export class SidenavComponent {
     this.editingToggled.emit(this.isEditing);
   }
 
+  toggleGeoJSONtextfield() {
+    this.allowDrop = !this.allowDrop;
+  }
+
+  onGeoJsonChange(event: Event) {
+    const inputElement = event.target as HTMLTextAreaElement;
+    this.geoJsonText = inputElement.value;
+  }
+
+  uploadGeoJSON() {
+    try {
+      const geoJsonObject = JSON.parse(this.geoJsonText);
+
+      // Perform basic validation to check if it's a valid GeoJSON
+      if (
+        geoJsonObject.type &&
+        (geoJsonObject.type === 'FeatureCollection' ||
+          geoJsonObject.type === 'Feature')
+      ) {
+        this.geoJsonUpload.emit(geoJsonObject);
+        this.snackBar.open('GeoJSON was added to map!', '', {
+          duration: 3000,
+          panelClass: ['custom-snackbar'],
+        });
+      } else {
+        throw new Error('Invalid GeoJSON format');
+      }
+    } catch (error) {
+      console.error('Invalid GeoJSON:');
+      this.snackBar.open('Please enter a valid GeoJSON', '', {
+        duration: 3000,
+        panelClass: ['custom-snackbar'],
+      });
+    }
+  }
+
   /**
    * Updates the width of the side navigation bar during resizing.
    * @param event - The mouse event.
@@ -210,18 +248,15 @@ export class SidenavComponent {
 
     if (this.selectedEntity?.properties) {
       const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
-      this.sidenavService.updateHeight(id, hoyde, lat, lon).subscribe(
-        response => {
-          console.log('Height updated successfully', response);
+      this.sidenavService.updateCoordinates(id, hoyde, lat, lon).subscribe(
+        () => {
           this.snackBar.open('Changes saved successfully', '', {
             duration: 3000,
-
             panelClass: ['custom-snackbar'],
           });
           window.location.reload();
         },
-        error => {
-          console.error('Error updating height', error);
+        () => {
           this.snackBar.open('Error saving changes', '', {
             duration: 3000,
             horizontalPosition: 'center',

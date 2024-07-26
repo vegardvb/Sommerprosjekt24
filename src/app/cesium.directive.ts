@@ -7,6 +7,8 @@ import {
   Output,
   OnDestroy,
   Inject,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import {
   Cartesian2,
@@ -57,9 +59,10 @@ proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
  * Represents a Cesium directive that provides a Cesium viewer for 3D visualization of a cable network.
  * This directive initializes the Cesium viewer, loads the necessary data, and handles user interactions.
  */
-export class CesiumDirective implements OnInit, OnDestroy {
+export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   @Input()
   alpha!: number;
+  @Input() geoJson!: string;
   tileset!: Cesium3DTileset;
   polygons: Entity[] = [];
   @Output() bboxExtracted = new EventEmitter<string>();
@@ -107,7 +110,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
     await this.initializeViewer();
     await this.extractCoordinates();
     this.initializeGlobeClippingPlanes();
-    //this.initializeTilesetClippingPlanes();
     await this.loadCables();
     await this.loadWorkingArea();
     await this.loadCablePoints();
@@ -184,6 +186,12 @@ export class CesiumDirective implements OnInit, OnDestroy {
     );
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['geoJson']) {
+      this.handleGeoJsonUpload(changes['geoJson'].currentValue);
+    }
+  }
+
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
     this.cesiumInteractionService.dispose();
@@ -229,13 +237,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
       2000.0,
       1.0
     );
-
-    // try {
-    //   this.tileset = await Cesium3DTileset.fromIonAssetId(96188);
-    //   this.viewer.scene.primitives.add(this.tileset);
-    // } catch (error) {
-    //   console.error('Error loading Cesium tileset:', error);
-    // }
   }
 
   private initializeGlobeClippingPlanes(): void {
@@ -261,31 +262,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
     });
 
     this.viewer.scene.globe.clippingPlanes = globeClippingPlanes;
-  }
-
-  private initializeTilesetClippingPlanes(): void {
-    if (!this.center) {
-      console.error(
-        'Center is not defined. Clipping planes initialization skipped.'
-      );
-      return;
-    }
-
-    const tilesetClippingPlanes = new ClippingPlaneCollection({
-      modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
-      planes: [
-        new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), this.width),
-        new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), this.width),
-        new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), this.height),
-        new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), this.height),
-      ],
-      unionClippingRegions: true,
-      edgeWidth: 1,
-      edgeColor: Color.RED,
-      enabled: true,
-    });
-
-    this.tileset.clippingPlanes = tilesetClippingPlanes;
   }
 
   /**
@@ -723,6 +699,28 @@ export class CesiumDirective implements OnInit, OnDestroy {
     } else {
       this.disableEditing();
     }
+  }
+
+  public async handleGeoJsonUpload(geoJsonText: object) {
+    const dataSource = await GeoJsonDataSource.load(geoJsonText, {
+      stroke: Color.BLUEVIOLET,
+      fill: Color.BLUEVIOLET.withAlpha(1),
+      strokeWidth: 3,
+      markerSize: 1, // Size of the marker
+      credit: 'Provided by Jess',
+    });
+
+    this.viewer.dataSources.add(dataSource);
+    this.viewer.zoomTo(dataSource);
+    // Add picking and moving functionality to cables
+    dataSource.entities.values.forEach(entity => {
+      if (entity.polygon) {
+        entity.polygon.heightReference =
+          HeightReference.CLAMP_TO_GROUND as unknown as Property;
+        this.polygons.push(entity);
+        this.viewer.entities.add(entity);
+      }
+    });
   }
 
   /**

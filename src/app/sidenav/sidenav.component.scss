@@ -23,6 +23,7 @@ $color-hover-close: #f83b3b;
   transition: $property $duration $ease;
 }
 
+
 // Sidenav
 .sidenav {
   height: 100vh;
@@ -81,6 +82,39 @@ $color-hover-close: #f83b3b;
 
   &:hover {
     background-color: $color-hover-save;
+  }
+}
+.json-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: $white;
+  background-color: $color-edit-btn-bg;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  @include transition(background-color, 0.3s, ease);
+
+  &:hover {
+    background-color: $color-edit-btn-hover-bg;
+  }
+}
+.geojson-textarea {
+  width: 100%;
+  max-width: 500px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  resize: none;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
   }
 }
 

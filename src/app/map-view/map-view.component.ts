@@ -29,12 +29,14 @@ export class MapViewComponent implements OnInit, OnDestroy {
   polygonsVisible: boolean = true;
   Math!: Math;
   inquiryId: number | undefined;
+  geoJsonData!: string;
 
   private viewer!: Viewer;
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
   private entitySubscription: Subscription | undefined;
   private editingSubscription: Subscription | undefined;
+  private geoJsonSubscription: Subscription | undefined;
   public billboardsVisible: boolean = true;
 
   /**
@@ -69,6 +71,11 @@ export class MapViewComponent implements OnInit, OnDestroy {
         this.cesiumDirective.setEditingMode(isEditing);
       }
     );
+    this.geoJsonSubscription = this.sidenavComponent.geoJsonUpload.subscribe(
+      geoJsonData => {
+        this.cesiumDirective.handleGeoJsonUpload(geoJsonData);
+      }
+    );
   }
 
   /**
@@ -86,6 +93,9 @@ export class MapViewComponent implements OnInit, OnDestroy {
     }
     if (this.editingSubscription) {
       this.editingSubscription.unsubscribe();
+    }
+    if (this.geoJsonSubscription) {
+      this.geoJsonSubscription.unsubscribe();
     }
   }
 

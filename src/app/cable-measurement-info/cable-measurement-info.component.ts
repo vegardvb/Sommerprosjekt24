@@ -147,8 +147,6 @@ export class CableMeasurementInfoComponent implements OnInit {
     this.editMode = !this.editMode;
 
     if (!this.editMode) {
-      console.log('Save changes');
-
       const editedFeatures: { [key: string]: string } = {};
 
       const editableElements = document.querySelectorAll('.editable');
@@ -160,10 +158,6 @@ export class CableMeasurementInfoComponent implements OnInit {
           editedFeatures[id] = editableElement.innerText.trim();
         }
       });
-
-      console.log('Edited features:', editedFeatures);
-    } else {
-      console.log('Edit mode enabled');
     }
   }
 }
