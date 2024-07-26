@@ -7,7 +7,6 @@ import json
 
 import os
 import sys
-from backend.models.geojson_models import CoordinateUpdate
 from queries import (
     query_images_by_inquiry_id,
     query_inquiries,
@@ -24,6 +23,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import select, update, func
+from models.geojson_models import CoordinateUpdate
 # Add the project root directory to the system path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
