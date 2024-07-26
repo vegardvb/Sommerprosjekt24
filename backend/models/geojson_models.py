@@ -114,3 +114,10 @@ class FeatureCollection(BaseModel):
             "type": self.type,
             "features": [feature.__geo_interface__ for feature in self.features],
         }
+
+
+class CoordinateUpdate(BaseModel):
+    """ Data model for height update."""
+    hoyde: float
+    lat: float
+    lon: float

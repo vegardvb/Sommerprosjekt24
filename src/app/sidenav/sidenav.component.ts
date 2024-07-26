@@ -19,6 +19,7 @@ import {
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 /**
  * Component for the side navigation bar.
@@ -35,6 +36,7 @@ import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-m
     CableMeasurementInfoComponent,
     CommonModule,
     ReactiveFormsModule,
+    MatSnackBarModule,
   ],
 })
 export class SidenavComponent {
@@ -77,7 +79,10 @@ export class SidenavComponent {
     startingWidth: 0,
   };
 
-  constructor(public sidenavService: SidenavService) {}
+  constructor(
+    public sidenavService: SidenavService,
+    private snackBar: MatSnackBar
+  ) {}
 
   /**
    * Starts the resizing of the side navigation bar.
@@ -194,6 +199,33 @@ export class SidenavComponent {
 
     // 3. Set the new width
     this.sidenavService.setSidenavWidth(newWidth);
+  }
+
+  saveChanges() {
+    const hoyde = this.height as unknown as number;
+    const lat = this.latitude as unknown as number;
+    const lon = this.longitude as unknown as number;
+
+    if (this.selectedEntity?.properties) {
+      const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
+      this.sidenavService.updateCoordinates(id, hoyde, lat, lon).subscribe(
+        () => {
+          this.snackBar.open('Changes saved successfully', '', {
+            duration: 3000,
+            panelClass: ['custom-snackbar'],
+          });
+          window.location.reload();
+        },
+        () => {
+          this.snackBar.open('Error saving changes', '', {
+            duration: 3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'top',
+            panelClass: ['custom-snackbar'],
+          });
+        }
+      );
+    }
   }
 
   /**

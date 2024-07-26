@@ -6,6 +6,7 @@ import tempfile
 import docker
 from fastapi import HTTPException
 import requests
+from sqlalchemy import text
 from sql_executer import execute_sql
 from common.status_codes import henvendelse_status_dict
 
@@ -261,3 +262,22 @@ def query_images_by_inquiry_id(inquiry_id, logger, connection):
         logger.error(f"Error querying images for inquiry {inquiry_id}: {e}")
         raise HTTPException(
             status_code=500, detail="Internal Server Error, Can't get images by inquiry id") from e
+
+
+def query_update_views(connection):
+    """Query measurement geometry by inquiry.
+
+    Args:
+        inquiry_id (int): The ID of the inquiry.
+        connection: The database connection.
+
+    Returns:
+        list: List of measurement geometry related to the inquiry.
+    """
+    result = execute_sql(
+        connection=connection,
+        main_file_path=f"{
+            QUERY_PATH}update_queries/refresh_materialized_views.sql",
+        params={},
+    )
+    return result
