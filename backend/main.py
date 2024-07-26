@@ -175,9 +175,9 @@ def get_images_by_inquiry(inquiry_id: int, connection=Depends(get_db_public)):
             status_code=500, detail="Internal Server Error") from e
 
 
-@app.put("/update-coordinates/{id}")
+@app.put("/update-coordinates/{edited_point_id}")
 def update_height(
-    id: int,
+    edited_point_id: int,
     coordinate_update: CoordinateUpdate,
     db: Session = Depends(get_db_public)
 ):
@@ -195,7 +195,7 @@ def update_height(
     try:
         # Fetch the current metadata
         stmt = select(ledningsmaaling_innmaaling_punkt.c.metadata).where(
-            ledningsmaaling_innmaaling_punkt.c.id == id)
+            ledningsmaaling_innmaaling_punkt.c.id == edited_point_id)
         current_data = db.execute(stmt).fetchone()
 
         if not current_data:
@@ -226,7 +226,7 @@ def update_height(
         # Create the update statement
         stmt = (
             update(ledningsmaaling_innmaaling_punkt)
-            .where(ledningsmaaling_innmaaling_punkt.c.id == id)
+            .where(ledningsmaaling_innmaaling_punkt.c.id == edited_point_id)
             .values(hoyde=coordinate_update.hoyde, metadata=updated_metadata, geom=new_geom)
         )
 
@@ -239,7 +239,7 @@ def update_height(
             raise HTTPException(status_code=404, detail="Item not found")
 
         return {"message": "Height, coordinates, and metadata updated successfully",
-                "id": id,
+                "id": edited_point_id,
                 "new_height": coordinate_update.hoyde,
                 "new_lat": coordinate_update.lat,
                 "new_lon": coordinate_update.lon}

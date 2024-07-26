@@ -30,14 +30,14 @@ export class SidenavService {
   }
 
   updateCoordinates(
-    id: number,
+    edited_point_id: number,
     hoyde: number,
     lat: number,
     lon: number
   ): Observable<unknown> {
     const payload = { hoyde, lat, lon };
     return this.http
-      .put(`${this.apiUrl}/update-coordinates/${id}`, payload)
+      .put(`${this.apiUrl}/update-coordinates/${edited_point_id}`, payload)
       .pipe(catchError(this.handleError));
   }
   private handleError(error: Error): Observable<never> {
