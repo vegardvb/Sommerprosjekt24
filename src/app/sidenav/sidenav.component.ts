@@ -20,6 +20,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { GeojsonDropComponent } from '../geojson-drop/geojson-drop.component';
 
 /**
  * Component for the side navigation bar.
@@ -37,6 +38,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     CommonModule,
     ReactiveFormsModule,
     MatSnackBarModule,
+    GeojsonDropComponent,
   ],
 })
 export class SidenavComponent {
