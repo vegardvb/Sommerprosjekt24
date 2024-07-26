@@ -14,7 +14,7 @@ import { lastValueFrom } from 'rxjs';
   providedIn: 'root',
 })
 export class CesiumImageService {
-  private billboards: Entity[] = [];
+  public billboards: Entity[] = [];
 
   constructor(private imageService: ImageService) {}
 

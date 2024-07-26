@@ -39,7 +39,7 @@ import { ActivatedRoute } from '@angular/router';
 import proj4 from 'proj4';
 import * as turf from '@turf/turf';
 import { Subscription, lastValueFrom } from 'rxjs';
-import { CablePointsService } from './services/cable_points.service';
+import { CablePointsService } from './services/cable-points.service';
 import { ClickedPointService } from './services/clickedpoint.service';
 import { WorkingAreaService } from './services/workingarea.service';
 import { CesiumImageService } from './services/image/cesium-image.service';
@@ -88,6 +88,7 @@ export class CesiumDirective implements OnInit, OnDestroy {
     private clickedPointService: ClickedPointService,
     private cesiumInteractionService: CesiumInteractionService,
     private cesiumImageService: CesiumImageService,
+    @Inject(CableMeasurementService)
     private cableMeasurementService: CableMeasurementService,
     private geometryService: GeometryService,
     private workingAreaService: WorkingAreaService,
