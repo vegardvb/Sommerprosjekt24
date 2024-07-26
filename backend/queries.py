@@ -123,8 +123,6 @@ def query_points_of_cables_by_inquiry(inquiry_id, connection):
     return [dict(row) for row in result.mappings()]
 
 
-
-
 def fetch_geotiff(bbox: str, width: float, height: float, logger) -> dict:
     """Fetch a GeoTIFF file based on the bounding box and dimensions.
 
@@ -266,7 +264,7 @@ def query_images_by_inquiry_id(inquiry_id, logger, connection):
             status_code=500, detail="Internal Server Error, Can't get images by inquiry id") from e
 
 
-def query_updateViews(connection):
+def query_update_views(connection):
     """Query measurement geometry by inquiry.
 
     Args:
@@ -279,7 +277,7 @@ def query_updateViews(connection):
     result = execute_sql(
         connection=connection,
         main_file_path=f"{
-            QUERY_PATH}refresh_materialized_views.sql",
+            QUERY_PATH}refresh_queries/refresh_materialized_views.sql",
         params={},
     )
     return result 
