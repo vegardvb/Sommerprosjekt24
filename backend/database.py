@@ -3,8 +3,8 @@ This module provides functionality for connecting to the database.
 """
 import os
 from sqlalchemy import ResultProxy, create_engine, text, MetaData, Table, Column, Integer, String, Float, DateTime
-from dotenv import load_dotenv
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 

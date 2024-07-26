@@ -7,6 +7,7 @@ module.exports = {
         customBlue: " #004C97",
         footerColor: "#C0CCD9",
         offwhite: "#FAF9F6",
+        hoverBlue: "#0d61b5",
 
       },
     },
