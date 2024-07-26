@@ -7,6 +7,7 @@ import json
  
 import os
 import sys
+from models.geojson_models import CoordinateUpdate
 from queries import (
     query_images_by_inquiry_id,
     query_inquiries,
@@ -16,7 +17,7 @@ from queries import (
     query_points_of_cables_by_inquiry,
     fetch_geotiff,
     process_geotiff, 
-    query_updateViews
+    query_update_views,
 )
 from database import get_db, get_db_public
 from fastapi import FastAPI, Depends, HTTPException
@@ -175,11 +176,7 @@ def get_images_by_inquiry(inquiry_id: int, connection=Depends(get_db_public)):
             status_code=500, detail="Internal Server Error") from e
 
  
-class CoordinateUpdate(BaseModel):
-    """ Data model for height update."""
-    hoyde: float
-    lat: float
-    lon: float
+
  
 @app.put("/update-coordinates/{id}")
 def update_height(id: int, coordinate_update: CoordinateUpdate, db: Session = Depends(get_db_public)):
@@ -230,7 +227,7 @@ def update_height(id: int, coordinate_update: CoordinateUpdate, db: Session = De
  
         # Execute the update statement
         result = db.execute(stmt)
-        query_updateViews(db)
+        query_update_views(db)
         db.commit()
  
         if result.rowcount == 0:

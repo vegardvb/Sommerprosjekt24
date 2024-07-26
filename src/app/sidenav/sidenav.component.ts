@@ -209,8 +209,7 @@ export class SidenavComponent {
     if (this.selectedEntity?.properties) {
       const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
       this.sidenavService.updateHeight(id, hoyde, lat, lon).subscribe(
-        response => {
-          console.log('Height updated successfully', response);
+        () => {
           this.snackBar.open('Changes saved successfully', '', {
             duration: 3000,
 
@@ -218,8 +217,7 @@ export class SidenavComponent {
           });
           window.location.reload();
         },
-        error => {
-          console.error('Error updating height', error);
+        () => {
           this.snackBar.open('Error saving changes', '', {
             duration: 3000,
             horizontalPosition: 'center',
