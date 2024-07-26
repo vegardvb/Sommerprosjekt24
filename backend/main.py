@@ -7,7 +7,6 @@ import json
 
 import os
 import sys
-from models.geojson_models import CoordinateUpdate
 from queries import (
     query_images_by_inquiry_id,
     query_inquiries,
