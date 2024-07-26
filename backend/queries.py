@@ -6,7 +6,6 @@ import tempfile
 import docker
 from fastapi import HTTPException
 import requests
-from sqlalchemy import text
 from sql_executer import execute_sql
 from common.status_codes import henvendelse_status_dict
 
