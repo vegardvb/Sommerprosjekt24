@@ -1,7 +1,9 @@
+"""
+This module provides functionality for connecting to the database.
+"""
 import os
-from sqlalchemy import ResultProxy, create_engine, text
+from sqlalchemy import ResultProxy, create_engine, text, MetaData, Table, Column, Integer, String, Float, DateTime
 from dotenv import load_dotenv
-from sqlalchemy import MetaData, Table, Column, Integer, String, Float, DateTime
 from sqlalchemy.orm import sessionmaker
 # Load environment variables from .env file
 load_dotenv()
@@ -45,23 +47,23 @@ def get_db_public():
         connection = connection.execution_options(mapper=ResultProxy.mappings)
         connection.execute(text(f"SET search_path TO {SCHEMA_PUBLIC}"))
         yield connection
- 
- 
+
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 metadata = MetaData()
 metadata = MetaData()
- 
+
 ledningsmaaling_innmaaling_punkt = Table(
     "ledningsmaaling_innmaaling_punkt",
     metadata,
     Column("id", Integer, primary_key=True, index=True),
     Column("navn", String),
     Column("bruker_id", Integer),
-    Column("geom", String),  
-    Column("survey_geom", String),  
+    Column("geom", String),
+    Column("survey_geom", String),
     Column("noyaktighet_z", Float),
     Column("hoyde", Float),
     Column("tidpunkt", DateTime),
-    Column("metadata", String)  
+    Column("metadata", String)
 )
 metadata.create_all(bind=engine)

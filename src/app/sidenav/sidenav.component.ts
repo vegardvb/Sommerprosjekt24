@@ -209,21 +209,17 @@ export class SidenavComponent {
 
     if (this.selectedEntity?.properties) {
       const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
-      console.log(this.selectedEntity);
-      this.sidenavService.updateHeight(id, hoyde, lat, lon).subscribe(
-        response => {
-          console.log('Height updated successfully', response);
+      this.sidenavService.updateCoordinates(id, hoyde, lat, lon).subscribe(
+        () => {
           this.snackBar.open('Changes saved successfully', '', {
-            duration: 4000,
-
+            duration: 3000,
             panelClass: ['custom-snackbar'],
           });
           window.location.reload();
         },
-        error => {
-          console.error('Error updating height', error);
+        () => {
           this.snackBar.open('Error saving changes', '', {
-            duration: 4000,
+            duration: 3000,
             horizontalPosition: 'center',
             verticalPosition: 'top',
             panelClass: ['custom-snackbar'],

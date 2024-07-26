@@ -107,7 +107,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
     await this.initializeViewer();
     await this.extractCoordinates();
     this.initializeGlobeClippingPlanes();
-    //this.initializeTilesetClippingPlanes();
     await this.loadCables();
     await this.loadWorkingArea();
     await this.loadCablePoints();
@@ -230,13 +229,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
       2000.0,
       1.0
     );
-
-    // try {
-    //   this.tileset = await Cesium3DTileset.fromIonAssetId(96188);
-    //   this.viewer.scene.primitives.add(this.tileset);
-    // } catch (error) {
-    //   console.error('Error loading Cesium tileset:', error);
-    // }
   }
 
   private initializeGlobeClippingPlanes(): void {
@@ -262,31 +254,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
     });
 
     this.viewer.scene.globe.clippingPlanes = globeClippingPlanes;
-  }
-
-  private initializeTilesetClippingPlanes(): void {
-    if (!this.center) {
-      console.error(
-        'Center is not defined. Clipping planes initialization skipped.'
-      );
-      return;
-    }
-
-    const tilesetClippingPlanes = new ClippingPlaneCollection({
-      modelMatrix: Transforms.eastNorthUpToFixedFrame(this.center),
-      planes: [
-        new ClippingPlane(new Cartesian3(1.0, 0.0, 0.0), this.width),
-        new ClippingPlane(new Cartesian3(-1.0, 0.0, 0.0), this.width),
-        new ClippingPlane(new Cartesian3(0.0, 1.0, 0.0), this.height),
-        new ClippingPlane(new Cartesian3(0.0, -1.0, 0.0), this.height),
-      ],
-      unionClippingRegions: true,
-      edgeWidth: 1,
-      edgeColor: Color.RED,
-      enabled: true,
-    });
-
-    this.tileset.clippingPlanes = tilesetClippingPlanes;
   }
 
   /**
@@ -441,7 +408,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
       const pickedObject = this.viewer.scene.pick(movement.position);
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
-        console.log(this.selectedEntity?.properties?.['point_id']._value);
         this.clickedPointId =
           this.selectedEntity?.properties?.['point_id']._value;
         this.selectedEntityChanged.emit(this.selectedEntity);
