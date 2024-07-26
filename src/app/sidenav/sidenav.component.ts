@@ -214,7 +214,7 @@ export class SidenavComponent {
         response => {
           console.log('Height updated successfully', response);
           this.snackBar.open('Changes saved successfully', '', {
-            duration: 3000,
+            duration: 4000,
 
             panelClass: ['custom-snackbar'],
           });
@@ -223,7 +223,7 @@ export class SidenavComponent {
         error => {
           console.error('Error updating height', error);
           this.snackBar.open('Error saving changes', '', {
-            duration: 3000,
+            duration: 4000,
             horizontalPosition: 'center',
             verticalPosition: 'top',
             panelClass: ['custom-snackbar'],
