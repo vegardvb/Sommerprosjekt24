@@ -12,7 +12,7 @@ $color-scrollbar-thumb-border: rgb(196, 194, 194);
 $white: #ffffff;
 $spacing-small: 0.5rem;
 $spacing-medium: 1rem;
-$spacing-large: 2rem;
+$spacing-large: 1rem;
 $border-radius: 5px;
 $color-save-btn: rgb(110, 172, 113);
 $color-hover-save: rgba(149, 255, 152, 0.753);
@@ -120,7 +120,7 @@ $color-hover-close: #f83b3b;
 
 // Form Group
 .form-group {
-  margin-bottom: $spacing-medium;
+  margin-bottom: $spacing-small;
 }
 
 // Form Label

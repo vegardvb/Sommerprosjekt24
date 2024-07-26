@@ -703,8 +703,8 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
 
   public async handleGeoJsonUpload(geoJsonText: object) {
     const dataSource = await GeoJsonDataSource.load(geoJsonText, {
-      stroke: Color.BLUEVIOLET,
-      fill: Color.BLUEVIOLET.withAlpha(1),
+      stroke: Color.TURQUOISE,
+      fill: Color.TURQUOISE.withAlpha(1),
       strokeWidth: 3,
       markerSize: 1, // Size of the marker
       credit: 'Provided by Jess',
