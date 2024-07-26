@@ -7,6 +7,7 @@ import json
 
 import os
 import sys
+from backend.models.geojson_models import CoordinateUpdate
 from queries import (
     query_images_by_inquiry_id,
     query_inquiries,
@@ -23,7 +24,6 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import select, update, func
-from models.geojson_models import CoordinateUpdate
 # Add the project root directory to the system path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
@@ -251,11 +251,11 @@ def update_height(
         raise HTTPException(
             status_code=500, detail="An error occurred while updating the metadata") from e
 
-@app.put("/update-coordinates/{id}")
-def update_coordinates(id: int, coordinate_update: CoordinateUpdate, db: Session = Depends(get_db_public)):
+@app.put("/update-coordinates/{edited_point_id}")
+def update_coordinates(edited__point_id: int, coordinate_update: CoordinateUpdate, db: Session = Depends(get_db_public)):
     try:
         # Fetch the current metadata
-        stmt = select(ledningsmaaling_innmaaling_punkt.c.metadata).where(ledningsmaaling_innmaaling_punkt.c.id == id)
+        stmt = select(ledningsmaaling_innmaaling_punkt.c.metadata).where(ledningsmaaling_innmaaling_punkt.c.id == edited__point_id)
         current_data = db.execute(stmt).fetchone()
         
         if not current_data:
@@ -297,7 +297,7 @@ def update_coordinates(id: int, coordinate_update: CoordinateUpdate, db: Session
         # Create the update statement
         stmt = (
             update(ledningsmaaling_innmaaling_punkt)
-            .where(ledningsmaaling_innmaaling_punkt.c.id == id)
+            .where(ledningsmaaling_innmaaling_punkt.c.id == edited__point_id)
             .values(hoyde=coordinate_update.hoyde, metadata=updated_metadata, geom=new_geom)
         )
         
@@ -309,7 +309,7 @@ def update_coordinates(id: int, coordinate_update: CoordinateUpdate, db: Session
         if result.rowcount == 0:
             raise HTTPException(status_code=404, detail="Item not found")
         
-        return {"message": "Height, coordinates, and metadata updated successfully", "id": id, "new_height": coordinate_update.hoyde, "new_lat": coordinate_update.lat, "new_lon": coordinate_update.lon}
+        return {"message": "Height, coordinates, and metadata updated successfully", "id": edited__point_id, "new_height": coordinate_update.hoyde, "new_lat": coordinate_update.lat, "new_lon": coordinate_update.lon}
     
     except HTTPException as e:
         raise e
