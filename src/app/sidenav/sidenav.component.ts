@@ -208,11 +208,10 @@ export class SidenavComponent {
 
     if (this.selectedEntity?.properties) {
       const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
-      this.sidenavService.updateHeight(id, hoyde, lat, lon).subscribe(
+      this.sidenavService.updateCoordinates(id, hoyde, lat, lon).subscribe(
         () => {
           this.snackBar.open('Changes saved successfully', '', {
             duration: 3000,
-
             panelClass: ['custom-snackbar'],
           });
           window.location.reload();

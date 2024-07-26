@@ -29,7 +29,7 @@ export class SidenavService {
     document.body.style.setProperty('--sidenav-width', `${clampedWidth}px`);
   }
 
-  updateHeight(
+  updateCoordinates(
     id: number,
     hoyde: number,
     lat: number,
@@ -41,7 +41,7 @@ export class SidenavService {
       .pipe(catchError(this.handleError));
   }
   private handleError(error: Error): Observable<never> {
-    console.error('An error occurred:', error.message);
+    console.error('Error with updating coordinates:', error.message);
     return throwError(
       () => new Error('Something bad happened; please try again later.')
     );

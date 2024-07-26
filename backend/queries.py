@@ -123,8 +123,6 @@ def query_points_of_cables_by_inquiry(inquiry_id, connection):
     return [dict(row) for row in result.mappings()]
 
 
-
-
 def fetch_geotiff(bbox: str, width: float, height: float, logger) -> dict:
     """Fetch a GeoTIFF file based on the bounding box and dimensions.
 
@@ -282,6 +280,4 @@ def query_update_views(connection):
             QUERY_PATH}update_queries/refresh_materialized_views.sql",
         params={},
     )
-    return result 
-
-
+    return result
