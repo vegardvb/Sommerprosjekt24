@@ -28,7 +28,6 @@ from models.geojson_models import CoordinateUpdate
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
  
- 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -39,10 +38,10 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
- 
+
 # FastAPI instance
 app = FastAPI()
- 
+
 # CORS configuration
 origins = ["http://localhost:4200"]
 app.add_middleware(
@@ -52,10 +51,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
- 
+
 DEBUG = False
- 
- 
+
 @app.get("/")
 def read_root():
     """Home endpoint for the FastAPI application.
@@ -64,8 +62,7 @@ def read_root():
         dict: A greeting message.
     """
     return {"Hello": "World"}
- 
- 
+
 # * GET Requests
 @app.get("/inquiries")
 def get_inquiries(connection=Depends(get_db)):
@@ -77,8 +74,8 @@ def get_inquiries(connection=Depends(get_db)):
     """
     result = query_inquiries(connection)
     return result
- 
- 
+
+
 @app.get("/geometries/area/boundary/inquiry/{inquiry_id}")
 def get_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
     """Endpoint for retrieving the boundary geometry by the given inquiry ID.
@@ -91,8 +88,8 @@ def get_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
     """
     result = query_boundary_geometry_by_inquiry(inquiry_id, connection)
     return result
- 
- 
+
+
 @app.get("/geometries/area/working_area/inquiry/{inquiry_id}")
 def get_working_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
     """Endpoint for retrieving the working area geometry by the given inquiry ID.
@@ -105,8 +102,8 @@ def get_working_area_geometry_by_inquiry(inquiry_id: int, connection=Depends(get
     """
     result = query_working_area_geometry_by_inquiry(inquiry_id, connection)
     return result
- 
- 
+
+
 @app.get("/geometries/measurements/inquiry/{inquiry_id}")
 def get_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
     """Endpoint which returns all measurements related to a specified inquiry by its inquiry ID.
@@ -122,8 +119,8 @@ def get_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
     result = query_measurement_geometry_by_inquiry(inquiry_id, connection)
 
     return result
- 
- 
+
+
 @app.get("/geometries/measurements/cable_points/inquiry/{inquiry_id}")
 def get_measurement_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_db)):
     """Endpoint for fetching the points cable measurements are made up of, by the given inquiry ID.
@@ -137,14 +134,14 @@ def get_measurement_geometry_by_inquiry(inquiry_id: int, connection=Depends(get_
     """
     result = query_points_of_cables_by_inquiry(inquiry_id, connection)
     return result
- 
- 
+
+
 @app.get("/fetch-geotiff")
 def fetch_geotiff_endpoint(bbox: str, width: float, height: float):
     """Fetch GeoTIFF based on bounding box and dimensions."""
     return fetch_geotiff(bbox, width, height, logger)
- 
- 
+
+
 @app.get("/process-geotiff")
 async def process_geotiff_endpoint(file_path: str):
     """Process GeoTIFF to generate terrain tiles."""
@@ -221,20 +218,20 @@ def update_coordinates(
         # Create the new geometry point
         new_geom = func.ST_SetSRID(func.ST_MakePoint(
             coordinate_update.lon, coordinate_update.lat), 4326)
-        
+      
             # Extract x and y from new_geom
         x_expr = func.ST_X(func.ST_Transform(new_geom, 32633))  # Transform to UTM Zone 33
         y_expr = func.ST_Y(func.ST_Transform(new_geom, 32633))  # Transform to UTM Zone 33
 
-        
+     
         # Execute the expressions to get actual values
         x = db.execute(x_expr).scalar()
         y = db.execute(y_expr).scalar()
-        
+    
         # Update the metadata with x and y values
         metadata_dict['x'] = x
         metadata_dict['y'] = y
-        
+       
         # Convert metadata back to JSON string for storage
         updated_metadata = json.dumps(metadata_dict)
 
