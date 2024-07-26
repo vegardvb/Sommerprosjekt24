@@ -175,7 +175,7 @@ def get_images_by_inquiry(inquiry_id: int, connection=Depends(get_db_public)):
 
 
 @app.put("/update-coordinates/{edited_point_id}")
-def update_height(
+def update_coordinates(
     edited_point_id: int,
     coordinate_update: CoordinateUpdate,
     db: Session = Depends(get_db_public)
@@ -221,6 +221,23 @@ def update_height(
         # Create the new geometry point
         new_geom = func.ST_SetSRID(func.ST_MakePoint(
             coordinate_update.lon, coordinate_update.lat), 4326)
+        
+            # Extract x and y from new_geom
+        x_expr = func.ST_X(func.ST_Transform(new_geom, 32633))  # Transform to UTM Zone 33
+        y_expr = func.ST_Y(func.ST_Transform(new_geom, 32633))  # Transform to UTM Zone 33
+
+        
+        # Execute the expressions to get actual values
+        x = db.execute(x_expr).scalar()
+        y = db.execute(y_expr).scalar()
+        
+        # Update the metadata with x and y values
+        metadata_dict['x'] = x
+        metadata_dict['y'] = y
+        
+        # Convert metadata back to JSON string for storage
+        updated_metadata = json.dumps(metadata_dict)
+
 
         # Create the update statement
         stmt = (
@@ -250,69 +267,3 @@ def update_height(
         db.rollback()
         raise HTTPException(
             status_code=500, detail="An error occurred while updating the metadata") from e
-
-@app.put("/update-coordinates/{edited_point_id}")
-def update_coordinates(edited__point_id: int, coordinate_update: CoordinateUpdate, db: Session = Depends(get_db_public)):
-    try:
-        # Fetch the current metadata
-        stmt = select(ledningsmaaling_innmaaling_punkt.c.metadata).where(ledningsmaaling_innmaaling_punkt.c.id == edited__point_id)
-        current_data = db.execute(stmt).fetchone()
-        
-        if not current_data:
-            raise HTTPException(status_code=404, detail="Item not found")
-        
-        metadata = current_data[0]  # Access the metadata column from the result
-        
-        # Handle the case where metadata is already a dictionary
-        if isinstance(metadata, dict):
-            metadata_dict = metadata
-        else:
-            # Assume metadata is a JSON string and convert it to a dict
-            metadata_dict = json.loads(metadata) if metadata else {}
-        
-        # Update the height and coordinates in metadata
-        metadata_dict['height'] = coordinate_update.hoyde
-        metadata_dict['lat'] = coordinate_update.lat
-        metadata_dict['lon'] = coordinate_update.lon
-        
-        # Create the new geometry point
-        new_geom = func.ST_SetSRID(func.ST_MakePoint(coordinate_update.lon, coordinate_update.lat), 4326)
-        
-        # Extract x and y from new_geom
-        x_expr = func.ST_X(func.ST_Transform(new_geom, 32633))  # Transform to UTM Zone 33
-        y_expr = func.ST_Y(func.ST_Transform(new_geom, 32633))  # Transform to UTM Zone 33
-
-        
-        # Execute the expressions to get actual values
-        x = db.execute(x_expr).scalar()
-        y = db.execute(y_expr).scalar()
-        
-        # Update the metadata with x and y values
-        metadata_dict['x'] = x
-        metadata_dict['y'] = y
-        
-        # Convert metadata back to JSON string for storage
-        updated_metadata = json.dumps(metadata_dict)
-        
-        # Create the update statement
-        stmt = (
-            update(ledningsmaaling_innmaaling_punkt)
-            .where(ledningsmaaling_innmaaling_punkt.c.id == edited__point_id)
-            .values(hoyde=coordinate_update.hoyde, metadata=updated_metadata, geom=new_geom)
-        )
-        
-        # Execute the update statement
-        result = db.execute(stmt)
-        query_update_views(db)
-        db.commit()
-        
-        if result.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Item not found")
-        
-        return {"message": "Height, coordinates, and metadata updated successfully", "id": edited__point_id, "new_height": coordinate_update.hoyde, "new_lat": coordinate_update.lat, "new_lon": coordinate_update.lon}
-    
-    except HTTPException as e:
-        raise e
-    
-    except Exception as e:
-        db.rollback()
