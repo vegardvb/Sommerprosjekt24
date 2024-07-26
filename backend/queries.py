@@ -280,6 +280,4 @@ def query_update_views(connection):
             QUERY_PATH}refresh_queries/refresh_materialized_views.sql",
         params={},
     )
-    return result 
-
-
+    return result
