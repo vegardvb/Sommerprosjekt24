@@ -149,7 +149,6 @@ export class SidenavComponent {
     const inputElement = event.target as HTMLInputElement;
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
-    console.log(this.height);
   }
   /**
    * Updates the position of the selected entity.

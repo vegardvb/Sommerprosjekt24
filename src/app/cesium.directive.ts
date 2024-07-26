@@ -136,7 +136,6 @@ export class CesiumDirective implements OnInit, OnDestroy {
           }
         } else {
           this.viewer.selectedEntity = undefined;
-          console.log('deselected');
         }
       },
       ScreenSpaceEventType.LEFT_CLICK
