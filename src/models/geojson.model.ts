@@ -1,8 +1,7 @@
 /**
- * Represents metadata associated with a geojson feature.
+ * Represents metadata associated with a GeoJSON feature.
  */
 export interface Metadata {
-  id: string;
   x: number;
   y: number;
   lat: number;
@@ -12,7 +11,7 @@ export interface Metadata {
   fixType: string;
   accuracy: number;
   timestamp: number;
-  imgFileName: string;
+  imgFileName?: string;
   antennaHeight: number;
   numSatellites: number;
   numMeasurements: number;
@@ -20,7 +19,7 @@ export interface Metadata {
 }
 
 /**
- * Represents properties of a geojson feature.
+ * Represents properties of a GeoJSON feature.
  */
 export interface Properties {
   metadata?: Metadata;
@@ -29,26 +28,26 @@ export interface Properties {
 }
 
 /**
- * Represents the geometry of a geojson feature.
+ * Represents the geometry of a GeoJSON feature.
  */
 export interface Geometry {
-  type: string;
+  type: 'Point' | 'LineString' | 'Polygon';
   coordinates: number[] | number[][];
 }
 
 /**
- * Represents a geojson feature.
+ * Represents a GeoJSON feature.
  */
 export interface Feature {
-  type: string;
+  type: 'Feature';
   geometry: Geometry;
   properties: Properties;
 }
 
 /**
- * Represents a geojson object.
+ * Represents a GeoJSON object.
  */
 export interface GeoJSON {
-  type: string;
+  type: 'FeatureCollection';
   features: Feature[];
 }

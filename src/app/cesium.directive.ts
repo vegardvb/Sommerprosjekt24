@@ -41,7 +41,7 @@ import { ActivatedRoute } from '@angular/router';
 import proj4 from 'proj4';
 import * as turf from '@turf/turf';
 import { Subscription, lastValueFrom } from 'rxjs';
-import { CablePointsService } from './services/cable_points.service';
+import { CablePointsService } from './services/cable-points.service';
 import { ClickedPointService } from './services/clickedpoint.service';
 import { WorkingAreaService } from './services/workingarea.service';
 import { CesiumImageService } from './services/image/cesium-image.service';
@@ -91,6 +91,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     private clickedPointService: ClickedPointService,
     private cesiumInteractionService: CesiumInteractionService,
     private cesiumImageService: CesiumImageService,
+    @Inject(CableMeasurementService)
     private cableMeasurementService: CableMeasurementService,
     private geometryService: GeometryService,
     private workingAreaService: WorkingAreaService,
@@ -284,7 +285,20 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       });
 
       this.calculateDimensions(data[0].geojson.geometry.coordinates);
-      this.setCenterCoordinates(data[0].geojson.properties.center.coordinates);
+      if (
+        data &&
+        data[0] &&
+        data[0].geojson &&
+        data[0].geojson.properties &&
+        data[0].geojson.properties.center &&
+        data[0].geojson.properties.center.coordinates
+      ) {
+        this.setCenterCoordinates(
+          data[0].geojson.properties.center.coordinates
+        );
+      } else {
+        console.error('Invalid data or missing coordinates');
+      }
     } catch (error) {
       console.error('Error extracting coordinates:', error);
     }

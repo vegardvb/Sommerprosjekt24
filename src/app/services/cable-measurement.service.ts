@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-
 import { MeasurementGeometry } from '../../models/measurement_geometry';
 
 /**
@@ -20,16 +19,12 @@ export class CableMeasurementService {
    * Retrieves data for a specific inquiry ID.
    *
    * @param inquiry_id - The ID of the inquiry.
-   * @returns An Observable that emits a FeatureCollection.
+   * @returns An Observable that emits an array of MeasurementGeometry.
    */
-  getData(
-    inquiry_id: number | undefined
-  ): Observable<Array<MeasurementGeometry>> {
+  getData(inquiry_id: number | undefined): Observable<MeasurementGeometry[]> {
     const apiUrl = `http://127.0.0.1:8000/geometries/measurements/inquiry/${inquiry_id}`;
-    return this.http.get<Array<MeasurementGeometry>>(apiUrl).pipe(
-      map((data: Array<MeasurementGeometry>) => {
-        return data;
-      }),
+    return this.http.get<MeasurementGeometry[]>(apiUrl).pipe(
+      map((data: MeasurementGeometry[]) => data),
       catchError(this.handleError)
     );
   }

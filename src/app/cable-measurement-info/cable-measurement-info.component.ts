@@ -32,7 +32,7 @@ export class CableMeasurementInfoComponent implements OnInit {
   @ViewChild('accordion')
   accordion!: AccordionModule;
 
-  inquiryId: string | null = null;
+  inquiryId: number | null = null;
   measurementIds: number[] = [];
   pointIds: number[] = [];
   metadata: Metadata[] = [];
@@ -70,7 +70,7 @@ export class CableMeasurementInfoComponent implements OnInit {
     });
   }
 
-  fetchGeoJsonData(inquiry_id: string): void {
+  fetchGeoJsonData(inquiry_id: number): void {
     this.geojsonService.getData(inquiry_id).subscribe({
       next: () => {
         this.features = this.geojsonService.getFeatures();

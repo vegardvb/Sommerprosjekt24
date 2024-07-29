@@ -44,7 +44,7 @@ export class CesiumInteractionService {
    */
   async showImage(braArkivId: string): Promise<void> {
     try {
-      const imageUrl = await this.imageService.getImageUrl(braArkivId);
+      const imageUrl = this.imageService.getImageUrl(braArkivId);
       this.dialog.open(ImageDialogComponent, {
         data: { imageUrl },
       });
