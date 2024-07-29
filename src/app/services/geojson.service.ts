@@ -24,8 +24,8 @@ export class GeojsonService {
    * @param inquiry_id - The ID of the inquiry.
    * @returns An Observable that emits void when the data is processed.
    */
-  getData(inquiry_id: string): Observable<void> {
-    const url = this.apiUrl.replace('{inquiry_id}', inquiry_id);
+  getData(inquiry_id: number): Observable<void> {
+    const url = this.apiUrl.replace('{inquiry_id}', inquiry_id.toString());
     return this.http.get<GeoJSONResponse[]>(url).pipe(
       map((response: GeoJSONResponse[]) => {
         if (

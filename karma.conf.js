@@ -1,3 +1,4 @@
+// karma.conf.js
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -31,28 +32,7 @@ module.exports = function (config) {
       fixWebpackSourcePaths: true,
     },
     reporters: ['progress', 'kjhtml'],
-    port: 9876,
-    colors: true,
-    logLevel: config.LOG_INFO,
-    autoWatch: true,
     browsers: ['Chrome'],
-    singleRun: false,
     restartOnFileChange: true,
-
-    // Including both PNG and JPG images
-    files: [
-      {
-        pattern: 'src/assets/images/**/*.{png,jpg}',
-        watched: false,
-        included: false,
-        served: true,
-        nocache: false,
-      },
-    ],
-
-    // Proxies configuration to serve the assets correctly
-    proxies: {
-      '/assets/images/': '/base/src/assets/images/',
-    },
   });
 };
