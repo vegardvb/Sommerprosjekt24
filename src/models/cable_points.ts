@@ -17,9 +17,11 @@ export interface CablePoints {
           lon: number;
           PDOP: number;
           height: number;
+          comment: string;
           fixType: string;
           accuracy: number;
           timestamp: number;
+          imgFileName: string;
           antennaHeight: number;
           numSatellites: number;
           numMeasurements: number;

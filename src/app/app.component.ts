@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { CesiumDirective } from './cesium.directive';
 import { InquiryListComponent } from './inquiry-list/inquiry-list.component';
 import { HomePageComponent } from './home-page/home-page.component';
 import { NavbarComponent } from './navbar/navbar.component';
@@ -12,7 +11,6 @@ import { NavbarComponent } from './navbar/navbar.component';
   imports: [
     CommonModule,
     RouterOutlet,
-    CesiumDirective,
     InquiryListComponent,
     HomePageComponent,
     NavbarComponent,

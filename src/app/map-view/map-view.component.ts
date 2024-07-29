@@ -24,13 +24,11 @@ export class MapViewComponent implements OnInit, OnDestroy {
   @ViewChild(SidenavComponent, { static: true })
   sidenavComponent!: SidenavComponent;
 
-  alpha = 100;
-  tilesetVisible: boolean = true;
-  polygonsVisible: boolean = true;
-  Math!: Math;
-  inquiryId: number | undefined;
-  geoJsonData!: string;
-
+  public alpha = 100;
+  public polygonsVisible: boolean = true;
+  public geoJsonData!: string;
+  private tilesetVisible: boolean = true;
+  private inquiryId: number | undefined;
   private viewer!: Viewer;
   private queryParamsSubscription: Subscription | undefined;
   private bboxSubscription: Subscription | undefined;
@@ -117,7 +115,7 @@ export class MapViewComponent implements OnInit, OnDestroy {
    * @param width - The width.
    * @param height - The height.
    */
-  fetchAndProcessTerrain(bbox: string, width: number, height: number) {
+  private fetchAndProcessTerrain(bbox: string, width: number, height: number) {
     this.terrainService
       .fetchGeoTIFF(bbox, width, height)
       .pipe(
