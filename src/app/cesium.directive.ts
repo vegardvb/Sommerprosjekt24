@@ -701,26 +701,36 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+  /**
+   * Handles the upload of GeoJSON data and displays it on the Cesium viewer.
+   * @param geoJsonText - The GeoJSON data to be loaded.
+   */
   public async handleGeoJsonUpload(geoJsonText: object) {
-    const dataSource = await GeoJsonDataSource.load(geoJsonText, {
-      stroke: Color.TURQUOISE,
-      fill: Color.TURQUOISE.withAlpha(1),
-      strokeWidth: 3,
-      markerSize: 1, // Size of the marker
-      credit: 'Provided by Jess',
-    });
+    try {
+      const dataSource = await GeoJsonDataSource.load(geoJsonText, {
+        stroke: Color.TURQUOISE,
+        fill: Color.TURQUOISE.withAlpha(1),
+        strokeWidth: 3,
+        markerSize: 1, // Size of the marker
+        credit: 'Provided by Jess',
+      });
 
-    this.viewer.dataSources.add(dataSource);
-    this.viewer.zoomTo(dataSource);
-    // Add picking and moving functionality to cables
-    dataSource.entities.values.forEach(entity => {
-      if (entity.polygon) {
-        entity.polygon.heightReference =
-          HeightReference.CLAMP_TO_GROUND as unknown as Property;
-        this.polygons.push(entity);
-        this.viewer.entities.add(entity);
-      }
-    });
+      this.viewer.dataSources.add(dataSource);
+      this.viewer.zoomTo(dataSource);
+
+      // Add picking and moving functionality to cables
+      dataSource.entities.values.forEach(entity => {
+        if (entity.polygon) {
+          entity.polygon.heightReference =
+            HeightReference.CLAMP_TO_GROUND as unknown as Property;
+          this.polygons.push(entity);
+          this.viewer.entities.add(entity);
+        }
+      });
+    } catch (error) {
+      console.error('Error loading GeoJSON data:', error);
+      // Optionally, add user feedback or additional error handling here
+    }
   }
 
   /**

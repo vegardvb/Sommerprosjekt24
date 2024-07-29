@@ -10,14 +10,14 @@
       </app-sidenav-link>
     </div>
     <app-cable-measurement-info></app-cable-measurement-info>
-    <button (click)="toggleGeoJSONtextfield()" class="btn json-btn mb-3">
+    <button (click)="toggleGeoJSONtextfield()" class="btn json-btn mb-3" aria-label="Toggle GeoJSON Textfield">
       {{ allowDrop ? 'Finish Upload' : 'Add GeoJSON to Map' }}
     </button>
   
     <!-- Large text box that appears when allowDrop is true -->
     <div *ngIf="allowDrop">
       <div>
-      <textarea (input)="onGeoJsonChange($event)" rows="10" cols="30" placeholder="Enter GeoJSON here" class="geojson-textarea"></textarea>
+        <textarea (input)="onGeoJsonChange($event)" rows="10" cols="30" placeholder="Enter GeoJSON here" class="geojson-textarea"></textarea>
       </div>
       <!-- Upload button -->
       <button (click)="uploadGeoJSON()" class="btn json-btn mb-3">

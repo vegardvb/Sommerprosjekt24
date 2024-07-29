@@ -23,7 +23,7 @@ import { ClickedPointService } from '../services/clickedpoint.service';
     CesiumDirective,
   ],
   templateUrl: './cable-measurement-info.component.html',
-  styleUrls: ['./cable-measurement-info.component.scss'],
+  styleUrls: ['./cable-measurement-info.component.css'],
 })
 export class CableMeasurementInfoComponent implements OnInit {
   @ViewChild(CesiumDirective, { static: true })

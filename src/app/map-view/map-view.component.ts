@@ -167,20 +167,34 @@ export class MapViewComponent implements OnInit, OnDestroy {
    * @param event - The event object.
    */
   togglePolygons(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    this.polygonsVisible = inputElement.checked;
-    if (this.cesiumDirective) {
-      this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
+    try {
+      const inputElement = event.target as HTMLInputElement;
+      this.polygonsVisible = inputElement.checked;
+      if (this.cesiumDirective) {
+        this.cesiumDirective.setPolygonsVisibility(this.polygonsVisible);
+      }
+    } catch (error) {
+      console.error('Error toggling polygons visibility:', error);
     }
   }
 
+  /**
+   * Toggles the visibility of billboards.
+   * @param event - The event triggered by the input element.
+   */
   toggleBillboards(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
-    this.billboardsVisible = inputElement.checked;
-    this.cesiumImageService.setBillboardsVisibility(
-      this.viewer,
-      this.billboardsVisible
-    );
+    try {
+      const inputElement = event.target as HTMLInputElement;
+      this.billboardsVisible = inputElement.checked;
+      if (this.viewer) {
+        this.cesiumImageService.setBillboardsVisibility(
+          this.viewer,
+          this.billboardsVisible
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling billboards visibility:', error);
+    }
   }
 
   /**

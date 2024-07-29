@@ -195,24 +195,26 @@ export class SidenavComponent {
 
   uploadGeoJSON() {
     try {
-      const geoJsonObject = JSON.parse(this.geoJsonText);
+      const geoJSONObject = JSON.parse(this.geoJsonText); //TODO: type geoJsonObject
+      const snackBarConfig = {
+        duration: 3000,
+        panelClass: ['custom-snackbar'],
+      };
 
       // Perform basic validation to check if it's a valid GeoJSON
       if (
-        geoJsonObject.type &&
-        (geoJsonObject.type === 'FeatureCollection' ||
-          geoJsonObject.type === 'Feature')
+        geoJSONObject.type &&
+        ((geoJSONObject.type === 'FeatureCollection' &&
+          Array.isArray(geoJSONObject.features)) ||
+          geoJSONObject.type === 'Feature')
       ) {
-        this.geoJsonUpload.emit(geoJsonObject);
-        this.snackBar.open('GeoJSON was added to map!', '', {
-          duration: 3000,
-          panelClass: ['custom-snackbar'],
-        });
+        this.geoJsonUpload.emit(geoJSONObject);
+        this.snackBar.open('GeoJSON was added to map!', '', snackBarConfig);
       } else {
         throw new Error('Invalid GeoJSON format');
       }
     } catch (error) {
-      console.error('Invalid GeoJSON:');
+      console.error('Invalid GeoJSON:', error);
       this.snackBar.open('Please enter a valid GeoJSON', '', {
         duration: 3000,
         panelClass: ['custom-snackbar'],
