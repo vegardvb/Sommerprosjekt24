@@ -1,10 +1,23 @@
 """
 This module provides functionality for connecting to the database.
 """
+
 import os
-from sqlalchemy import ResultProxy, create_engine, text, MetaData, Table, Column, Integer, String, Float, DateTime
+from sqlalchemy import (
+    ResultProxy,
+    create_engine,
+    text,
+    MetaData,
+    Table,
+    Column,
+    Integer,
+    String,
+    Float,
+    DateTime,
+)
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -64,6 +77,6 @@ ledningsmaaling_innmaaling_punkt = Table(
     Column("noyaktighet_z", Float),
     Column("hoyde", Float),
     Column("tidpunkt", DateTime),
-    Column("metadata", String)
+    Column("metadata", String),
 )
 metadata.create_all(bind=engine)
