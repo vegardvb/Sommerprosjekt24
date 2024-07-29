@@ -47,7 +47,10 @@ export class SidenavComponent {
   latitude: number = 0;
   height: number = 0;
   isEditing: boolean = false;
+  allowDrop = false;
+  geoJsonText = '';
   @Output() editingToggled = new EventEmitter<boolean>();
+  @Output() geoJsonUpload = new EventEmitter<object>();
 
   /**
    * Gets the current width of the side navigation bar.
@@ -150,6 +153,7 @@ export class SidenavComponent {
     this.height = Number(inputElement.value);
     this.updateEntityPosition();
   }
+
   /**
    * Updates the position of the selected entity.
    * If there is a selected entity, it updates its position based on the longitude, latitude, and height values.
@@ -178,6 +182,44 @@ export class SidenavComponent {
     this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
     this.isEditing = false;
     this.editingToggled.emit(this.isEditing);
+  }
+
+  toggleGeoJSONtextfield() {
+    this.allowDrop = !this.allowDrop;
+  }
+
+  onGeoJsonChange(event: Event) {
+    const inputElement = event.target as HTMLTextAreaElement;
+    this.geoJsonText = inputElement.value;
+  }
+
+  uploadGeoJSON() {
+    try {
+      const geoJSONObject = JSON.parse(this.geoJsonText); //TODO: type geoJsonObject
+      const snackBarConfig = {
+        duration: 3000,
+        panelClass: ['custom-snackbar'],
+      };
+
+      // Perform basic validation to check if it's a valid GeoJSON
+      if (
+        geoJSONObject.type &&
+        ((geoJSONObject.type === 'FeatureCollection' &&
+          Array.isArray(geoJSONObject.features)) ||
+          geoJSONObject.type === 'Feature')
+      ) {
+        this.geoJsonUpload.emit(geoJSONObject);
+        this.snackBar.open('GeoJSON was added to map!', '', snackBarConfig);
+      } else {
+        throw new Error('Invalid GeoJSON format');
+      }
+    } catch (error) {
+      console.error('Invalid GeoJSON:', error);
+      this.snackBar.open('Please enter a valid GeoJSON', '', {
+        duration: 3000,
+        panelClass: ['custom-snackbar'],
+      });
+    }
   }
 
   /**
