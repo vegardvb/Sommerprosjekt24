@@ -14,7 +14,7 @@ def __load_sql__(path):
     Returns:
         str: The query file content.
     """
-    with open(path, "r", encoding="utf-8") as file:
+    with open(path, 'r', encoding='utf-8') as file:
         query = file.read()
     return query
 
