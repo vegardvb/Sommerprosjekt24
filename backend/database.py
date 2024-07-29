@@ -65,6 +65,7 @@ def get_db_public():
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 metadata = MetaData()
+metadata = MetaData()
 
 ledningsmaaling_innmaaling_punkt = Table(
     'ledningsmaaling_innmaaling_punkt',
