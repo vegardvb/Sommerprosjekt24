@@ -122,6 +122,8 @@ def query_points_of_cables_by_inquiry(inquiry_id, connection):
     return [dict(row) for row in result.mappings()]
 
 
+
+
 def fetch_geotiff(bbox: str, width: float, height: float, logger) -> dict:
     """Fetch a GeoTIFF file based on the bounding box and dimensions.
 

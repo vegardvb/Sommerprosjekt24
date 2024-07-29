@@ -12,7 +12,7 @@ $color-scrollbar-thumb-border: rgb(196, 194, 194);
 $white: #ffffff;
 $spacing-small: 0.5rem;
 $spacing-medium: 1rem;
-$spacing-large: 2rem;
+$spacing-large: 1rem;
 $border-radius: 5px;
 $color-save-btn: rgb(110, 172, 113);
 $color-hover-save: rgba(149, 255, 152, 0.753);
@@ -22,6 +22,7 @@ $color-hover-close: #f83b3b;
 @mixin transition($property, $duration, $ease) {
   transition: $property $duration $ease;
 }
+
 
 // Sidenav
 .sidenav {
@@ -43,12 +44,12 @@ $color-hover-close: #f83b3b;
   display: inline-block;
   padding: 10px 20px;
   font-size: 16px;
-  font-weight: bold;
   color: $white;
   background-color: $color-edit-btn-bg;
   border: none;
   border-radius: $border-radius;
   cursor: pointer;
+  font-size: small;
   @include transition(background-color, 0.3s, ease);
 
   &:hover {
@@ -61,11 +62,11 @@ $color-hover-close: #f83b3b;
   display: inline-block;
   padding: 10px 20px;
   font-size: 16px;
-  font-weight: bold;
   color: $white;
   background-color: $color-close-btn-bg;
   border: none;
   border-radius: $border-radius;
+  font-size: small;
   &:hover {
     background-color: $color-hover-close;
   }
@@ -77,16 +78,49 @@ $color-hover-close: #f83b3b;
   border-radius: $border-radius;
   color: white;
   margin: 20px;
-  font-weight: bold;
+  font-size: small;
 
   &:hover {
     background-color: $color-hover-save;
   }
 }
+.json-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: $white;
+  background-color: $color-edit-btn-bg;
+  border: none;
+  border-radius: $border-radius;
+  cursor: pointer;
+  @include transition(background-color, 0.3s, ease);
+  font-size: small;
+
+  &:hover {
+    background-color: $color-edit-btn-hover-bg;
+  }
+}
+.geojson-textarea {
+  width: 100%;
+  max-width: 500px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  resize: none;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+}
 
 // Form Group
 .form-group {
-  margin-bottom: $spacing-medium;
+  margin-bottom: $spacing-small;
 }
 
 // Form Label
@@ -109,6 +143,14 @@ $color-hover-close: #f83b3b;
     border-color: $color-form-focus-border;
     outline: none;
     box-shadow: 0 0 5px rgba($color-form-focus-border, 0.5);
+  }
+}
+
+.home-btn {
+  padding: 10px 20px;
+
+  &:hover {
+    background-color: $color-edit-btn-hover-bg;
   }
 }
 

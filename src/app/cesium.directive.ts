@@ -7,6 +7,8 @@ import {
   Output,
   OnDestroy,
   Inject,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import {
   Cartesian2,
@@ -57,9 +59,10 @@ proj4.defs('EPSG:25833', '+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs');
  * Represents a Cesium directive that provides a Cesium viewer for 3D visualization of a cable network.
  * This directive initializes the Cesium viewer, loads the necessary data, and handles user interactions.
  */
-export class CesiumDirective implements OnInit, OnDestroy {
+export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   @Input()
   alpha!: number;
+  @Input() geoJson!: string;
   tileset!: Cesium3DTileset;
   polygons: Entity[] = [];
   @Output() bboxExtracted = new EventEmitter<string>();
@@ -182,6 +185,12 @@ export class CesiumDirective implements OnInit, OnDestroy {
         }
       })
     );
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['geoJson']) {
+      this.handleGeoJsonUpload(changes['geoJson'].currentValue);
+    }
   }
 
   ngOnDestroy() {
@@ -703,6 +712,38 @@ export class CesiumDirective implements OnInit, OnDestroy {
       this.enableEditing();
     } else {
       this.disableEditing();
+    }
+  }
+
+  /**
+   * Handles the upload of GeoJSON data and displays it on the Cesium viewer.
+   * @param geoJsonText - The GeoJSON data to be loaded.
+   */
+  public async handleGeoJsonUpload(geoJsonText: object) {
+    try {
+      const dataSource = await GeoJsonDataSource.load(geoJsonText, {
+        stroke: Color.TURQUOISE,
+        fill: Color.TURQUOISE.withAlpha(1),
+        strokeWidth: 3,
+        markerSize: 1, // Size of the marker
+        credit: 'Provided by Jess',
+      });
+
+      this.viewer.dataSources.add(dataSource);
+      this.viewer.zoomTo(dataSource);
+
+      // Add picking and moving functionality to cables
+      dataSource.entities.values.forEach(entity => {
+        if (entity.polygon) {
+          entity.polygon.heightReference =
+            HeightReference.CLAMP_TO_GROUND as unknown as Property;
+          this.polygons.push(entity);
+          this.viewer.entities.add(entity);
+        }
+      });
+    } catch (error) {
+      console.error('Error loading GeoJSON data:', error);
+      // Optionally, add user feedback or additional error handling here
     }
   }
 

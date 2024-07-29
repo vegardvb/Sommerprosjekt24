@@ -40,6 +40,10 @@ describe('MapViewComponent', () => {
 
     fixture = TestBed.createComponent(MapViewComponent);
     component = fixture.componentInstance;
+
+    // Mock the viewer property
+    component['viewer'] = jasmine.createSpyObj('Viewer', ['']);
+
     fixture.detectChanges();
   });
 
@@ -64,11 +68,15 @@ describe('MapViewComponent', () => {
     const editingSubscription = jasmine.createSpyObj('Subscription', [
       'unsubscribe',
     ]);
+    const geoJsonSubscription = jasmine.createSpyObj('Subscription', [
+      'unsubscribe',
+    ]);
 
     component['queryParamsSubscription'] = queryParamsSubscription;
     component['bboxSubscription'] = bboxSubscription;
     component['entitySubscription'] = entitySubscription;
     component['editingSubscription'] = editingSubscription;
+    component['geoJsonSubscription'] = geoJsonSubscription;
 
     component.ngOnDestroy();
 
@@ -76,6 +84,7 @@ describe('MapViewComponent', () => {
     expect(bboxSubscription.unsubscribe).toHaveBeenCalled();
     expect(entitySubscription.unsubscribe).toHaveBeenCalled();
     expect(editingSubscription.unsubscribe).toHaveBeenCalled();
+    expect(geoJsonSubscription.unsubscribe).toHaveBeenCalled();
   });
 
   it('should set billboards visibility when toggleBillboards is called', () => {

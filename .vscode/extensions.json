@@ -6,8 +6,7 @@
     "bradlc.vscode-tailwindcss",
     "ms-python.python",
     "ms-python.vscode-pylance",
-    "ms-python.autopep8",
-    "ms-python.pylint",
+    "charliermarsh.ruff",
     "ms-azuretools.vscode-docker",
     "adpyke.vscode-sql-formatter"
   ]
