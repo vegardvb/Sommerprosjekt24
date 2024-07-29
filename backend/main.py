@@ -212,7 +212,7 @@ def update_coordinates(
         metadata_dict["height"] = coordinate_update.hoyde
         metadata_dict["lat"] = coordinate_update.lat
         metadata_dict["lon"] = coordinate_update.lon
-
+        metadata_dict["edited"] = True
         # Convert metadata back to JSON string for storage
         updated_metadata = json.dumps(metadata_dict)
 

@@ -167,6 +167,15 @@
               >{{ feature.properties.metadata.y }}</span
             >
           </li>
+          <li>
+            Edited:
+            <span
+              id="edited"
+              [class.editable]="editMode"
+              [attr.contenteditable]="editMode"
+              >{{ feature?.properties?.metadata?.edited || 'Not Edited' }}</span
+            >
+          </li>
         </ul>
       </div>
     </p-accordionTab>

@@ -17,6 +17,7 @@ export interface Metadata {
   numSatellites: number;
   numMeasurements: number;
   verticalAccuracy: number;
+  edited: boolean;
 }
 
 /**

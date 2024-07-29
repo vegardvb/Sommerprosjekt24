@@ -64,7 +64,6 @@ def get_db_public():
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 metadata = MetaData()
-metadata = MetaData()
 
 ledningsmaaling_innmaaling_punkt = Table(
     "ledningsmaaling_innmaaling_punkt",
@@ -76,7 +75,7 @@ ledningsmaaling_innmaaling_punkt = Table(
     Column("survey_geom", String),
     Column("noyaktighet_z", Float),
     Column("hoyde", Float),
-    Column("tidpunkt", DateTime),
+    Column("tidspunkt", DateTime),
     Column("metadata", String),
 )
 metadata.create_all(bind=engine)
