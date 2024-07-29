@@ -276,7 +276,20 @@ export class CesiumDirective implements OnInit, OnDestroy {
       });
 
       this.calculateDimensions(data[0].geojson.geometry.coordinates);
-      this.setCenterCoordinates(data[0].geojson.properties.center.coordinates);
+      if (
+        data &&
+        data[0] &&
+        data[0].geojson &&
+        data[0].geojson.properties &&
+        data[0].geojson.properties.center &&
+        data[0].geojson.properties.center.coordinates
+      ) {
+        this.setCenterCoordinates(
+          data[0].geojson.properties.center.coordinates
+        );
+      } else {
+        console.error('Invalid data or missing coordinates');
+      }
     } catch (error) {
       console.error('Error extracting coordinates:', error);
     }
