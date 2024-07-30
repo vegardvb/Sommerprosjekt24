@@ -4,6 +4,7 @@ import {
   HostListener,
   Output,
   ViewEncapsulation,
+  OnInit,
 } from '@angular/core';
 import { SidenavService } from './sidenav.service';
 import { SidenavLinkComponent } from './sidenav-link.component';
@@ -20,6 +21,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { GeojsonService } from '../services/geojson.service';
+import { ActivatedRoute } from '@angular/router';
 
 /**
  * Component for the side navigation bar.
@@ -39,18 +42,39 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatSnackBarModule,
   ],
 })
-export class SidenavComponent {
+export class SidenavComponent implements OnInit {
   readonly sidenavMinWidth = 250;
   readonly sidenavMaxWidth = window.innerWidth - 300;
-  selectedEntity!: Entity | null;
-  longitude: number = 0;
-  latitude: number = 0;
-  height: number = 0;
-  isEditing: boolean = false;
-  allowDrop = false;
-  geoJsonText = '';
+
+  private inquiryId: number | undefined;
+  private geoJsonText = '';
+  public allowDrop = false;
+  public height: number = 0;
+  public isEditing: boolean = false;
+  public latitude: number = 0;
+  public longitude: number = 0;
+  public selectedEntity!: Entity | null;
+
   @Output() editingToggled = new EventEmitter<boolean>();
   @Output() geoJsonUpload = new EventEmitter<object>();
+
+  constructor(
+    private route: ActivatedRoute,
+    public sidenavService: SidenavService,
+    public geojsonService: GeojsonService,
+    private snackBar: MatSnackBar
+  ) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      this.inquiryId = params['inquiryId'];
+      if (this.inquiryId) {
+        // Do something with the inquiryId if needed
+      } else {
+        console.error('Inquiry ID not found in the query parameters');
+      }
+    });
+  }
 
   /**
    * Gets the current width of the side navigation bar.
@@ -81,11 +105,6 @@ export class SidenavComponent {
     startingCursorX: 0,
     startingWidth: 0,
   };
-
-  constructor(
-    public sidenavService: SidenavService,
-    private snackBar: MatSnackBar
-  ) {}
 
   /**
    * Starts the resizing of the side navigation bar.
@@ -184,15 +203,31 @@ export class SidenavComponent {
     this.editingToggled.emit(this.isEditing);
   }
 
+  /**
+   * Toggles the visibility of the GeoJSON text field.
+   */
   toggleGeoJSONtextfield() {
     this.allowDrop = !this.allowDrop;
   }
 
+  /**
+   * Handles the change event of the GeoJSON input element.
+   * Updates the `geoJsonText` property with the new value.
+   *
+   * @param event - The change event object.
+   */
   onGeoJsonChange(event: Event) {
     const inputElement = event.target as HTMLTextAreaElement;
     this.geoJsonText = inputElement.value;
   }
 
+  /**
+   * Uploads a GeoJSON object to the map.
+   * @remarks
+   * This method parses the provided GeoJSON text and performs basic validation to check if it's a valid GeoJSON.
+   * If the GeoJSON is valid, it emits the `geoJSONObject` using the `geoJsonUpload` event and displays a success message.
+   * If the GeoJSON is invalid, it displays an error message.
+   */
   uploadGeoJSON() {
     try {
       const geoJSONObject = JSON.parse(this.geoJsonText); //TODO: type geoJsonObject
@@ -243,30 +278,46 @@ export class SidenavComponent {
     this.sidenavService.setSidenavWidth(newWidth);
   }
 
+  /**
+   * Saves the changes made to the selected entity's coordinates.
+   */
   saveChanges() {
-    const hoyde = this.height as unknown as number;
-    const lat = this.latitude as unknown as number;
-    const lon = this.longitude as unknown as number;
+    const hoyde = this.height;
+    const lat = this.latitude;
+    const lon = this.longitude;
 
     if (this.selectedEntity?.properties) {
-      const id = this.selectedEntity?.properties?.['point_id']._value; // Assuming each entity has an id
-      this.sidenavService.updateCoordinates(id, hoyde, lat, lon).subscribe(
-        () => {
-          this.snackBar.open('Changes saved successfully', '', {
-            duration: 3000,
-            panelClass: ['custom-snackbar'],
-          });
-          window.location.reload();
-        },
-        () => {
-          this.snackBar.open('Error saving changes', '', {
-            duration: 3000,
-            horizontalPosition: 'center',
-            verticalPosition: 'top',
-            panelClass: ['custom-snackbar'],
-          });
-        }
-      );
+      const id = this.selectedEntity?.properties?.['point_id']?._value;
+
+      if (id !== undefined) {
+        this.sidenavService.updateCoordinates(id, hoyde, lat, lon).subscribe({
+          next: () => {
+            this.snackBar.open('Changes saved successfully', '', {
+              duration: 3000,
+              panelClass: ['custom-snackbar'],
+            });
+
+            if (this.inquiryId !== undefined) {
+              this.geojsonService.refreshData(this.inquiryId);
+            }
+          },
+          error: error => {
+            console.error('Error saving changes', error);
+            this.snackBar.open('Error saving changes', '', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['custom-snackbar'],
+            });
+          },
+        });
+      } else {
+        console.error('Invalid entity ID');
+        this.snackBar.open('Invalid entity selected', '', {
+          duration: 3000,
+          panelClass: ['custom-snackbar'],
+        });
+      }
     }
   }
 
