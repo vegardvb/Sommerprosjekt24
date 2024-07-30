@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { GeoJSON, Feature } from '../../models/geojson.model';
 
@@ -8,6 +8,9 @@ interface GeoJSONResponse {
   geojson: GeoJSON;
 }
 
+/**
+ * Service for handling GeoJSON data.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -15,24 +18,21 @@ export class GeojsonService {
   private apiUrl =
     'http://127.0.0.1:8000/geometries/measurements/inquiry/{inquiry_id}';
 
-  private features: Feature[] = [];
+  private featuresSubject = new BehaviorSubject<Feature[]>([]);
+  public updatedFeatures$ = this.featuresSubject.asObservable();
 
   constructor(private http: HttpClient) {}
 
   /**
-   * Retrieves GeoJSON data for a specific inquiry ID.
-   * @param inquiry_id - The ID of the inquiry.
-   * @returns An Observable that emits void when the data is processed.
+   * Retrieves GeoJSON data from the server.
+   * @param inquiry_id The ID of the inquiry.
+   * @returns An Observable that emits void.
    */
   getData(inquiry_id: number): Observable<void> {
     const url = this.apiUrl.replace('{inquiry_id}', inquiry_id.toString());
     return this.http.get<GeoJSONResponse[]>(url).pipe(
       map((response: GeoJSONResponse[]) => {
-        if (
-          Array.isArray(response) &&
-          response.length > 0 &&
-          response[0].geojson
-        ) {
+        if (response && response.length > 0 && response[0].geojson) {
           this.processGeoJSON(response[0].geojson);
         } else {
           throw new Error('Invalid GeoJSON response');
@@ -43,24 +43,34 @@ export class GeojsonService {
   }
 
   /**
-   * Processes the GeoJSON data and updates the features array.
-   * @param geojson - The GeoJSON data to process.
+   * Processes the retrieved GeoJSON data.
+   * @param geojson The GeoJSON data to process.
    */
   private processGeoJSON(geojson: GeoJSON): void {
-    this.features = geojson.features;
+    this.featuresSubject.next(geojson.features);
   }
 
   /**
-   * Returns the processed GeoJSON features.
-   * @returns An array of GeoJSON features.
+   * Refreshes the GeoJSON data for a specific inquiry.
+   * @param inquiry_id The ID of the inquiry.
+   */
+  refreshData(inquiry_id: number): void {
+    this.getData(inquiry_id).subscribe({
+      error: err => console.error('Error refreshing data:', err),
+    });
+  }
+
+  /**
+   * Retrieves the current features.
+   * @returns An array of Feature objects.
    */
   getFeatures(): Feature[] {
-    return this.features;
+    return this.featuresSubject.getValue();
   }
 
   /**
-   * Handles errors during the HTTP request.
-   * @param error - The error object.
+   * Handles errors that occur during data retrieval.
+   * @param error The error that occurred.
    * @returns An Observable that emits an error.
    */
   private handleError(error: Error): Observable<never> {
