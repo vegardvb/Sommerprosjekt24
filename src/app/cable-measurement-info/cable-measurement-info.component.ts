@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Feature } from '../../models/geojson.model';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -43,8 +43,7 @@ export class CableMeasurementInfoComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private geojsonService: GeojsonService,
-    private clickedPointService: ClickedPointService,
-    private cdr: ChangeDetectorRef
+    private clickedPointService: ClickedPointService
   ) {}
 
   measurementTypeMap: { [key: number]: string } = {};
