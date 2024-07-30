@@ -73,7 +73,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   private center!: Cartesian3;
   private selectedEntity: Entity | null = null;
 
-  private viewer!: Viewer;
+  public viewer!: Viewer;
   private handler!: ScreenSpaceEventHandler;
   private width!: number;
   private height!: number;

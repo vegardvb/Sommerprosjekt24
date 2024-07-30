@@ -1,4 +1,10 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  OnDestroy,
+  AfterViewInit,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
 import { TerrainService } from '../services/terrain.service';
@@ -7,6 +13,7 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 import { Entity, Viewer } from 'cesium';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 import { CesiumImageService } from '../services/image/cesium-image.service';
+
 /**
  * Represents the map view component.
  */
@@ -17,7 +24,7 @@ import { CesiumImageService } from '../services/image/cesium-image.service';
   standalone: true,
   imports: [CesiumDirective, SidenavComponent, CableMeasurementInfoComponent],
 })
-export class MapViewComponent implements OnInit, OnDestroy {
+export class MapViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
 
@@ -76,6 +83,18 @@ export class MapViewComponent implements OnInit, OnDestroy {
     );
   }
 
+  ngAfterViewInit() {
+    // Ensure the viewer is ready before setting billboard visibility
+    if (this.cesiumDirective.viewer) {
+      this.viewer = this.cesiumDirective.viewer;
+      this.cesiumImageService.setBillboardsVisibility(
+        this.viewer,
+        this.billboardsVisible
+      );
+    } else {
+      console.error('Viewer is not initialized after view init');
+    }
+  }
   /**
    * Lifecycle hook that is called when the component is destroyed.
    */
@@ -184,11 +203,14 @@ export class MapViewComponent implements OnInit, OnDestroy {
     try {
       const inputElement = event.target as HTMLInputElement;
       this.billboardsVisible = inputElement.checked;
-      if (this.viewer) {
+
+      if (this.cesiumDirective.viewer) {
         this.cesiumImageService.setBillboardsVisibility(
-          this.viewer,
+          this.cesiumDirective.viewer,
           this.billboardsVisible
         );
+      } else {
+        console.error('Viewer is not initialized');
       }
     } catch (error) {
       console.error('Error toggling billboards visibility:', error);
