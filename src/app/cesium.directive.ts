@@ -103,6 +103,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
    * This method is called once after the first `ngOnChanges` method is called.
    * @returns A promise that resolves when the initialization is complete.
    */
+
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
@@ -122,47 +123,20 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
+
     const infobox = this.viewer.infoBox;
     infobox.destroy();
 
-    // Set up a screen space event handler to select entities and create a popup
-    this.viewer.screenSpaceEventHandler.setInputAction(
-      (movement: { position: Cartesian2 }) => {
-        const pickedObject = this.viewer.scene.pick(movement.position);
-        if (defined(pickedObject)) {
-          const entity = pickedObject.id;
-          this.viewer.selectedEntity = entity; // Set the selected entity
-          this.clickedPointId =
-            this.viewer.selectedEntity?.properties?.['point_id']._value;
-
-          if (this.clickedPointId) {
-            this.clickedPointService.setClickedPointId(this.clickedPointId);
-          }
-        } else {
-          this.viewer.selectedEntity = undefined;
+    // Subscribe to selected entity changes from CesiumInteractionService
+    this.subscriptions.add(
+      this.cesiumInteractionService.selectedEntityChanged.subscribe(entity => {
+        this.viewer.selectedEntity = entity;
+        this.clickedPointId = entity?.properties?.['point_id']?._value;
+        if (this.clickedPointId) {
+          this.clickedPointService.setClickedPointId(this.clickedPointId);
         }
-      },
-      ScreenSpaceEventType.LEFT_CLICK
+      })
     );
-
-    this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
-      if (defined(entity)) {
-        this.selectedEntityChanged.emit(entity);
-        if (entity.polyline) {
-          this.pointEntities.forEach(pointEntity => {
-            if (pointEntity.point) {
-              pointEntity.point.show = new ConstantProperty(true);
-            }
-          });
-        }
-      } else {
-        this.pointEntities.forEach(pointEntity => {
-          if (pointEntity.point) {
-            pointEntity.point.show = new ConstantProperty(false);
-          }
-        });
-      }
-    });
 
     this.subscriptions.add(
       this.clickedPointService.latitude$.subscribe(lat => {
@@ -227,7 +201,6 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     });
 
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
-    this.enableEntitySelection();
 
     const scene = this.viewer.scene;
     const globe = scene.globe;
@@ -420,21 +393,6 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
         });
       }
     );
-  }
-
-  /**
-   * Enables entity selection by adding an input action to the handler.
-   */
-  private enableEntitySelection() {
-    this.handler.setInputAction((movement: { position: Cartesian2 }) => {
-      const pickedObject = this.viewer.scene.pick(movement.position);
-      if (defined(pickedObject)) {
-        this.selectedEntity = pickedObject.id as Entity;
-        this.clickedPointId =
-          this.selectedEntity?.properties?.['point_id']._value;
-        this.selectedEntityChanged.emit(this.selectedEntity);
-      }
-    }, ScreenSpaceEventType.LEFT_DOWN);
   }
 
   /**
