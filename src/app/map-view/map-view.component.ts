@@ -13,6 +13,7 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 import { Entity, Viewer } from 'cesium';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 import { CesiumImageService } from '../services/image/cesium-image.service';
+import { CesiumDataService } from '../services/cesium-data.service'; // Import the new service
 
 /**
  * Represents the map view component.
@@ -50,7 +51,8 @@ export class MapViewComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private route: ActivatedRoute,
     private terrainService: TerrainService,
-    private cesiumImageService: CesiumImageService
+    private cesiumImageService: CesiumImageService,
+    private cesiumDataService: CesiumDataService // Inject the CesiumDataService
   ) {}
 
   /**
@@ -95,6 +97,7 @@ export class MapViewComponent implements OnInit, OnDestroy, AfterViewInit {
       console.error('Viewer is not initialized after view init');
     }
   }
+
   /**
    * Lifecycle hook that is called when the component is destroyed.
    */
@@ -146,7 +149,10 @@ export class MapViewComponent implements OnInit, OnDestroy, AfterViewInit {
       .subscribe({
         next: async response => {
           if (response && response.tileSetUrl) {
-            await this.cesiumDirective.loadTerrainFromUrl(response.tileSetUrl);
+            await this.cesiumDataService.loadTerrainFromUrl(
+              this.cesiumDirective.viewer,
+              response.tileSetUrl
+            );
           } else {
             console.error('Tileset URL not provided in the response', response);
           }

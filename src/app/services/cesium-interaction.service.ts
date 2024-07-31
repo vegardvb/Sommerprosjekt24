@@ -59,7 +59,6 @@ export class CesiumInteractionService {
       this.clickedPointId =
         this.selectedEntity?.properties?.['point_id']?._value;
       this.selectedEntityChanged.emit(this.selectedEntity);
-      console.log('Point clicked:', this.selectedEntity);
       // Additional logic for handling the selected point can be added here
     }
   }
