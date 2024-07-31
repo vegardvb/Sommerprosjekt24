@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { CesiumInteractionService } from './cesium.interaction.service';
+import { CesiumInteractionService } from './cesium-interaction.service';
 import { MatDialog } from '@angular/material/dialog';
 import { Viewer } from 'cesium';
 import { ImageService } from './image/image.service';

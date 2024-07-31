@@ -45,7 +45,7 @@ import { CablePointsService } from './services/cable-points.service';
 import { ClickedPointService } from './services/clickedpoint.service';
 import { WorkingAreaService } from './services/workingarea.service';
 import { CesiumImageService } from './services/image/cesium-image.service';
-import { CesiumInteractionService } from './services/cesium.interaction.service';
+import { CesiumInteractionService } from './services/cesium-interaction.service';
 
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
