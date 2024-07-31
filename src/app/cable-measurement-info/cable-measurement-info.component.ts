@@ -9,6 +9,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { GeojsonService } from '../services/geojson.service';
 import { CesiumDirective } from '../cesium.directive';
 import { ClickedPointService } from '../services/clickedpoint.service';
+import { SidenavPointService } from '../services/sidenav-point.service';
 
 /**
  * Component for displaying cable measurement information.
@@ -37,14 +38,20 @@ export class CableMeasurementInfoComponent implements OnInit {
   public editMode: boolean = false;
   private inquiryId: number | undefined;
   public features: Feature[] = [];
+  public featurePoints: Feature[] = [];
+  public singlePoints: Feature[] = [];
+
   private clickedPointId: number | null = null;
   public activeHeader: string = '';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public groupedMeasurements: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private geojsonService: GeojsonService,
-    private clickedPointService: ClickedPointService
-  ) {}
+    private clickedPointService: ClickedPointService,
+    private sidenavPointService: SidenavPointService
+  ) { }
 
   measurementTypeMap: { [key: number]: string } = {};
 
@@ -55,6 +62,7 @@ export class CableMeasurementInfoComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
       if (this.inquiryId) {
+        this.fetchPointData(this.inquiryId);
         this.fetchGeoJsonData(this.inquiryId);
       } else {
         console.error('Inquiry ID not found in the query parameters');
@@ -65,8 +73,20 @@ export class CableMeasurementInfoComponent implements OnInit {
       this.clickedPointId = pointId;
     });
 
+    this.sidenavPointService.updatedFeatures$.subscribe(updatedFeatures => {
+      updatedFeatures.forEach(feature => {
+        if (feature.properties.point_id) {
+          this.features.push(feature);
+          if (!feature.properties.measurement_id) {
+            this.singlePoints.push(feature);
+          }
+        }
+      });
+    });
+
     this.geojsonService.updatedFeatures$.subscribe(updatedFeatures => {
-      this.features = updatedFeatures;
+      updatedFeatures.forEach(feature => this.features.push(feature));
+      this.groupFeaturesByMeasurementId();
     });
   }
 
@@ -85,17 +105,45 @@ export class CableMeasurementInfoComponent implements OnInit {
     });
   }
 
+  fetchPointData(inquiry_id: number): void {
+    this.sidenavPointService.getData(inquiry_id).subscribe({
+      next: () => {
+        this.featurePoints = this.sidenavPointService.getFeatures();
+      },
+      error: error => {
+        console.error('Error fetching data:', error);
+      },
+    });
+  }
+
+  groupFeaturesByMeasurementId() {
+    const grouped = this.features.reduce(
+      (acc, feature) => {
+        const measurementId = feature.properties.measurement_id;
+        if (measurementId !== undefined) {
+          if (!acc[measurementId]) {
+            acc[measurementId] = [];
+          }
+          acc[measurementId].push(feature);
+        }
+        return acc;
+      },
+      {} as { [key: number]: Feature[] }
+    );
+
+    this.groupedMeasurements = Object.keys(grouped).map(id => ({
+      id: Number(id),
+      features: grouped[Number(id)],
+    }));
+  }
+
   /**
    * Gets the header for a feature.
    * @param feature The feature.
    * @returns The header string.
    */
   getHeader(feature: Feature): string {
-    return feature.properties.measurement_id !== undefined
-      ? `Measurement ID: ${feature.properties.measurement_id}`
-      : feature.properties.point_id !== undefined
-        ? `Point ID: ${feature.properties.point_id}`
-        : 'ID Not Available';
+    return `Point ID: ${feature.properties.point_id}`;
   }
 
   /**
@@ -103,10 +151,8 @@ export class CableMeasurementInfoComponent implements OnInit {
    * @param feature The feature.
    * @returns The ID string.
    */
-  getID(feature: Feature): string {
-    return feature.properties.point_id !== undefined
-      ? `${feature.properties.point_id}`
-      : 'ID Not Available';
+  getID(feature: Feature): number | undefined {
+    return feature.properties.point_id;
   }
 
   /**
@@ -114,11 +160,35 @@ export class CableMeasurementInfoComponent implements OnInit {
    * @param feature The feature.
    * @returns The CSS class string.
    */
-  getHeaderClass(feature: Feature): string {
+  getHeaderClass(feature: Feature): string | null {
     const header = this.getID(feature);
     const clickedPointIdStr = this.clickedPointId?.toString();
 
-    return header === clickedPointIdStr ? 'clicked-header' : 'default-header';
+    if (header !== undefined && clickedPointIdStr !== undefined) {
+      return header.toString() === clickedPointIdStr
+        ? 'clicked-header'
+        : 'default-header';
+    } else {
+      return null;
+    }
+  }
+
+  getMeasurementClass(measurementId: number): string | null {
+    if (this.clickedPointId !== null) {
+      const features = this.groupedMeasurements.find(
+        m => m.id === measurementId
+      )?.features;
+      if (
+        features &&
+        features.some(
+          (f: { properties: { point_id: number | null } }) =>
+            f.properties.point_id === this.clickedPointId
+        )
+      ) {
+        return 'clicked-measurement-id';
+      }
+    }
+    return null;
   }
 
   /**
@@ -126,7 +196,7 @@ export class CableMeasurementInfoComponent implements OnInit {
    * @param headerId The header ID.
    */
   captureHeader(headerId: string) {
-    const match = headerId.match(/(?:Measurement ID:|Point ID:)\s*(\d+)/);
+    const match = headerId.match(/(?:Point ID:)\s*(\d+)/);
     if (match) {
       const extractedID = match[1];
 
@@ -134,6 +204,7 @@ export class CableMeasurementInfoComponent implements OnInit {
       const tab = document
         .querySelector(`#measurement-${extractedID}`)
         ?.closest('p-accordionTab');
+
       if (tab) {
         const latElement = tab.querySelector('#lat');
         const lonElement = tab.querySelector('#lon');

@@ -5,7 +5,7 @@ import { catchError, map } from 'rxjs/operators';
 import { GeoJSON, Feature } from '../../models/geojson.model';
 
 interface GeoJSONResponse {
-  geojson: GeoJSON[];
+  geojson: GeoJSON;
 }
 
 /**
@@ -14,14 +14,14 @@ interface GeoJSONResponse {
 @Injectable({
   providedIn: 'root',
 })
-export class GeojsonService {
+export class SidenavPointService {
   private apiUrl =
-    'http://127.0.0.1:8000/geometries/measurements/cable_points/inquiry/{inquiry_id}';
+    'http://127.0.0.1:8000/geometries/measurements/inquiry/{inquiry_id}';
 
   private featuresSubject = new BehaviorSubject<Feature[]>([]);
   public updatedFeatures$ = this.featuresSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   /**
    * Retrieves GeoJSON data from the server.
@@ -33,10 +33,7 @@ export class GeojsonService {
     return this.http.get<GeoJSONResponse[]>(url).pipe(
       map((response: GeoJSONResponse[]) => {
         if (response && response.length > 0 && response[0].geojson) {
-          response[0].geojson.forEach((geojson: GeoJSON) => {
-            this.processGeoJSON(geojson);
-            console.log('meh', geojson);
-          });
+          this.processGeoJSON(response[0].geojson);
         } else {
           throw new Error('Invalid GeoJSON response');
         }

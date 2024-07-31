@@ -9,6 +9,13 @@ import { DataService } from '../data.service';
 import { Inquiry } from '../../models/inquiry-interface';
 import { Router } from '@angular/router';
 import { DropdownModule } from 'primeng/dropdown';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -24,6 +31,14 @@ import { DropdownModule } from 'primeng/dropdown';
   ],
   templateUrl: './inquiry-list.component.html',
   styleUrls: ['./inquiry-list.component.css'],
+  animations: [
+    trigger('slideIn', [
+      state('void', style({ transform: 'translateX(-500%)' })),
+      transition(':enter', [
+        animate('2000ms ease-out', style({ transform: 'translateX(0)' })),
+      ]),
+    ]),
+  ],
 })
 export class InquiryListComponent implements OnInit {
   products: Inquiry[] = [];
