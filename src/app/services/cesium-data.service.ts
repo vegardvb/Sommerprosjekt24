@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import {
   GeoJsonDataSource,
   Color,
@@ -22,6 +22,7 @@ import { WorkingAreaService } from './workingarea.service';
 })
 export class CesiumDataService {
   constructor(
+    @Inject(CableMeasurementService)
     private cableMeasurementService: CableMeasurementService,
     private cablePointsService: CablePointsService,
     private workingAreaService: WorkingAreaService
