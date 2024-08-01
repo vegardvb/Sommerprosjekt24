@@ -9,6 +9,7 @@ import {
   PointPrimitive,
   Billboard,
   ConstantPositionProperty,
+  Polyline,
 } from 'cesium';
 import { ImageDialogComponent } from '../components/image-dialog.component';
 import { SidenavService } from '../sidenav/sidenav.service';
@@ -38,6 +39,7 @@ export class CesiumInteractionService {
     this.isEditing = !this.isEditing;
     this.editingToggled.emit(this.isEditing);
   }
+
   /**
    * Sets up the click handler for the Cesium viewer.
    * @param viewer The Cesium viewer instance.
@@ -51,6 +53,8 @@ export class CesiumInteractionService {
           this.handlePointClick(pickedObject);
         } else if (pickedObject.primitive instanceof Billboard) {
           this.handleImageClick(pickedObject);
+        } else if (pickedObject.primitive instanceof Polyline) {
+          this.handlePolylineClick(pickedObject);
         }
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
@@ -69,6 +73,7 @@ export class CesiumInteractionService {
       this.clickedPointId =
         this.selectedEntity?.properties?.['point_id']?._value;
       this.selectedEntityChanged.emit(this.selectedEntity);
+      console.log('Point clicked:', this.selectedEntity);
     }
   }
 
@@ -83,6 +88,21 @@ export class CesiumInteractionService {
     if (pickedObject.id && pickedObject.id.properties) {
       const braArkivId = pickedObject.id.properties['bra_arkiv_id'].getValue();
       this.showImage(braArkivId);
+    }
+  }
+
+  /**
+   * Handles the click event on a polyline.
+   * @param pickedObject The picked object containing the polyline and its ID.
+   */
+  private handlePolylineClick(pickedObject: {
+    primitive: Polyline;
+    id: Entity;
+  }): void {
+    if (defined(pickedObject)) {
+      this.selectedEntity = pickedObject.id as Entity;
+      console.log('Polyline clicked:', this.selectedEntity);
+      // Additional logic for handling the polyline click can be added here
     }
   }
 
