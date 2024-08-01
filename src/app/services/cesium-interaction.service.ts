@@ -1,17 +1,18 @@
-import { ImageDialogComponent } from '../components/image-dialog.component';
-import { ImageService } from './image/image.service';
-
 import { Injectable, EventEmitter } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Cartesian2, defined } from 'cesium';
+import { Cartesian2, Cartesian3, defined } from 'cesium';
 import {
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
+  Viewer,
   Entity,
   PointPrimitive,
   Billboard,
-  Viewer,
+  ConstantPositionProperty,
 } from 'cesium';
+import { ImageDialogComponent } from '../components/image-dialog.component';
+import { SidenavService } from '../sidenav/sidenav.service';
+import { ImageService } from './image/image.service';
 
 @Injectable({
   providedIn: 'root',
@@ -19,18 +20,20 @@ import {
 export class CesiumInteractionService {
   private handler!: ScreenSpaceEventHandler;
   public selectedEntityChanged = new EventEmitter<Entity>();
+  public entityUpdated = new EventEmitter<void>();
 
   private selectedEntity: Entity | undefined;
   public clickedPointId: number | null = null;
 
   constructor(
     private dialog: MatDialog,
-    private imageService: ImageService
+    private imageService: ImageService,
+    private sidenavService: SidenavService
   ) {}
 
   /**
    * Sets up the click handler for the Cesium viewer.
-   * @param viewer The Cesium viewer object.
+   * @param viewer The Cesium viewer instance.
    */
   setupClickHandler(viewer: Viewer): void {
     this.handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -55,11 +58,10 @@ export class CesiumInteractionService {
     id: Entity;
   }): void {
     if (defined(pickedObject)) {
-      this.selectedEntity = pickedObject.id;
+      this.selectedEntity = pickedObject.id as Entity;
       this.clickedPointId =
         this.selectedEntity?.properties?.['point_id']?._value;
       this.selectedEntityChanged.emit(this.selectedEntity);
-      // Additional logic for handling the selected point can be added here
     }
   }
 
@@ -78,8 +80,8 @@ export class CesiumInteractionService {
   }
 
   /**
-   * Shows the image associated with the given braArkivId.
-   * @param braArkivId The ID of the image in the image service.
+   * Shows the image dialog for the given braArkivId.
+   * @param braArkivId The ID of the image to show.
    */
   async showImage(braArkivId: string): Promise<void> {
     try {
@@ -89,7 +91,34 @@ export class CesiumInteractionService {
       });
     } catch (error) {
       console.error('Failed to load image URL', error);
-      // Handle the error, e.g., show an error message to the user
+    }
+  }
+
+  /**
+   * Updates the coordinates of the selected entity.
+   * @param lat The latitude of the new position.
+   * @param lon The longitude of the new position.
+   * @param height The height of the new position.
+   */
+  updateEntityCoordinates(lat: number, lon: number, height: number): void {
+    if (this.selectedEntity) {
+      const newPosition = Cartesian3.fromDegrees(lon, lat, height);
+      this.selectedEntity.position = new ConstantPositionProperty(newPosition);
+
+      const id = this.selectedEntity.properties?.['point_id']?._value;
+      if (id !== undefined) {
+        this.sidenavService.updateCoordinates(id, height, lat, lon).subscribe({
+          next: () => {
+            console.log('Coordinates updated successfully');
+            this.entityUpdated.emit();
+          },
+          error: (error: Error) => {
+            console.error('Error updating coordinates', error);
+          },
+        });
+      } else {
+        console.error('Invalid entity ID');
+      }
     }
   }
 
