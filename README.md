@@ -5,7 +5,7 @@ This project integrates an Angular front-end with a FastAPI back-end to visualiz
 ## Table of Contents
 
 1. [Development Server](#development-server)
-2. [Backend Setup](#backend-setup)
+2. [Backend](#backend)
 3. [Installing Docker](#installing-docker)
 4. [Running Docker Containers](#running-docker-containers)
 5. [Code Scaffolding](#code-scaffolding)
@@ -18,7 +18,26 @@ This project integrates an Angular front-end with a FastAPI back-end to visualiz
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Backend Setup
+## Backend 
+
+The backend is comprised of a Postgres database (geomelding-5) which contains the related data for the all cable networks and is accesiable thorugh a FastAPI which is built on top on the database to extract the necessary data.
+
+![Database preview](imgs/points.png)
+*Preview of the data related to the measurements in the form of measured points*
+
+The FastAPI which includes different endpoints for extracting data about the cable networks is defined thorugh SQL files that are executed on the database to obtain the specifed information. The SQL files include queries and views to systematically organize the data recived from the measurements into both GeoJSON for the measurement data itself and JSON for the information about the related inquiries. The GeoJSON format is known for its compatibility with various geographic information system (GIS) tools, enables the visualization of these cables with ease. This approach ensures that the data is readily available for integration with Cesium, as well as other frameworks and libraries that support GeoJSON.
+
+![Query](imgs/queries.png)
+*Example of a query used to compose measurement data into GeoJSON format*
+
+The database has a schema "analytics_cable_measurement_inquiries" which is a subset of the public schema containing all the relevant information for the cable networks. In this schema you will find materialized views which represent the subsets of the tables in the public schema (Should be made into tables in the future). 
+
+![View](imgs/views.png)
+*Preview of the view which represents all cables in GeoJSON format*
+
+
+
+### Setup
 
 1. **Install Dependencies:**
 
@@ -59,7 +78,7 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 
    - The backend server will be available at `http://localhost:8000`.
 
-## Installing Docker
+### Installing Docker
 
 1. **Install Docker:**
 
@@ -73,7 +92,7 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
      docker --version
      ```
 
-## Running Docker Containers
+### Running Docker Containers
 
 1. **Build the Docker Image:**
 
@@ -160,8 +179,20 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
   The backend uses logging to track the status of operations. Logs are stored in the `app.log` file.
 
 - **API Endpoints:**
-  - `GET /fetch-geotiff`: Fetches a GeoTIFF file based on the provided bounding box and dimensions.
-  - `GET /process-geotiff`: Processes the fetched GeoTIFF file to generate terrain tiles.
+
+![API](imgs/api.png)
+*Preview of Swagger documentation of the API*
+
+- `GET /`: Reads the root of the API.
+- `GET /inquiries`: Retrieves a list of inquiries.
+- `GET /geometries/area/boundary/inquiry/{inquiry_id}`: Gets the area boundary geometry for a specific inquiry.
+- `GET /geometries/area/working_area/inquiry/{inquiry_id}`: Gets the working area geometry for a specific inquiry.
+- `GET /geometries/measurements/inquiry/{inquiry_id}`: Retrieves all geometric data associated with a specific inquiry.
+- `GET /geometries/measurements/cable_points/inquiry/{inquiry_id}`: Gets the cable point measurements geometry for a specific inquiry.
+- `GET /fetch-geotiff`: Fetches a GeoTIFF file.
+- `GET /process-geotiff`: Processes a GeoTIFF file.
+- `GET /images/inquiry/{inquiry_id}`: Retrieves images related to a specific inquiry.
+- `PUT /update-coordinates/{edited_point_id}`: Updates the coordinates of a specified point.
 
 Ensure you follow these steps to set up the project correctly. For any issues or further assistance, refer to the project documentation or reach out to the development team.
 
