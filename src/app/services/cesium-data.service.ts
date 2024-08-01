@@ -11,6 +11,9 @@ import {
   Cartesian3,
   JulianDate,
   Property,
+  CallbackProperty,
+  defined,
+  PropertyBag,
 } from 'cesium';
 import { lastValueFrom } from 'rxjs';
 import { CableMeasurementService } from './cable-measurement.service';
@@ -95,6 +98,8 @@ export class CesiumDataService {
 
           viewer.dataSources.add(dataSource);
 
+          const groupEntities: Entity[] = [];
+
           dataSource.entities.values.forEach(entity => {
             if (entity.position) {
               entity.point = new PointGraphics({
@@ -104,6 +109,8 @@ export class CesiumDataService {
                 outlineWidth: 2,
                 show: new ConstantProperty(false),
               });
+              groupEntities.push(entity);
+
               pointEntities.push(entity);
               const position = entity.position.getValue(JulianDate.now());
               if (position) {
@@ -112,11 +119,18 @@ export class CesiumDataService {
             }
           });
 
-          if (allPositions.length > 1) {
+          // Create a polyline for each group of entities
+          if (groupEntities.length > 1) {
             viewer.entities.add({
               polyline: {
-                positions: allPositions,
-                width: 3,
+                positions: new CallbackProperty(() => {
+                  return groupEntities
+                    .map(entity => {
+                      return entity.position?.getValue(JulianDate.now());
+                    })
+                    .filter(position => position !== undefined);
+                }, false),
+                width: 4.5,
                 material: Color.BLUEVIOLET,
               },
             });
@@ -128,6 +142,13 @@ export class CesiumDataService {
     }
   }
 
+  private disablePolygonClick(entity: Entity): void {
+    if (defined(entity.properties)) {
+      entity.properties = new PropertyBag();
+
+      entity.properties['nonPickable'] = true;
+    }
+  }
   /**
    * Loads the working area data and displays it on the Cesium viewer.
    */
@@ -158,6 +179,7 @@ export class CesiumDataService {
               HeightReference.CLAMP_TO_GROUND as unknown as Property;
             polygons.push(entity);
             viewer.entities.add(entity);
+            this.disablePolygonClick(entity);
           }
         });
       }

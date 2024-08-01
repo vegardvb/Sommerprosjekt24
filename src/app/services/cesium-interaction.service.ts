@@ -1,4 +1,4 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable, EventEmitter, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Cartesian2, Cartesian3, defined } from 'cesium';
 import {
@@ -24,6 +24,9 @@ export class CesiumInteractionService {
 
   private selectedEntity: Entity | undefined;
   public clickedPointId: number | null = null;
+  public isEditing: boolean = false;
+
+  @Output() editingToggled = new EventEmitter<boolean>();
 
   constructor(
     private dialog: MatDialog,
@@ -31,6 +34,10 @@ export class CesiumInteractionService {
     private sidenavService: SidenavService
   ) {}
 
+  toggleEditing() {
+    this.isEditing = !this.isEditing;
+    this.editingToggled.emit(this.isEditing);
+  }
   /**
    * Sets up the click handler for the Cesium viewer.
    * @param viewer The Cesium viewer instance.
@@ -116,6 +123,7 @@ export class CesiumInteractionService {
             console.error('Error updating coordinates', error);
           },
         });
+        this.toggleEditing();
       } else {
         console.error('Invalid entity ID');
       }

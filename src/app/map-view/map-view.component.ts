@@ -230,11 +230,4 @@ export class MapViewComponent implements OnInit, OnDestroy, AfterViewInit {
   handleEntitySelected(entity: Entity) {
     this.sidenavComponent.updateSelectedEntity(entity);
   }
-
-  /**
-   * Handles the deselection of an entity.
-   */
-  handleEntityDeselection() {
-    this.sidenavComponent.clearSelectedEntity();
-  }
 }

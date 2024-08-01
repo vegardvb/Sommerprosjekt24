@@ -65,7 +65,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   private inquiryId: number | undefined;
   private pointEntities: Entity[] = [];
   private center!: Cartesian3;
-  private selectedEntity: Entity | null = null;
+  private selectedEntity: Entity | undefined = undefined;
 
   public viewer!: Viewer;
   private handler!: ScreenSpaceEventHandler;
@@ -198,6 +198,21 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       animation: false,
       sceneModePicker: false,
     });
+
+    const originalPick = this.viewer.scene.pick;
+
+    this.viewer.scene.pick = function (mousePosition) {
+      const pickedObject = originalPick.call(this, mousePosition);
+      if (
+        pickedObject &&
+        pickedObject.id &&
+        pickedObject.id.properties &&
+        pickedObject.id.properties.nonPickable
+      ) {
+        return undefined;
+      }
+      return pickedObject;
+    };
 
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
 
@@ -400,27 +415,12 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
    */
   private enableEditing() {
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
-    // let originalCoordinates: Cartographic | undefined;
 
     this.handler.setInputAction((movement: { position: Cartesian2 }) => {
       const pickedObject = this.viewer.scene.pick(movement.position);
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
-
         this.selectedEntityChanged.emit(this.selectedEntity); // Emit the event
-
-        // if (defined(this.selectedEntity.position)) {
-        //   const originalCoordinatesCartesian =
-        //     this.selectedEntity.position.getValue(
-        //       JulianDate.now()
-        //     ) as Cartesian3;
-        //   originalCoordinates = Cartographic.fromCartesian(
-        //     originalCoordinatesCartesian
-        //   );
-        //   //console.log('Original Coordinates:', originalCoordinates);
-        // }
-
-        // Disable camera interactions
         this.disableCameraInteractions();
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
@@ -430,15 +430,6 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
         const cartesian = this.viewer.camera.pickEllipsoid(
           movement.endPosition
         );
-        // if (originalCoordinates && cartesian) {
-        //   const cartographic = Cartographic.fromCartesian(cartesian);
-        //   cartographic.height = originalCoordinates.height;
-        //   cartesian = Cartesian3.fromRadians(
-        //     cartographic.latitude,
-        //     cartographic.longitude,
-        //     cartographic.height
-        //   );
-        // }
         if (defined(cartesian)) {
           if (defined(this.selectedEntity.position)) {
             this.selectedEntity.position = new CallbackProperty(
@@ -464,7 +455,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       this.handler.destroy();
     }
     this.isDragging = false;
-    this.selectedEntity = null;
+    this.selectedEntity = undefined;
     this.enableCameraInteractions();
   }
 
@@ -561,7 +552,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   /**
    * Disables camera interactions.
    */
-  private disableCameraInteractions() {
+  public disableCameraInteractions() {
     this.viewer.scene.screenSpaceCameraController.enableRotate = false;
     this.viewer.scene.screenSpaceCameraController.enableZoom = false;
     this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
@@ -571,7 +562,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   /**
    * Enables camera interactions.
    */
-  private enableCameraInteractions() {
+  public enableCameraInteractions() {
     this.viewer.scene.screenSpaceCameraController.enableRotate = true;
     this.viewer.scene.screenSpaceCameraController.enableZoom = true;
     this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
