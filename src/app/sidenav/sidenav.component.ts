@@ -311,6 +311,7 @@ export class SidenavComponent implements OnInit {
             });
           },
         });
+        this.toggleEditing();
       } else {
         console.error('Invalid entity ID');
         this.snackBar.open('Invalid entity selected', '', {
