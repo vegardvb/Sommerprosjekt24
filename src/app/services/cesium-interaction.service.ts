@@ -17,6 +17,7 @@ import {
 import { ImageDialogComponent } from '../components/image-dialog.component';
 import { SidenavService } from '../sidenav/sidenav.service';
 import { ImageService } from './image/image.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({
   providedIn: 'root',
@@ -35,7 +36,8 @@ export class CesiumInteractionService {
   constructor(
     private dialog: MatDialog,
     private imageService: ImageService,
-    private sidenavService: SidenavService
+    private sidenavService: SidenavService,
+    private snackBar: MatSnackBar
   ) {}
 
   toggleEditing() {
@@ -173,15 +175,22 @@ export class CesiumInteractionService {
         this.sidenavService.updateCoordinates(id, height, lat, lon).subscribe({
           next: () => {
             console.log('Coordinates updated successfully');
+            this.snackBar.open('Coordinates updated successfully', 'Close', {
+              duration: 3000,
+            }); // Show MatSnackBar
             this.entityUpdated.emit();
           },
           error: (error: Error) => {
             console.error('Error updating coordinates', error);
+            this.snackBar.open('Error updating coordinates', 'Close', {
+              duration: 3000,
+            }); // Show error MatSnackBar
           },
         });
         this.toggleEditing();
       } else {
         console.error('Invalid entity ID');
+        this.snackBar.open('Invalid entity ID', 'Close', { duration: 3000 }); // Show invalid ID MatSnackBar
       }
     }
   }
