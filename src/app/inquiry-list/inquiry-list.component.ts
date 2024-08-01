@@ -9,13 +9,6 @@ import { DataService } from '../data.service';
 import { Inquiry } from '../../models/inquiry-interface';
 import { Router } from '@angular/router';
 import { DropdownModule } from 'primeng/dropdown';
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
 
 @Component({
   selector: 'app-inquiry-list',
@@ -31,14 +24,6 @@ import {
   ],
   templateUrl: './inquiry-list.component.html',
   styleUrls: ['./inquiry-list.component.css'],
-  animations: [
-    trigger('slideIn', [
-      state('void', style({ transform: 'translateX(-500%)' })),
-      transition(':enter', [
-        animate('6000ms ease-in-out', style({ transform: 'translateX(0)' })),
-      ]),
-    ]),
-  ],
 })
 export class InquiryListComponent implements OnInit {
   products: Inquiry[] = [];
@@ -76,7 +61,7 @@ export class InquiryListComponent implements OnInit {
   constructor(
     private dataService: DataService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.dataService.getData().subscribe({
@@ -99,7 +84,7 @@ export class InquiryListComponent implements OnInit {
       error: error => {
         console.error('Error fetching data:', error);
       },
-      complete: () => { },
+      complete: () => {},
     });
   }
 

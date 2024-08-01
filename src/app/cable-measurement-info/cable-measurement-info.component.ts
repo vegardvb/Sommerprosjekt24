@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { Feature } from '../../models/geojson.model';
 import { ActivatedRoute } from '@angular/router';
@@ -10,10 +11,9 @@ import { GeojsonService } from '../services/geojson.service';
 import { CesiumDirective } from '../cesium.directive';
 import { ClickedPointService } from '../services/clickedpoint.service';
 import { SidenavPointService } from '../services/sidenav-point.service';
+import { switchMap } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
-/**
- * Component for displaying cable measurement information.
- */
 @Component({
   selector: 'app-cable-measurement-info',
   standalone: true,
@@ -43,31 +43,43 @@ export class CableMeasurementInfoComponent implements OnInit {
 
   private clickedPointId: number | null = null;
   public activeHeader: string = '';
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public groupedMeasurements: any[] = [];
-
+  public groupedMeasurements: { id: number; features: Feature[] }[] = [];
   constructor(
     private route: ActivatedRoute,
     private geojsonService: GeojsonService,
     private clickedPointService: ClickedPointService,
     private sidenavPointService: SidenavPointService
-  ) { }
+  ) {}
 
   measurementTypeMap: { [key: number]: string } = {};
 
-  /**
-   * Initializes the component.
-   */
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      this.inquiryId = params['inquiryId'];
-      if (this.inquiryId) {
-        this.fetchPointData(this.inquiryId);
-        this.fetchGeoJsonData(this.inquiryId);
-      } else {
-        console.error('Inquiry ID not found in the query parameters');
-      }
-    });
+    this.route.queryParams
+      .pipe(
+        switchMap(params => {
+          this.inquiryId = params['inquiryId'];
+          if (this.inquiryId) {
+            this.fetchPointData(this.inquiryId);
+            console.log(typeof this.groupedMeasurements);
+            return this.geojsonService.getData(this.inquiryId);
+          } else {
+            console.error('Inquiry ID not found in the query parameters');
+            return throwError(
+              () => new Error('Inquiry ID not found in the query parameters')
+            );
+          }
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.features = this.geojsonService.getFeatures();
+          this.groupFeaturesByMeasurementId();
+          console.log(typeof this.groupedMeasurements);
+        },
+        error: error => {
+          console.error('Error fetching data:', error);
+        },
+      });
 
     this.clickedPointService.clickedPointId$.subscribe(pointId => {
       this.clickedPointId = pointId;
@@ -76,32 +88,21 @@ export class CableMeasurementInfoComponent implements OnInit {
     this.sidenavPointService.updatedFeatures$.subscribe(updatedFeatures => {
       updatedFeatures.forEach(feature => {
         if (feature.properties.point_id) {
-          this.features.push(feature);
+          this.addFeatureIfNotExists(this.features, feature);
           if (!feature.properties.measurement_id) {
-            this.singlePoints.push(feature);
+            this.addFeatureIfNotExists(this.singlePoints, feature);
           }
         }
       });
     });
 
     this.geojsonService.updatedFeatures$.subscribe(updatedFeatures => {
-      updatedFeatures.forEach(feature => this.features.push(feature));
+      updatedFeatures.forEach(feature =>
+        this.addFeatureIfNotExists(this.features, feature)
+      );
       this.groupFeaturesByMeasurementId();
-    });
-  }
-
-  /**
-   * Fetches GeoJSON data for the given inquiry ID.
-   * @param inquiry_id The inquiry ID.
-   */
-  fetchGeoJsonData(inquiry_id: number): void {
-    this.geojsonService.getData(inquiry_id).subscribe({
-      next: () => {
-        this.features = this.geojsonService.getFeatures();
-      },
-      error: error => {
-        console.error('Error fetching data:', error);
-      },
+      console.log(this.groupedMeasurements);
+      console.log(typeof this.groupedMeasurements);
     });
   }
 
@@ -137,29 +138,14 @@ export class CableMeasurementInfoComponent implements OnInit {
     }));
   }
 
-  /**
-   * Gets the header for a feature.
-   * @param feature The feature.
-   * @returns The header string.
-   */
   getHeader(feature: Feature): string {
     return `Point ID: ${feature.properties.point_id}`;
   }
 
-  /**
-   * Gets the ID for a feature.
-   * @param feature The feature.
-   * @returns The ID string.
-   */
   getID(feature: Feature): number | undefined {
     return feature.properties.point_id;
   }
 
-  /**
-   * Gets the CSS class for the header of a feature.
-   * @param feature The feature.
-   * @returns The CSS class string.
-   */
   getHeaderClass(feature: Feature): string | null {
     const header = this.getID(feature);
     const clickedPointIdStr = this.clickedPointId?.toString();
@@ -180,10 +166,7 @@ export class CableMeasurementInfoComponent implements OnInit {
       )?.features;
       if (
         features &&
-        features.some(
-          (f: { properties: { point_id: number | null } }) =>
-            f.properties.point_id === this.clickedPointId
-        )
+        features.some(f => f.properties.point_id === this.clickedPointId)
       ) {
         return 'clicked-measurement-id';
       }
@@ -191,10 +174,6 @@ export class CableMeasurementInfoComponent implements OnInit {
     return null;
   }
 
-  /**
-   * Captures the header ID and performs necessary actions.
-   * @param headerId The header ID.
-   */
   captureHeader(headerId: string) {
     const match = headerId.match(/(?:Point ID:)\s*(\d+)/);
     if (match) {
@@ -228,11 +207,6 @@ export class CableMeasurementInfoComponent implements OnInit {
     }
   }
 
-  /**
-   * Formats the coordinates.
-   * @param coordinates The coordinates.
-   * @returns The formatted coordinates.
-   */
   formatCoordinates(coordinates: number[] | number[][]): string[] {
     if (Array.isArray(coordinates[0])) {
       return (coordinates as number[][]).map(coord => `[${coord.join(', ')}]`);
@@ -241,9 +215,6 @@ export class CableMeasurementInfoComponent implements OnInit {
     }
   }
 
-  /**
-   * Toggles the edit mode.
-   */
   toggleEditMode(): void {
     this.editMode = !this.editMode;
 
@@ -259,6 +230,18 @@ export class CableMeasurementInfoComponent implements OnInit {
           editedFeatures[id] = editableElement.innerText.trim();
         }
       });
+    }
+  }
+
+  private addFeatureIfNotExists(
+    featuresArray: Feature[],
+    feature: Feature
+  ): void {
+    const existingFeature = featuresArray.find(
+      f => f.properties.point_id === feature.properties.point_id
+    );
+    if (!existingFeature) {
+      featuresArray.push(feature);
     }
   }
 }

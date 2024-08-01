@@ -1,7 +1,7 @@
 <div class="p-2">
   <div class="mb-1">
     <!-- Accordion for single points -->
-    <p-accordion [multiple]="true">
+    <p-accordion [multiple]="false">
       <p-accordionTab *ngFor="let feature of singlePoints">
         <ng-template pTemplate="header">
           <div
@@ -196,7 +196,7 @@
   </div>
 
   <!-- Accordion for grouped measurements -->
-  <p-accordion [multiple]="true">
+  <p-accordion [multiple]="false">
     <p-accordionTab *ngFor="let measurement of groupedMeasurements">
       <ng-template pTemplate="header">
         <div [ngClass]="getMeasurementClass(measurement.id)">
@@ -204,7 +204,7 @@
         </div>
       </ng-template>
 
-      <p-accordion [multiple]="true">
+      <p-accordion [multiple]="false">
         <p-accordionTab *ngFor="let feature of measurement.features">
           <ng-template pTemplate="header">
             <div
