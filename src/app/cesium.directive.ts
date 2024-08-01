@@ -134,6 +134,10 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
         if (this.clickedPointId) {
           this.clickedPointService.setClickedPointId(this.clickedPointId);
         }
+        this.cesiumInteractionService.updatePointVisibility(
+          entity,
+          this.pointEntities
+        );
       })
     );
 
@@ -421,7 +425,6 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
         this.selectedEntityChanged.emit(this.selectedEntity); // Emit the event
-        this.disableCameraInteractions();
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
 
@@ -456,7 +459,6 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     }
     this.isDragging = false;
     this.selectedEntity = undefined;
-    this.enableCameraInteractions();
   }
 
   /**
@@ -547,26 +549,5 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       console.error('Error loading GeoJSON data:', error);
       // Optionally, add user feedback or additional error handling here
     }
-  }
-
-  /**
-   * Disables camera interactions.
-   */
-  public disableCameraInteractions() {
-    this.viewer.scene.screenSpaceCameraController.enableRotate = false;
-    this.viewer.scene.screenSpaceCameraController.enableZoom = false;
-    this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
-    this.viewer.scene.screenSpaceCameraController.enableLook = false;
-  }
-
-  /**
-   * Enables camera interactions.
-   */
-  public enableCameraInteractions() {
-    this.viewer.scene.screenSpaceCameraController.enableRotate = true;
-    this.viewer.scene.screenSpaceCameraController.enableZoom = true;
-    this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
-    this.viewer.scene.screenSpaceCameraController.enableTilt = true;
-    this.viewer.scene.screenSpaceCameraController.enableLook = true;
   }
 }

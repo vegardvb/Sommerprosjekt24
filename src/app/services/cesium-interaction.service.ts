@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Cartesian2, Cartesian3, defined } from 'cesium';
+import { Cartesian2, Cartesian3, ConstantProperty, defined } from 'cesium';
 import {
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
@@ -101,8 +101,24 @@ export class CesiumInteractionService {
   }): void {
     if (defined(pickedObject)) {
       this.selectedEntity = pickedObject.id as Entity;
-      console.log('Polyline clicked:', this.selectedEntity);
+      this.selectedEntityChanged.emit(this.selectedEntity);
+
       // Additional logic for handling the polyline click can be added here
+    }
+  }
+
+  /**
+   * Updates the visibility of point entities based on whether the selected entity is a polyline.
+   * @param selectedEntity The selected entity.
+   * @param pointEntities The array of point entities.
+   */
+  updatePointVisibility(selectedEntity: Entity, pointEntities: Entity[]): void {
+    if (selectedEntity) {
+      pointEntities.forEach(pointEntity => {
+        if (pointEntity.point) {
+          pointEntity.point.show = new ConstantProperty(true);
+        }
+      });
     }
   }
 
