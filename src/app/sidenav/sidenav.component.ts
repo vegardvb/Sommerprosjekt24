@@ -124,12 +124,17 @@ export class SidenavComponent implements OnInit {
    */
   updateSelectedEntity(entity: Entity) {
     this.selectedEntity = entity;
+
     const position = this.selectedEntity.position?.getValue(JulianDate.now());
     if (position) {
       const cartographic = Cartographic.fromCartesian(position);
       this.longitude = CesiumMath.toDegrees(cartographic.longitude);
       this.latitude = CesiumMath.toDegrees(cartographic.latitude);
       this.height = cartographic.height;
+    } else {
+      this.isEditing = false;
+      this.editingToggled.emit(this.isEditing);
+      console.log('other selected entity', this.selectedEntity);
     }
   }
 
