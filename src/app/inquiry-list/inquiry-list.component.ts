@@ -35,7 +35,7 @@ import {
     trigger('slideIn', [
       state('void', style({ transform: 'translateX(-500%)' })),
       transition(':enter', [
-        animate('2000ms ease-out', style({ transform: 'translateX(0)' })),
+        animate('6000ms ease-in-out', style({ transform: 'translateX(0)' })),
       ]),
     ]),
   ],
@@ -76,7 +76,7 @@ export class InquiryListComponent implements OnInit {
   constructor(
     private dataService: DataService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.dataService.getData().subscribe({
@@ -99,7 +99,7 @@ export class InquiryListComponent implements OnInit {
       error: error => {
         console.error('Error fetching data:', error);
       },
-      complete: () => {},
+      complete: () => { },
     });
   }
 

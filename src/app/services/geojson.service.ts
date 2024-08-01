@@ -35,7 +35,7 @@ export class GeojsonService {
         if (response && response.length > 0 && response[0].geojson) {
           response[0].geojson.forEach((geojson: GeoJSON) => {
             this.processGeoJSON(geojson);
-            console.log('meh', geojson);
+            console.log('Cable_point_metadata', geojson);
           });
         } else {
           throw new Error('Invalid GeoJSON response');
