@@ -40,6 +40,9 @@ export class CesiumInteractionService {
     private snackBar: MatSnackBar
   ) {}
 
+  /**
+   * Toggles the editing state and emits the new state.
+   */
   toggleEditing() {
     this.isEditing = !this.isEditing;
     this.editingToggled.emit(this.isEditing);
@@ -47,6 +50,7 @@ export class CesiumInteractionService {
 
   /**
    * Sets up the click handler for the Cesium viewer.
+   * Handles picking objects from the scene on click and performs actions based on the type of object picked.
    * @param viewer The Cesium viewer instance.
    */
   setupClickHandler(viewer: Viewer): void {
@@ -55,28 +59,36 @@ export class CesiumInteractionService {
 
     this.handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
     this.handler.setInputAction((movement: { position: Cartesian2 }) => {
-      const pickedObject = viewer.scene.pick(movement.position);
+      try {
+        const pickedObject = viewer.scene.pick(movement.position);
 
-      // Handle clicks on empty spaces
-      if (!pickedObject) {
-        this.deselectEntity();
-        return;
-      }
-
-      if (pickedObject && pickedObject.primitive) {
-        if (pickedObject.primitive instanceof PointPrimitive) {
-          this.handlePointClick(pickedObject);
-        } else if (pickedObject.primitive instanceof Billboard) {
-          this.handleImageClick(pickedObject);
-        } else if (pickedObject.primitive instanceof Polyline) {
-          this.handlePolylineClick(pickedObject);
+        if (!pickedObject) {
+          this.deselectEntity();
+          return;
         }
+
+        if (pickedObject.primitive) {
+          if (pickedObject.primitive instanceof PointPrimitive) {
+            this.handlePointClick(pickedObject);
+          } else if (pickedObject.primitive instanceof Billboard) {
+            this.handleImageClick(pickedObject);
+          } else if (pickedObject.primitive instanceof Polyline) {
+            this.handlePolylineClick(pickedObject);
+          }
+        }
+      } catch (error) {
+        console.error('Error handling click event', error);
+        this.snackBar.open(
+          'An error occurred while processing the click event.',
+          'Close',
+          { duration: 3000 }
+        );
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
   }
 
   /**
-   * Deselects the currently selected entity.
+   * Deselects the currently selected entity and emits the change.
    */
   private deselectEntity(): void {
     this.selectedEntity = undefined;
@@ -85,61 +97,88 @@ export class CesiumInteractionService {
 
   /**
    * Handles the click event on a point primitive.
+   * Updates the selected entity and emits the change.
    * @param pickedObject The picked object containing the point primitive and its ID.
    */
   private handlePointClick(pickedObject: {
     primitive: PointPrimitive;
     id: Entity;
   }): void {
-    if (defined(pickedObject)) {
-      this.selectedEntity = pickedObject.id as Entity;
-      this.clickedPointId =
-        this.selectedEntity?.properties?.['point_id']?._value;
-      this.selectedEntityChanged.emit(this.selectedEntity);
+    try {
+      if (defined(pickedObject)) {
+        this.selectedEntity = pickedObject.id as Entity;
+        this.clickedPointId =
+          this.selectedEntity?.properties?.['point_id']?._value;
+        this.selectedEntityChanged.emit(this.selectedEntity);
+      }
+    } catch (error) {
+      console.error('Error handling point click', error);
+      this.snackBar.open('Error selecting point', 'Close', { duration: 3000 });
     }
   }
 
   /**
    * Handles the click event on a billboard.
+   * Opens an image dialog with the associated image.
    * @param pickedObject The picked object containing the billboard and its ID.
    */
   private handleImageClick(pickedObject: {
     primitive: Billboard;
     id: Entity;
   }): void {
-    if (pickedObject.id && pickedObject.id.properties) {
-      const braArkivId = pickedObject.id.properties['bra_arkiv_id'].getValue();
-      this.showImage(braArkivId);
+    try {
+      if (pickedObject.id && pickedObject.id.properties) {
+        const braArkivId =
+          pickedObject.id.properties['bra_arkiv_id'].getValue();
+        this.showImage(braArkivId);
+      }
+    } catch (error) {
+      console.error('Error handling image click', error);
+      this.snackBar.open('Error displaying image', 'Close', { duration: 3000 });
     }
   }
 
   /**
    * Handles the click event on a polyline.
+   * Updates the selected entity and emits the change.
    * @param pickedObject The picked object containing the polyline and its ID.
    */
   private handlePolylineClick(pickedObject: {
     primitive: Polyline;
     id: Entity;
   }): void {
-    if (defined(pickedObject)) {
-      this.selectedEntity = pickedObject.id as Entity;
-      this.selectedEntityChanged.emit(this.selectedEntity);
-
-      // Additional logic for handling the polyline click can be added here
+    try {
+      if (defined(pickedObject)) {
+        this.selectedEntity = pickedObject.id as Entity;
+        this.selectedEntityChanged.emit(this.selectedEntity);
+      }
+    } catch (error) {
+      console.error('Error handling polyline click', error);
+      this.snackBar.open('Error selecting polyline', 'Close', {
+        duration: 3000,
+      });
     }
   }
 
   /**
-   * Updates the visibility of point entities based on whether the selected entity is a polyline.
+   * Updates the visibility of point entities based on the selected entity.
+   * If the selected entity is a polyline, it shows all points.
    * @param selectedEntity The selected entity.
    * @param pointEntities The array of point entities.
    */
   updatePointVisibility(selectedEntity: Entity, pointEntities: Entity[]): void {
-    if (selectedEntity) {
-      pointEntities.forEach(pointEntity => {
-        if (pointEntity.point) {
-          pointEntity.point.show = new ConstantProperty(true);
-        }
+    try {
+      if (selectedEntity) {
+        pointEntities.forEach(pointEntity => {
+          if (pointEntity.point) {
+            pointEntity.point.show = new ConstantProperty(true);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error updating point visibility', error);
+      this.snackBar.open('Error updating point visibility', 'Close', {
+        duration: 3000,
       });
     }
   }
@@ -156,11 +195,15 @@ export class CesiumInteractionService {
       });
     } catch (error) {
       console.error('Failed to load image URL', error);
+      this.snackBar.open('Failed to load image URL', 'Close', {
+        duration: 3000,
+      });
     }
   }
 
   /**
    * Updates the coordinates of the selected entity.
+   * Communicates the change to the server and updates the view accordingly.
    * @param lat The latitude of the new position.
    * @param lon The longitude of the new position.
    * @param height The height of the new position.
@@ -190,13 +233,21 @@ export class CesiumInteractionService {
         this.toggleEditing();
       } else {
         console.error('Invalid entity ID');
-        this.snackBar.open('Invalid entity ID', 'Close', { duration: 3000 }); // Show invalid ID MatSnackBar
+        this.snackBar.open('Invalid entity ID', 'Close', { duration: 3000 });
       }
+    } else {
+      console.error('No entity selected for updating coordinates');
+      this.snackBar.open(
+        'No entity selected for updating coordinates',
+        'Close',
+        { duration: 3000 }
+      );
     }
   }
 
   /**
-   * Disposes the click handler.
+   * Disposes of the current click handler, if it exists.
+   * Cleans up resources to prevent memory leaks.
    */
   dispose(): void {
     if (this.handler) {
