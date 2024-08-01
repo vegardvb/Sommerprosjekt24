@@ -5,7 +5,7 @@ This project integrates an Angular front-end with a FastAPI back-end to visualiz
 ## Table of Contents
 
 1. [Development Server](#development-server)
-2. [Backend Setup](#backend-setup)
+2. [Backend](#backend)
 3. [Installing Docker](#installing-docker)
 4. [Running Docker Containers](#running-docker-containers)
 5. [Code Scaffolding](#code-scaffolding)
@@ -18,7 +18,16 @@ This project integrates an Angular front-end with a FastAPI back-end to visualiz
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Backend Setup
+## Backend 
+
+The backend is comprised of a Postgres database (geomelding-5) which contains the related data for the all cable networks and is accesiable thorugh a FastAPI which is built on top on the database to extract the necessary data.
+
+The FastAPI which includes different endpoints for extracting data about the cable networks is defined thorugh SQL files that are executed on the database to obtain the specifed information. The SQL files include queries and views to systematically organize the data recived from the measurements into both GeoJSON for the measurement data itself and JSON for the information about the related inquiries. The GeoJSON format is known for its compatibility with various geographic information system (GIS) tools, enables the visualization of these cables with ease. This approach ensures that the data is readily available for integration with Cesium, as well as other frameworks and libraries that support GeoJSON.
+
+The database has a schema "analytics_cable_measurement_inquiries" which is a subset of the public schema containing all the relevant information for the cable networks. In this schema you will find materialized views which represent the subsets of the tables in the public schema (Should be made into tables in the future). 
+
+
+### Setup
 
 1. **Install Dependencies:**
 
@@ -59,7 +68,7 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
 
    - The backend server will be available at `http://localhost:8000`.
 
-## Installing Docker
+### Installing Docker
 
 1. **Install Docker:**
 
@@ -73,7 +82,7 @@ Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The appli
      docker --version
      ```
 
-## Running Docker Containers
+### Running Docker Containers
 
 1. **Build the Docker Image:**
 
