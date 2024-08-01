@@ -1,15 +1,18 @@
 import { Injectable, EventEmitter, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Cartesian2, Cartesian3, ConstantProperty, defined } from 'cesium';
 import {
   ScreenSpaceEventHandler,
-  ScreenSpaceEventType,
-  Viewer,
   Entity,
+  Viewer,
+  Cartesian2,
   PointPrimitive,
   Billboard,
-  ConstantPositionProperty,
   Polyline,
+  ScreenSpaceEventType,
+  defined,
+  ConstantProperty,
+  Cartesian3,
+  ConstantPositionProperty,
 } from 'cesium';
 import { ImageDialogComponent } from '../components/image-dialog.component';
 import { SidenavService } from '../sidenav/sidenav.service';
@@ -19,7 +22,7 @@ import { ImageService } from './image/image.service';
   providedIn: 'root',
 })
 export class CesiumInteractionService {
-  private handler!: ScreenSpaceEventHandler;
+  private handler: ScreenSpaceEventHandler | undefined;
   public selectedEntityChanged = new EventEmitter<Entity>();
   public entityUpdated = new EventEmitter<void>();
 
@@ -45,9 +48,19 @@ export class CesiumInteractionService {
    * @param viewer The Cesium viewer instance.
    */
   setupClickHandler(viewer: Viewer): void {
+    // Ensure that the handler is cleaned up if it was previously set
+    this.dispose();
+
     this.handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
     this.handler.setInputAction((movement: { position: Cartesian2 }) => {
       const pickedObject = viewer.scene.pick(movement.position);
+
+      // Handle clicks on empty spaces
+      if (!pickedObject) {
+        this.deselectEntity();
+        return;
+      }
+
       if (pickedObject && pickedObject.primitive) {
         if (pickedObject.primitive instanceof PointPrimitive) {
           this.handlePointClick(pickedObject);
@@ -58,6 +71,14 @@ export class CesiumInteractionService {
         }
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
+  }
+
+  /**
+   * Deselects the currently selected entity.
+   */
+  private deselectEntity(): void {
+    this.selectedEntity = undefined;
+    this.selectedEntityChanged.emit(undefined);
   }
 
   /**
@@ -73,7 +94,6 @@ export class CesiumInteractionService {
       this.clickedPointId =
         this.selectedEntity?.properties?.['point_id']?._value;
       this.selectedEntityChanged.emit(this.selectedEntity);
-      console.log('Point clicked:', this.selectedEntity);
     }
   }
 
@@ -172,6 +192,7 @@ export class CesiumInteractionService {
   dispose(): void {
     if (this.handler) {
       this.handler.destroy();
+      this.handler = undefined;
     }
   }
 }

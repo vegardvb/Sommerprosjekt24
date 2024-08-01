@@ -58,7 +58,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
   public isEditing: boolean = false;
   public latitude: number = 0;
   public longitude: number = 0;
-  public selectedEntity!: Entity | null;
+  public selectedEntity!: Entity | undefined;
 
   @Output() editingToggled = new EventEmitter<boolean>();
   @Output() geoJsonUpload = new EventEmitter<object>();
@@ -153,18 +153,21 @@ export class SidenavComponent implements OnInit, OnDestroy {
    * Updates the selected entity.
    * @param entity - The entity to update.
    */
-  updateSelectedEntity(entity: Entity) {
-    this.selectedEntity = entity;
+  updateSelectedEntity(entity: Entity | undefined) {
+    if (entity) {
+      this.selectedEntity = entity;
 
-    const position = this.selectedEntity.position?.getValue(JulianDate.now());
-    if (position) {
-      const cartographic = Cartographic.fromCartesian(position);
-      this.longitude = CesiumMath.toDegrees(cartographic.longitude);
-      this.latitude = CesiumMath.toDegrees(cartographic.latitude);
-      this.height = cartographic.height;
+      const position = this.selectedEntity.position?.getValue(JulianDate.now());
+      if (position) {
+        const cartographic = Cartographic.fromCartesian(position);
+        this.longitude = CesiumMath.toDegrees(cartographic.longitude);
+        this.latitude = CesiumMath.toDegrees(cartographic.latitude);
+        this.height = cartographic.height;
+      } else {
+        this.clearSelectedEntity();
+      }
     } else {
-      this.isEditing = false;
-      this.editingToggled.emit(this.isEditing);
+      this.clearSelectedEntity();
     }
   }
 
@@ -172,10 +175,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
    * Clears the selected entity.
    */
   clearSelectedEntity() {
-    this.selectedEntity = null;
+    this.selectedEntity = undefined;
     this.longitude = 0;
     this.latitude = 0;
     this.height = 0;
+    this.isEditing = false;
   }
 
   /**
@@ -237,7 +241,7 @@ export class SidenavComponent implements OnInit, OnDestroy {
    * Closes the editor.
    */
   closeEditor() {
-    this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
+    this.selectedEntity = undefined;
     this.isEditing = false;
     this.editingToggled.emit(this.isEditing);
   }
