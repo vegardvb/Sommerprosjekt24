@@ -60,7 +60,6 @@ export class CableMeasurementInfoComponent implements OnInit {
           this.inquiryId = params['inquiryId'];
           if (this.inquiryId) {
             this.fetchPointData(this.inquiryId);
-            console.log(typeof this.groupedMeasurements);
             return this.geojsonService.getData(this.inquiryId);
           } else {
             console.error('Inquiry ID not found in the query parameters');
@@ -74,7 +73,6 @@ export class CableMeasurementInfoComponent implements OnInit {
         next: () => {
           this.features = this.geojsonService.getFeatures();
           this.groupFeaturesByMeasurementId();
-          console.log(typeof this.groupedMeasurements);
         },
         error: error => {
           console.error('Error fetching data:', error);
@@ -101,8 +99,6 @@ export class CableMeasurementInfoComponent implements OnInit {
         this.addFeatureIfNotExists(this.features, feature)
       );
       this.groupFeaturesByMeasurementId();
-      console.log(this.groupedMeasurements);
-      console.log(typeof this.groupedMeasurements);
     });
   }
 

@@ -30,7 +30,6 @@ export class GeojsonService {
             newFeatures.push(...geojson.features);
           });
           this.featuresSubject.next(newFeatures);
-          console.log('Cable_point_metadata', newFeatures);
         } else {
           throw new Error('Invalid GeoJSON response');
         }
