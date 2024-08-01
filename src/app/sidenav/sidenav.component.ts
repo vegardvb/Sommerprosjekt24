@@ -134,7 +134,6 @@ export class SidenavComponent implements OnInit {
     } else {
       this.isEditing = false;
       this.editingToggled.emit(this.isEditing);
-      console.log('other selected entity', this.selectedEntity);
     }
   }
 
