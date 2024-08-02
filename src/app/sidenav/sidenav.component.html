@@ -36,53 +36,53 @@
 
     <div class="p-2">
       <div *ngIf="selectedEntity" class="coordinate-inputs">
-          <button (click)="toggleEditing()" class="btn edit-btn mb-3">
-            {{ isEditing ? 'Disable Editing' : 'Enable Editing' }}
-          </button>
-          <div class="form-group">
-            <label for="longitude" class="form-label">Longitude</label>
-            <input
-              id="longitude"
-              [(value)]="longitude"
-              (input)="onLongitudeChange($event)"
-              [readonly]="!isEditing"
-              type="number"
-              step="0.00001"
-              class="form-control mb-2"
-            />
-          </div>
+        <button (click)="toggleEditing()" class="btn edit-btn mb-3">
+          {{ isEditing ? 'Disable Editing' : 'Enable Editing' }}
+        </button>
+        <div class="form-group">
+          <label for="longitude" class="form-label">Longitude</label>
+          <input
+            id="longitude"
+            [(value)]="longitude"
+            (input)="onLongitudeChange($event)"
+            [readonly]="!isEditing"
+            type="number"
+            step="0.00001"
+            class="form-control mb-2"
+          />
+        </div>
 
-          <div class="form-group">
-            <label for="latitude" class="form-label">Latitude</label>
-            <input
-              id="latitude"
-              [(value)]="latitude"
-              (input)="onLatitudeChange($event)"
-              [readonly]="!isEditing"
-              type="number"
-              step="0.00001"
-              class="form-control mb-2"
-            />
-          </div>
-          <div class="form-group">
-            <label for="height" class="form-label">Height</label>
-            <input
-              id="height"
-              [(value)]="height"
-              (input)="onHeightChange($event)"
-              [readonly]="!isEditing"
-              type="number"
-              step="0.1"
-              class="form-control mb-2"
-            />
-          </div>
+        <div class="form-group">
+          <label for="latitude" class="form-label">Latitude</label>
+          <input
+            id="latitude"
+            [(value)]="latitude"
+            (input)="onLatitudeChange($event)"
+            [readonly]="!isEditing"
+            type="number"
+            step="0.00001"
+            class="form-control mb-2"
+          />
+        </div>
+        <div class="form-group">
+          <label for="height" class="form-label">Height</label>
+          <input
+            id="height"
+            [(value)]="height"
+            (input)="onHeightChange($event)"
+            [readonly]="!isEditing"
+            type="number"
+            step="0.1"
+            class="form-control mb-2"
+          />
+        </div>
 
-          <button (click)="closeEditor()" class="btn close-btn mb-3">
-            Close Editor
-          </button>
-          <button (click)="saveChanges()" class="save-btn mb-3">
-            Save Changes
-          </button>
+        <button (click)="closeEditor()" class="btn close-btn mb-3">
+          Close Editor
+        </button>
+        <button (click)="saveChanges()" class="save-btn mb-3">
+          Save Changes
+        </button>
       </div>
     </div>
   </div>
