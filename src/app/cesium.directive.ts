@@ -450,6 +450,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     this.handler.setInputAction(() => {
       if (this.isDragging) {
         this.isDragging = false;
+        this.disableEditing();
       } else if (defined(this.selectedEntity)) {
         this.isDragging = true;
       }
