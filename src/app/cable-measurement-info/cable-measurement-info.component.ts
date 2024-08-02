@@ -14,6 +14,10 @@ import { SidenavPointService } from '../services/sidenav-point.service';
 import { switchMap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
+/**
+ * Component for displaying cable measurement information.
+ */
+
 @Component({
   selector: 'app-cable-measurement-info',
   standalone: true,
@@ -49,9 +53,13 @@ export class CableMeasurementInfoComponent implements OnInit {
     private geojsonService: GeojsonService,
     private clickedPointService: ClickedPointService,
     private sidenavPointService: SidenavPointService
-  ) { }
+  ) {}
 
   measurementTypeMap: { [key: number]: string } = {};
+
+  /**
+   * Initializes the component.
+   */
 
   ngOnInit(): void {
     this.route.queryParams
@@ -171,6 +179,15 @@ export class CableMeasurementInfoComponent implements OnInit {
       return null;
     }
   }
+  /**
+   * Gets the class for a measurement based on its ID.
+   *
+   * Checks if the measurement with the given ID has a feature associated with
+   * the clicked point ID. If it does, returns 'clicked-measurement-id', otherwise returns null.
+   *
+   * @param {number} measurementId - The ID of the measurement.
+   * @returns {string|null} - 'clicked-measurement-id' or null.
+   */
 
   getMeasurementClass(measurementId: number): string | null {
     if (this.clickedPointId !== null) {
@@ -255,6 +272,14 @@ export class CableMeasurementInfoComponent implements OnInit {
       });
     }
   }
+
+  /**
+   * Adds a feature to the array if it does not already exist.
+   *
+   * @param {Feature[]} featuresArray - The array of features.
+   * @param {Feature} feature - The feature to add.
+   * @returns {void}
+   */
 
   private addFeatureIfNotExists(
     featuresArray: Feature[],
