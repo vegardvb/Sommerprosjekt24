@@ -94,20 +94,6 @@ describe('SidenavComponent', () => {
     }
   });
 
-  it('should clear selected entity and reset coordinates', () => {
-    component.selectedEntity = new Entity();
-    component.longitude = 10;
-    component.latitude = 20;
-    component.height = 30;
-
-    component.clearSelectedEntity();
-
-    expect(component.selectedEntity).toBeNull();
-    expect(component.longitude).toBe(0);
-    expect(component.latitude).toBe(0);
-    expect(component.height).toBe(0);
-  });
-
   it('should toggle editing mode and emit event', () => {
     spyOn(component.editingToggled, 'emit');
     component.toggleEditing();

@@ -27,3 +27,14 @@ body {
   margin: 0;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
+
+.custom-snackbar-container {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+  min-width: 300px !important;
+  text-align: center !important;
+  font-size: 16px !important;
+}
