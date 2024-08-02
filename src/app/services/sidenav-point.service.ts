@@ -1,21 +1,23 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { catchError, map, debounceTime } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { GeoJSON, Feature } from '../../models/geojson.model';
 
 interface GeoJSONResponse {
-  geojson: GeoJSON[];
+  geojson: GeoJSON;
 }
+
 /**
  * Service for handling GeoJSON data.
  */
 @Injectable({
   providedIn: 'root',
 })
-export class GeojsonService {
+export class SidenavPointService {
   private apiUrl =
-    'http://127.0.0.1:8000/geometries/measurements/cable_points/inquiry/{inquiry_id}';
+    'http://127.0.0.1:8000/geometries/measurements/inquiry/{inquiry_id}';
+
   private featuresSubject = new BehaviorSubject<Feature[]>([]);
   public updatedFeatures$ = this.featuresSubject.asObservable();
 
@@ -29,14 +31,9 @@ export class GeojsonService {
   getData(inquiry_id: number): Observable<void> {
     const url = this.apiUrl.replace('{inquiry_id}', inquiry_id.toString());
     return this.http.get<GeoJSONResponse[]>(url).pipe(
-      debounceTime(300),
       map((response: GeoJSONResponse[]) => {
         if (response && response.length > 0 && response[0].geojson) {
-          const newFeatures: Feature[] = [];
-          response[0].geojson.forEach((geojson: GeoJSON) => {
-            newFeatures.push(...geojson.features);
-          });
-          this.featuresSubject.next(newFeatures);
+          this.processGeoJSON(response[0].geojson);
         } else {
           throw new Error('Invalid GeoJSON response');
         }
@@ -44,6 +41,15 @@ export class GeojsonService {
       catchError(this.handleError)
     );
   }
+
+  /**
+   * Processes the retrieved GeoJSON data.
+   * @param geojson The GeoJSON data to process.
+   */
+  private processGeoJSON(geojson: GeoJSON): void {
+    this.featuresSubject.next(geojson.features);
+  }
+
   /**
    * Refreshes the GeoJSON data for a specific inquiry.
    * @param inquiry_id The ID of the inquiry.
@@ -53,6 +59,7 @@ export class GeojsonService {
       error: err => console.error('Error refreshing data:', err),
     });
   }
+
   /**
    * Retrieves the current features.
    * @returns An array of Feature objects.
@@ -60,6 +67,7 @@ export class GeojsonService {
   getFeatures(): Feature[] {
     return this.featuresSubject.getValue();
   }
+
   /**
    * Handles errors that occur during data retrieval.
    * @param error The error that occurred.

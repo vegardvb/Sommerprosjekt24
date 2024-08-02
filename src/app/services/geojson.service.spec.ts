@@ -35,6 +35,7 @@ describe('GeojsonService', () => {
             numSatellites: 23,
             numMeasurements: 3,
             verticalAccuracy: 0.018,
+            edited: true,
           },
           point_id: 4218,
         },

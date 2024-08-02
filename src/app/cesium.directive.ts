@@ -182,7 +182,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       const position = Cartesian3.fromDegrees(
         parseFloat(this.longitude),
         parseFloat(this.latitude),
-        130
+        150
       );
       this.viewer.camera.flyTo({
         destination: position,
@@ -450,6 +450,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     this.handler.setInputAction(() => {
       if (this.isDragging) {
         this.isDragging = false;
+        this.disableEditing();
       } else if (defined(this.selectedEntity)) {
         this.isDragging = true;
       }
