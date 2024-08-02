@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { DropdownComponent } from '../dropdown/dropdown.component';
 
 @Component({
@@ -15,4 +15,15 @@ export class SidenavLinkComponent {
 
   @Input()
   routerLinkActiveOptions: { exact: boolean } = { exact: false };
+
+  constructor(private router: Router) {}
+
+  navigateAndReload(event: Event, routerLink?: string): void {
+    event.preventDefault();
+    if (routerLink) {
+      this.router.navigate([routerLink]).then(() => {
+        window.location.reload();
+      });
+    }
+  }
 }

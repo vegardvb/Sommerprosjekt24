@@ -3,6 +3,7 @@
   routerLinkActive="active"
   [routerLinkActiveOptions]="routerLinkActiveOptions"
   class="m-1"
+  (click)="navigateAndReload($event, routerLink)"
 >
   <!-- Wrapping icon and text with spans to make text truncation work -->
   <span>

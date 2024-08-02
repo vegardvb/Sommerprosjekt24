@@ -11,3 +11,9 @@
   border-radius: 5px;
   padding: 10px;
 }
+
+.clicked-measurement-id {
+  background-color: #004b9732;
+  border-radius: 5px;
+  padding: 10px;
+}
