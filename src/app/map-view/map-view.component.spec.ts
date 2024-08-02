@@ -96,11 +96,4 @@ describe('MapViewComponent', () => {
       false
     );
   });
-
-  it('should call handleEntityDeselection when an entity is deselected', () => {
-    spyOn(component.sidenavComponent, 'clearSelectedEntity');
-    component.handleEntityDeselection();
-
-    expect(component.sidenavComponent.clearSelectedEntity).toHaveBeenCalled();
-  });
 });

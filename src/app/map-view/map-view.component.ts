@@ -1,4 +1,10 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  OnDestroy,
+  AfterViewInit,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumDirective } from '../cesium.directive';
 import { TerrainService } from '../services/terrain.service';
@@ -7,6 +13,8 @@ import { SidenavComponent } from '../sidenav/sidenav.component';
 import { Entity, Viewer } from 'cesium';
 import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-measurement-info.component';
 import { CesiumImageService } from '../services/image/cesium-image.service';
+import { CesiumDataService } from '../services/cesium-data.service'; // Import the new service
+
 /**
  * Represents the map view component.
  */
@@ -17,7 +25,7 @@ import { CesiumImageService } from '../services/image/cesium-image.service';
   standalone: true,
   imports: [CesiumDirective, SidenavComponent, CableMeasurementInfoComponent],
 })
-export class MapViewComponent implements OnInit, OnDestroy {
+export class MapViewComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(CesiumDirective, { static: true })
   cesiumDirective!: CesiumDirective;
 
@@ -43,7 +51,8 @@ export class MapViewComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private terrainService: TerrainService,
-    private cesiumImageService: CesiumImageService
+    private cesiumImageService: CesiumImageService,
+    private cesiumDataService: CesiumDataService // Inject the CesiumDataService
   ) {}
 
   /**
@@ -74,6 +83,19 @@ export class MapViewComponent implements OnInit, OnDestroy {
         this.cesiumDirective.handleGeoJsonUpload(geoJsonData);
       }
     );
+  }
+
+  ngAfterViewInit() {
+    // Ensure the viewer is ready before setting billboard visibility
+    if (this.cesiumDirective.viewer) {
+      this.viewer = this.cesiumDirective.viewer;
+      this.cesiumImageService.setBillboardsVisibility(
+        this.viewer,
+        this.billboardsVisible
+      );
+    } else {
+      console.error('Viewer is not initialized after view init');
+    }
   }
 
   /**
@@ -127,7 +149,10 @@ export class MapViewComponent implements OnInit, OnDestroy {
       .subscribe({
         next: async response => {
           if (response && response.tileSetUrl) {
-            await this.cesiumDirective.loadTerrainFromUrl(response.tileSetUrl);
+            await this.cesiumDataService.loadTerrainFromUrl(
+              this.cesiumDirective.viewer,
+              response.tileSetUrl
+            );
           } else {
             console.error('Tileset URL not provided in the response', response);
           }
@@ -184,11 +209,14 @@ export class MapViewComponent implements OnInit, OnDestroy {
     try {
       const inputElement = event.target as HTMLInputElement;
       this.billboardsVisible = inputElement.checked;
-      if (this.viewer) {
+
+      if (this.cesiumDirective.viewer) {
         this.cesiumImageService.setBillboardsVisibility(
-          this.viewer,
+          this.cesiumDirective.viewer,
           this.billboardsVisible
         );
+      } else {
+        console.error('Viewer is not initialized');
       }
     } catch (error) {
       console.error('Error toggling billboards visibility:', error);
@@ -201,12 +229,5 @@ export class MapViewComponent implements OnInit, OnDestroy {
    */
   handleEntitySelected(entity: Entity) {
     this.sidenavComponent.updateSelectedEntity(entity);
-  }
-
-  /**
-   * Handles the deselection of an entity.
-   */
-  handleEntityDeselection() {
-    this.sidenavComponent.clearSelectedEntity();
   }
 }

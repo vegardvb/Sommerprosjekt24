@@ -19,10 +19,6 @@ import {
   ClippingPlaneCollection,
   defined,
   CallbackProperty,
-  PointGraphics,
-  ConstantProperty,
-  CesiumTerrainProvider,
-  JulianDate,
   NearFarScalar,
   PositionProperty,
   ScreenSpaceEventHandler,
@@ -35,17 +31,15 @@ import {
   HeightReference,
   Property,
 } from 'cesium';
-import { CableMeasurementService } from './services/cable-measurement.service';
 import { GeometryService } from './geometry.service';
 import { ActivatedRoute } from '@angular/router';
 import proj4 from 'proj4';
 import * as turf from '@turf/turf';
 import { Subscription, lastValueFrom } from 'rxjs';
-import { CablePointsService } from './services/cable-points.service';
 import { ClickedPointService } from './services/clickedpoint.service';
-import { WorkingAreaService } from './services/workingarea.service';
 import { CesiumImageService } from './services/image/cesium-image.service';
-import { CesiumInteractionService } from './services/cesium.interaction.service';
+import { CesiumInteractionService } from './services/cesium-interaction.service';
+import { CesiumDataService } from './services/cesium-data.service';
 
 // Define the source and target projections
 proj4.defs('EPSG:4326', '+proj=longlat +datum=WGS84 +no_defs');
@@ -71,9 +65,9 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   private inquiryId: number | undefined;
   private pointEntities: Entity[] = [];
   private center!: Cartesian3;
-  private selectedEntity: Entity | null = null;
+  private selectedEntity: Entity | undefined = undefined;
 
-  private viewer!: Viewer;
+  public viewer!: Viewer;
   private handler!: ScreenSpaceEventHandler;
   private width!: number;
   private height!: number;
@@ -91,11 +85,8 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     private clickedPointService: ClickedPointService,
     private cesiumInteractionService: CesiumInteractionService,
     private cesiumImageService: CesiumImageService,
-    @Inject(CableMeasurementService)
-    private cableMeasurementService: CableMeasurementService,
-    private geometryService: GeometryService,
-    private workingAreaService: WorkingAreaService,
-    private cablePointService: CablePointsService
+    private cesiumDataService: CesiumDataService,
+    private geometryService: GeometryService
   ) {}
 
   /**
@@ -103,6 +94,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
    * This method is called once after the first `ngOnChanges` method is called.
    * @returns A promise that resolves when the initialization is complete.
    */
+
   async ngOnInit(): Promise<void> {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
@@ -111,9 +103,17 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     await this.initializeViewer();
     await this.extractCoordinates();
     this.initializeGlobeClippingPlanes();
-    await this.loadCables();
-    await this.loadWorkingArea();
-    await this.loadCablePoints();
+    await this.cesiumDataService.loadCables(this.viewer, this.inquiryId);
+    await this.cesiumDataService.loadWorkingArea(
+      this.viewer,
+      this.inquiryId,
+      this.polygons
+    );
+    await this.cesiumDataService.loadCablePoints(
+      this.viewer,
+      this.inquiryId,
+      this.pointEntities
+    );
     this.cesiumImageService.loadImages(this.viewer, this.inquiryId);
     this.cesiumInteractionService.setupClickHandler(this.viewer);
 
@@ -122,47 +122,26 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       this.viewer.camera.moveEnd.removeEventListener(cameraMoveEndListener);
     };
     this.viewer.camera.moveEnd.addEventListener(cameraMoveEndListener);
+
     const infobox = this.viewer.infoBox;
     infobox.destroy();
 
-    // Set up a screen space event handler to select entities and create a popup
-    this.viewer.screenSpaceEventHandler.setInputAction(
-      (movement: { position: Cartesian2 }) => {
-        const pickedObject = this.viewer.scene.pick(movement.position);
-        if (defined(pickedObject)) {
-          const entity = pickedObject.id;
-          this.viewer.selectedEntity = entity; // Set the selected entity
-          this.clickedPointId =
-            this.viewer.selectedEntity?.properties?.['point_id']._value;
-
-          if (this.clickedPointId) {
-            this.clickedPointService.setClickedPointId(this.clickedPointId);
-          }
+    // Subscribe to selected entity changes from CesiumInteractionService
+    this.subscriptions.add(
+      this.cesiumInteractionService.selectedEntityChanged.subscribe(entity => {
+        this.viewer.selectedEntity = entity;
+        this.clickedPointId = entity?.properties?.['point_id']?._value;
+        if (this.clickedPointId) {
+          this.clickedPointService.setClickedPointId(this.clickedPointId);
         } else {
-          this.viewer.selectedEntity = undefined;
+          this.enableCameraInteractions();
         }
-      },
-      ScreenSpaceEventType.LEFT_CLICK
+        this.cesiumInteractionService.updatePointVisibility(
+          entity,
+          this.pointEntities
+        );
+      })
     );
-
-    this.viewer.selectedEntityChanged.addEventListener((entity: Entity) => {
-      if (defined(entity)) {
-        this.selectedEntityChanged.emit(entity);
-        if (entity.polyline) {
-          this.pointEntities.forEach(pointEntity => {
-            if (pointEntity.point) {
-              pointEntity.point.show = new ConstantProperty(true);
-            }
-          });
-        }
-      } else {
-        this.pointEntities.forEach(pointEntity => {
-          if (pointEntity.point) {
-            pointEntity.point.show = new ConstantProperty(false);
-          }
-        });
-      }
-    });
 
     this.subscriptions.add(
       this.clickedPointService.latitude$.subscribe(lat => {
@@ -226,8 +205,22 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       sceneModePicker: false,
     });
 
+    const originalPick = this.viewer.scene.pick;
+
+    this.viewer.scene.pick = function (mousePosition) {
+      const pickedObject = originalPick.call(this, mousePosition);
+      if (
+        pickedObject &&
+        pickedObject.id &&
+        pickedObject.id.properties &&
+        pickedObject.id.properties.nonPickable
+      ) {
+        return undefined;
+      }
+      return pickedObject;
+    };
+
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
-    this.enableEntitySelection();
 
     const scene = this.viewer.scene;
     const globe = scene.globe;
@@ -423,47 +416,17 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   }
 
   /**
-   * Enables entity selection by adding an input action to the handler.
-   */
-  private enableEntitySelection() {
-    this.handler.setInputAction((movement: { position: Cartesian2 }) => {
-      const pickedObject = this.viewer.scene.pick(movement.position);
-      if (defined(pickedObject)) {
-        this.selectedEntity = pickedObject.id as Entity;
-        this.clickedPointId =
-          this.selectedEntity?.properties?.['point_id']._value;
-        this.selectedEntityChanged.emit(this.selectedEntity);
-      }
-    }, ScreenSpaceEventType.LEFT_DOWN);
-  }
-
-  /**
    * Enables editing functionality for the Cesium viewer.
    * Allows the user to interact with entities on the viewer, such as selecting and dragging them.
    */
   private enableEditing() {
     this.handler = new ScreenSpaceEventHandler(this.viewer.scene.canvas);
-    // let originalCoordinates: Cartographic | undefined;
 
     this.handler.setInputAction((movement: { position: Cartesian2 }) => {
       const pickedObject = this.viewer.scene.pick(movement.position);
       if (defined(pickedObject)) {
         this.selectedEntity = pickedObject.id as Entity;
-
         this.selectedEntityChanged.emit(this.selectedEntity); // Emit the event
-
-        // if (defined(this.selectedEntity.position)) {
-        //   const originalCoordinatesCartesian =
-        //     this.selectedEntity.position.getValue(
-        //       JulianDate.now()
-        //     ) as Cartesian3;
-        //   originalCoordinates = Cartographic.fromCartesian(
-        //     originalCoordinatesCartesian
-        //   );
-        //   //console.log('Original Coordinates:', originalCoordinates);
-        // }
-
-        // Disable camera interactions
         this.disableCameraInteractions();
       }
     }, ScreenSpaceEventType.LEFT_DOWN);
@@ -473,15 +436,6 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
         const cartesian = this.viewer.camera.pickEllipsoid(
           movement.endPosition
         );
-        // if (originalCoordinates && cartesian) {
-        //   const cartographic = Cartographic.fromCartesian(cartesian);
-        //   cartographic.height = originalCoordinates.height;
-        //   cartesian = Cartesian3.fromRadians(
-        //     cartographic.latitude,
-        //     cartographic.longitude,
-        //     cartographic.height
-        //   );
-        // }
         if (defined(cartesian)) {
           if (defined(this.selectedEntity.position)) {
             this.selectedEntity.position = new CallbackProperty(
@@ -507,140 +461,10 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
       this.handler.destroy();
     }
     this.isDragging = false;
-    this.selectedEntity = null;
+    this.selectedEntity = undefined;
     this.enableCameraInteractions();
   }
 
-  /**
-   * Loads the cables data and visualizes them on the Cesium viewer.
-   */
-  private async loadCables(): Promise<void> {
-    try {
-      const data = await lastValueFrom(
-        this.cableMeasurementService.getData(this.inquiryId)
-      );
-      if (data) {
-        const geoJson = data[0].geojson;
-        const dataSource = await GeoJsonDataSource.load(geoJson, {
-          stroke: Color.BLUE,
-          fill: Color.BLUE.withAlpha(1),
-          strokeWidth: 3,
-          markerSize: 1, // Size of the marker
-          credit: "Provided by Petter's Cable measurement service",
-        });
-
-        // Add picking and moving functionality to cables
-        dataSource.entities.values.forEach(entity => {
-          if (!entity.polyline) {
-            entity.point = new PointGraphics({
-              color: Color.BLUE,
-              pixelSize: 10,
-              outlineColor: Color.WHITE,
-              outlineWidth: 2,
-              show: new ConstantProperty(true),
-            });
-            this.viewer.entities.add(entity);
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load cables data:', error);
-    }
-  }
-
-  /**
-   * Loads the cable points data and visualizes it in Cesium.
-   * @returns A promise that resolves when the cable points data is loaded and visualized.
-   */
-  private async loadCablePoints(): Promise<void> {
-    try {
-      const data = await lastValueFrom(
-        this.cablePointService.getData(this.inquiryId)
-      );
-      if (data) {
-        const lineStringFeatures = data[0].geojson;
-
-        for (const geojson of lineStringFeatures) {
-          const allPositions: Cartesian3[] = [];
-          const dataSource = await GeoJsonDataSource.load(geojson, {
-            stroke: Color.BLUEVIOLET,
-            fill: Color.BLUEVIOLET.withAlpha(1),
-            strokeWidth: 3,
-            markerSize: 1, // Size of the marker
-            credit: "Provided by Petter's Cable measurement service",
-          });
-
-          this.viewer.dataSources.add(dataSource);
-
-          // Add picking and moving functionality to cables
-          dataSource.entities.values.forEach(entity => {
-            if (entity.position) {
-              entity.point = new PointGraphics({
-                color: Color.BLUE,
-                pixelSize: 10,
-                outlineColor: Color.WHITE,
-                outlineWidth: 2,
-                show: new ConstantProperty(false),
-              });
-              this.pointEntities.push(entity);
-              const position = entity.position.getValue(JulianDate.now());
-              if (position) {
-                allPositions.push(position);
-              }
-            }
-          });
-
-          // Create a polyline that connects the points
-          if (allPositions.length > 1) {
-            this.viewer.entities.add({
-              polyline: {
-                positions: allPositions,
-                width: 3,
-                material: Color.BLUEVIOLET,
-              },
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Failed to load cable points data:', error);
-    }
-  }
-
-  /**
-   * Loads the working area data and displays it on the Cesium viewer.
-   */
-  private async loadWorkingArea(): Promise<void> {
-    try {
-      const data = await lastValueFrom(
-        this.workingAreaService.getArea(this.inquiryId)
-      );
-      if (data) {
-        const geoJson = data[0].geojson;
-        const dataSource = await GeoJsonDataSource.load(geoJson, {
-          stroke: Color.PALEVIOLETRED,
-          fill: Color.PALEVIOLETRED.withAlpha(0.1),
-          strokeWidth: 2,
-          markerSize: 1, // Size of the marker
-          credit: "Provided by Petter's Cable measurement service",
-        });
-
-        this.viewer.dataSources.add(dataSource);
-
-        // Add picking and moving functionality to cables
-        dataSource.entities.values.forEach(entity => {
-          if (entity.polygon) {
-            entity.polygon.heightReference =
-              HeightReference.CLAMP_TO_GROUND as unknown as Property;
-            this.polygons.push(entity);
-            this.viewer.entities.add(entity);
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load working area data:', error);
-    }
-  }
   /**
    * Updates the position of the selected entity.
    * If the selected entity has a polyline, it updates the positions of the polyline based on the provided cartesian coordinates.
@@ -685,22 +509,6 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
     this.polygons.forEach(polygon => {
       polygon.show = visible;
     });
-  }
-
-  /**
-   * Loads terrain from the specified URL and sets it as the terrain provider for the Cesium viewer.
-   * @param url - The URL of the terrain data.
-   * @returns A promise that resolves when the terrain is successfully loaded.
-   */
-  public async loadTerrainFromUrl(url: string): Promise<void> {
-    try {
-      const terrainProvider = await CesiumTerrainProvider.fromUrl(url, {
-        requestVertexNormals: true,
-      });
-      this.viewer.terrainProvider = terrainProvider;
-    } catch (error) {
-      console.error('Error loading terrain into Cesium:', error);
-    }
   }
 
   /**
@@ -750,7 +558,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   /**
    * Disables camera interactions.
    */
-  private disableCameraInteractions() {
+  public disableCameraInteractions() {
     this.viewer.scene.screenSpaceCameraController.enableRotate = false;
     this.viewer.scene.screenSpaceCameraController.enableZoom = false;
     this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
@@ -760,7 +568,7 @@ export class CesiumDirective implements OnInit, OnDestroy, OnChanges {
   /**
    * Enables camera interactions.
    */
-  private enableCameraInteractions() {
+  public enableCameraInteractions() {
     this.viewer.scene.screenSpaceCameraController.enableRotate = true;
     this.viewer.scene.screenSpaceCameraController.enableZoom = true;
     this.viewer.scene.screenSpaceCameraController.enableTranslate = true;

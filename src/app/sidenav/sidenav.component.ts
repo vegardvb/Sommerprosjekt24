@@ -5,6 +5,7 @@ import {
   Output,
   ViewEncapsulation,
   OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { SidenavService } from './sidenav.service';
 import { SidenavLinkComponent } from './sidenav-link.component';
@@ -23,6 +24,8 @@ import { CableMeasurementInfoComponent } from '../cable-measurement-info/cable-m
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { GeojsonService } from '../services/geojson.service';
 import { ActivatedRoute } from '@angular/router';
+import { CesiumInteractionService } from '../services/cesium-interaction.service';
+import { Subscription } from 'rxjs';
 
 /**
  * Component for the side navigation bar.
@@ -42,18 +45,20 @@ import { ActivatedRoute } from '@angular/router';
     MatSnackBarModule,
   ],
 })
-export class SidenavComponent implements OnInit {
+export class SidenavComponent implements OnInit, OnDestroy {
   readonly sidenavMinWidth = 250;
   readonly sidenavMaxWidth = window.innerWidth - 300;
 
   private inquiryId: number | undefined;
   private geoJsonText = '';
+  private subscriptions: Subscription = new Subscription();
+
   public allowDrop = false;
   public height: number = 0;
   public isEditing: boolean = false;
   public latitude: number = 0;
   public longitude: number = 0;
-  public selectedEntity!: Entity | null;
+  public selectedEntity!: Entity | undefined;
 
   @Output() editingToggled = new EventEmitter<boolean>();
   @Output() geoJsonUpload = new EventEmitter<object>();
@@ -62,18 +67,44 @@ export class SidenavComponent implements OnInit {
     private route: ActivatedRoute,
     public sidenavService: SidenavService,
     public geojsonService: GeojsonService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cesiumInteractionService: CesiumInteractionService
   ) {}
 
+  /**
+   * Initializes the component and subscribes to necessary observables.
+   * Retrieves the inquiryId from the query parameters and updates the selected entity.
+   * Refreshes the data and displays a success message when the entity is updated.
+   */
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.inquiryId = params['inquiryId'];
-      if (this.inquiryId) {
-        // Do something with the inquiryId if needed
-      } else {
-        console.error('Inquiry ID not found in the query parameters');
-      }
     });
+
+    this.subscriptions.add(
+      this.cesiumInteractionService.selectedEntityChanged.subscribe(entity => {
+        this.updateSelectedEntity(entity);
+      })
+    );
+
+    this.subscriptions.add(
+      this.cesiumInteractionService.entityUpdated.subscribe(() => {
+        if (this.inquiryId !== undefined) {
+          this.geojsonService.refreshData(this.inquiryId);
+        }
+        this.snackBar.open('Entity updated successfully', '', {
+          duration: 3000,
+        });
+      })
+    );
+  }
+
+  /**
+   * Lifecycle hook that is called when the component is destroyed.
+   * It is used to perform any necessary cleanup logic, such as unsubscribing from observables.
+   */
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   /**
@@ -122,14 +153,19 @@ export class SidenavComponent implements OnInit {
    * Updates the selected entity.
    * @param entity - The entity to update.
    */
-  updateSelectedEntity(entity: Entity) {
-    this.selectedEntity = entity;
-    const position = this.selectedEntity.position?.getValue(JulianDate.now());
-    if (position) {
-      const cartographic = Cartographic.fromCartesian(position);
-      this.longitude = CesiumMath.toDegrees(cartographic.longitude);
-      this.latitude = CesiumMath.toDegrees(cartographic.latitude);
-      this.height = cartographic.height;
+  updateSelectedEntity(entity: Entity | undefined) {
+    if (entity) {
+      this.selectedEntity = entity;
+
+      const position = this.selectedEntity.position?.getValue(JulianDate.now());
+      if (position) {
+        const cartographic = Cartographic.fromCartesian(position);
+        this.longitude = CesiumMath.toDegrees(cartographic.longitude);
+        this.latitude = CesiumMath.toDegrees(cartographic.latitude);
+        this.height = cartographic.height;
+      }
+    } else {
+      this.clearSelectedEntity();
     }
   }
 
@@ -137,10 +173,11 @@ export class SidenavComponent implements OnInit {
    * Clears the selected entity.
    */
   clearSelectedEntity() {
-    this.selectedEntity = null;
+    this.selectedEntity = undefined;
     this.longitude = 0;
     this.latitude = 0;
     this.height = 0;
+    this.isEditing = false;
   }
 
   /**
@@ -154,8 +191,10 @@ export class SidenavComponent implements OnInit {
   }
 
   /**
-   * Handles the change event for the latitude input.
-   * @param event - The change event.
+   * Handles the change event for the latitude input field.
+   * Updates the latitude property and calls the updateEntityPosition method.
+   *
+   * @param event - The change event object.
    */
   onLatitudeChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
@@ -164,8 +203,9 @@ export class SidenavComponent implements OnInit {
   }
 
   /**
-   * Handles the change event for the height input.
-   * @param event - The change event.
+   * Handles the height change event.
+   *
+   * @param event - The height change event.
    */
   onHeightChange(event: Event) {
     const inputElement = event.target as HTMLInputElement;
@@ -185,6 +225,7 @@ export class SidenavComponent implements OnInit {
         this.height
       );
       this.selectedEntity.position = new ConstantPositionProperty(newPosition);
+      // No call to update the database here; only update the entity's visual position
     }
   }
   /**
@@ -198,7 +239,7 @@ export class SidenavComponent implements OnInit {
    * Closes the editor.
    */
   closeEditor() {
-    this.selectedEntity = null; // Or undefined, depending on how you handle entity selection
+    this.selectedEntity = undefined;
     this.isEditing = false;
     this.editingToggled.emit(this.isEditing);
   }
@@ -282,42 +323,12 @@ export class SidenavComponent implements OnInit {
    * Saves the changes made to the selected entity's coordinates.
    */
   saveChanges() {
-    const hoyde = this.height;
-    const lat = this.latitude;
-    const lon = this.longitude;
-
-    if (this.selectedEntity?.properties) {
-      const id = this.selectedEntity?.properties?.['point_id']?._value;
-
-      if (id !== undefined) {
-        this.sidenavService.updateCoordinates(id, hoyde, lat, lon).subscribe({
-          next: () => {
-            this.snackBar.open('Changes saved successfully', '', {
-              duration: 3000,
-              panelClass: ['custom-snackbar'],
-            });
-
-            if (this.inquiryId !== undefined) {
-              this.geojsonService.refreshData(this.inquiryId);
-            }
-          },
-          error: error => {
-            console.error('Error saving changes', error);
-            this.snackBar.open('Error saving changes', '', {
-              duration: 3000,
-              horizontalPosition: 'center',
-              verticalPosition: 'top',
-              panelClass: ['custom-snackbar'],
-            });
-          },
-        });
-      } else {
-        console.error('Invalid entity ID');
-        this.snackBar.open('Invalid entity selected', '', {
-          duration: 3000,
-          panelClass: ['custom-snackbar'],
-        });
-      }
+    if (this.selectedEntity) {
+      this.cesiumInteractionService.updateEntityCoordinates(
+        this.latitude,
+        this.longitude,
+        this.height
+      );
     }
   }
 
