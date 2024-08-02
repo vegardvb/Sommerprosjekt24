@@ -16,35 +16,43 @@ This project integrates an Angular front-end with a FastAPI back-end to visualiz
 
 ## Development Server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+To set up the development server:
 
-## Backend 
+1. **Install Dependencies**:
 
-The backend is comprised of a Postgres database (geomelding-5) which contains the related data for the all cable networks and is accesiable thorugh a FastAPI which is built on top on the database to extract the necessary data.
+   - From the root directory, run `npm install` to install the necessary packages.
+
+2. **Start the Server**:
+   - Run `ng serve` to start the development server.
+   - Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+
+## Backend
+
+The backend serves multiple purposes:
+
+- **Data Retrieval and Storage**: It connects to the `geomelding-5` Postgres database to fetch cable network inquiries and related data. The database contains detailed information about cable networks, including measurement data and inquiries.
+- **Data Processing**: It processes data into formats like GeoJSON for easy integration with GIS tools and visualization frameworks such as Cesium. The backend also includes functionalities to update and manage the data.
+- **APIs for Frontend**: The FastAPI server provides various endpoints to serve data to the frontend, including details about cable network inquiries and associated geometries.
 
 ![Database preview](imgs/points.png)
+_Preview of the data related to the measurements in the form of measured points_
 
-*Preview of the data related to the measurements in the form of measured points*
+The backend structure:
 
-The FastAPI which includes different endpoints for extracting data about the cable networks is defined thorugh SQL files that are executed on the database to obtain the specifed information. The SQL files include queries and views to systematically organize the data recived from the measurements into both GeoJSON for the measurement data itself and JSON for the information about the related inquiries. The GeoJSON format is known for its compatibility with various geographic information system (GIS) tools, enables the visualization of these cables with ease. This approach ensures that the data is readily available for integration with Cesium, as well as other frameworks and libraries that support GeoJSON.
+- **SQL Queries and Views**: Utilizes SQL files to define queries and views, organizing the data into formats like GeoJSON for geographic data and JSON for inquiry details.
+- **Data Schema**: The schema "analytics_cable_measurement_inquiries" within the database contains materialized views representing the subsets of the public schema tables.
 
 ![Query](imgs/queries.png)
-
-*Example of a query used to compose measurement data into GeoJSON format*
-
-The database has a schema "analytics_cable_measurement_inquiries" which is a subset of the public schema containing all the relevant information for the cable networks. In this schema you will find materialized views which represent the subsets of the tables in the public schema (Should be made into tables in the future). 
+_Example of a query used to compose measurement data into GeoJSON format_
 
 ![View](imgs/views.png)
-
-*Preview of the view which represents all cables in GeoJSON format*
-
-
+_Preview of the view which represents all cables in GeoJSON format_
 
 ### Setup
 
 1. **Install Dependencies:**
 
-   - Ensure you have Python 3.8+ installed.
+   - Ensure Python 3.8+ is installed.
    - Set up a Python virtual environment:
 
      ```sh
@@ -52,7 +60,7 @@ The database has a schema "analytics_cable_measurement_inquiries" which is a sub
      source venv/bin/activate  # On Windows use `venv\Scripts\activate`
      ```
 
-   - Install the required Python packages:
+   - Install required Python packages:
 
      ```sh
      pip install -r requirements.txt
@@ -81,7 +89,7 @@ The database has a schema "analytics_cable_measurement_inquiries" which is a sub
 
    - The backend server will be available at `http://localhost:8000`.
 
-### Installing Docker
+## Installing Docker
 
 1. **Install Docker:**
 
@@ -89,26 +97,29 @@ The database has a schema "analytics_cable_measurement_inquiries" which is a sub
 
 2. **Verify Docker Installation:**
 
-   - After installation, verify that Docker is installed correctly by running:
+   - After installation, verify Docker is correctly installed by running:
 
      ```sh
      docker --version
      ```
 
-### Running Docker Containers
+## Running Docker Containers
+
+### Build the Docker Image
 
 1. **Build the Docker Image:**
 
-   - Build the Docker image using the Dockerfile provided in the repository:
+   - Use the provided Dockerfile to build the Docker image:
 
      ```sh
      docker build -t cesium-terrain-builder .
      ```
 
+### Generate Terrain Tiles
+
 2. **Run the Docker Container to Generate Terrain Tiles:**
 
-   - Run the Docker container to generate terrain tiles. The `-v` option mounts the local directory to the Docker container. Use the command based on your operating system:
-
+   - This step involves generating terrain tiles, which are critical for rendering 3D terrain in Cesium. The process uses the `Cesium Terrain Builder` tool to convert GeoTIFF files into a terrain format suitable for Cesium.
    - **Linux - bash:**
 
      ```sh
@@ -133,19 +144,40 @@ The database has a schema "analytics_cable_measurement_inquiries" which is a sub
      docker run -it --name ctb -v "c:\docker\terrain:/data" cesium-terrain-builder
      ```
 
+   Finally, your terrain data folder should look similar to this:
+
+```text
+$ tree -v -C -L 1 terrain/
+terrain/
+|-- 0
+|-- 1
+|-- 2
+|-- 3
+|-- 4
+|-- 5
+|-- 6
+|-- 7
+|-- 8
+|-- 9
+|-- 10
+|-- 11
+|-- 12
+|-- 13
+|-- 14
+|-- 15
+`-- layer.json
+```
+
+### Serve Terrain Tiles
+
 3. **Run Cesium Terrain Server:**
 
-   - Pull the Cesium Terrain Server image:
+- Pull and run the Cesium Terrain Server to serve the generated terrain tiles:
 
-     ```sh
-     docker pull nmccready/cesium-terrain-server
-     ```
-
-   - Run the Cesium Terrain Server to serve the terrain tiles:
-
-     ```sh
-     docker run -p 8080:8000 --name cesium-terrain-server -v "C:/docker/terrain:/data/tilesets/terrain" nmccready/cesium-terrain-server
-     ```
+  ```sh
+  docker pull nmccready/cesium-terrain-server
+  docker run -p 8080:8000 --name cesium-terrain-server -v "C:/docker/terrain:/data/tilesets/terrain" nmccready/cesium-terrain-server
+  ```
 
 ## Code Scaffolding
 
@@ -157,7 +189,7 @@ Run `ng build` to build the project. The build artifacts will be stored in the `
 
 ## Running Unit Tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run `npm run test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
 ## Running End-to-End Tests
 
@@ -165,26 +197,23 @@ Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To u
 
 ## Further Help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-
----
+To get more help on the Angular CLI, use `ng help` or check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
 ### Additional Notes
 
-- **Fetching and Processing GeoTIFF Files:**
+- **Fetching and Processing GeoTIFF Files**:
   The backend endpoints `/fetch-geotiff` and `/process-geotiff` handle fetching and processing GeoTIFF files to generate terrain tiles.
-- **Directory Structure:**
 
-  - The terrain tiles are stored in the `C:/docker/terrain/output` directory.
-  - Ensure Docker has access to the `C:/docker/terrain` directory for volume mounting.
+- **Directory Structure**:
+- Terrain tiles are stored in the `C:/docker/terrain/output` directory.
+- Ensure Docker has access to the `C:/docker/terrain` directory for volume mounting.
 
-- **Logging:**
-  The backend uses logging to track the status of operations. Logs are stored in the `app.log` file.
+- **Logging**:
+  The backend uses logging to track the status of operations, stored in the `app.log` file.
 
-- **API Endpoints:**
-
-![API](imgs/api.png)
-*Preview of Swagger documentation of the API*
+- **API Endpoints**:
+  ![API](imgs/api.png)
+  _Preview of Swagger documentation of the API_
 
 - `GET /`: Reads the root of the API.
 - `GET /inquiries`: Retrieves a list of inquiries.
@@ -201,4 +230,4 @@ Ensure you follow these steps to set up the project correctly. For any issues or
 
 ### Credits
 
-- The Cesium Terrain Builder Docker setup is based on [tum-gis/cesium-terrain-builder-docker](https://github.com/tum-gis/cesium-terrain-builder-docker).
+The Cesium Terrain Builder Docker setup is based on [tum-gis/cesium-terrain-builder-docker](https://github.com/tum-gis/cesium-terrain-builder-docker).
