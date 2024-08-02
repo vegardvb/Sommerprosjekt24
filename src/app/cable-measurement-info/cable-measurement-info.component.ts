@@ -49,7 +49,7 @@ export class CableMeasurementInfoComponent implements OnInit {
     private geojsonService: GeojsonService,
     private clickedPointService: ClickedPointService,
     private sidenavPointService: SidenavPointService
-  ) {}
+  ) { }
 
   measurementTypeMap: { [key: number]: string } = {};
 
@@ -101,7 +101,10 @@ export class CableMeasurementInfoComponent implements OnInit {
       this.groupFeaturesByMeasurementId();
     });
   }
-
+  /**
+   * Fetches GeoJSON data for the given inquiry ID.
+   * @param inquiry_id The inquiry ID.
+   */
   fetchPointData(inquiry_id: number): void {
     this.sidenavPointService.getData(inquiry_id).subscribe({
       next: () => {
@@ -112,7 +115,11 @@ export class CableMeasurementInfoComponent implements OnInit {
       },
     });
   }
-
+  /**
+   * Gets the header for a feature.
+   * @param feature The feature.
+   * @returns The header string.
+   */
   groupFeaturesByMeasurementId() {
     const grouped = this.features.reduce(
       (acc, feature) => {
@@ -138,10 +145,20 @@ export class CableMeasurementInfoComponent implements OnInit {
     return `Point ID: ${feature.properties.point_id}`;
   }
 
+  /**
+   * Gets the ID for a feature.
+   * @param feature The feature.
+   * @returns The ID string.
+   */
   getID(feature: Feature): number | undefined {
     return feature.properties.point_id;
   }
 
+  /**
+   * Gets the CSS class for the header of a feature.
+   * @param feature The feature.
+   * @returns The CSS class string.
+   */
   getHeaderClass(feature: Feature): string | null {
     const header = this.getID(feature);
     const clickedPointIdStr = this.clickedPointId?.toString();
@@ -169,7 +186,10 @@ export class CableMeasurementInfoComponent implements OnInit {
     }
     return null;
   }
-
+  /**
+   * Captures the header ID and performs necessary actions.
+   * @param headerId The header ID.
+   */
   captureHeader(headerId: string) {
     const match = headerId.match(/(?:Point ID:)\s*(\d+)/);
     if (match) {
@@ -202,7 +222,11 @@ export class CableMeasurementInfoComponent implements OnInit {
       this.activeHeader = '';
     }
   }
-
+  /**
+   * Formats the coordinates.
+   * @param coordinates The coordinates.
+   * @returns The formatted coordinates.
+   */
   formatCoordinates(coordinates: number[] | number[][]): string[] {
     if (Array.isArray(coordinates[0])) {
       return (coordinates as number[][]).map(coord => `[${coord.join(', ')}]`);
@@ -211,6 +235,9 @@ export class CableMeasurementInfoComponent implements OnInit {
     }
   }
 
+  /**
+   * Toggles the edit mode.
+   */
   toggleEditMode(): void {
     this.editMode = !this.editMode;
 

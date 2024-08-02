@@ -7,7 +7,9 @@ import { GeoJSON, Feature } from '../../models/geojson.model';
 interface GeoJSONResponse {
   geojson: GeoJSON[];
 }
-
+/**
+ * Service for handling GeoJSON data.
+ */
 @Injectable({
   providedIn: 'root',
 })
@@ -19,6 +21,11 @@ export class GeojsonService {
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Retrieves GeoJSON data from the server.
+   * @param inquiry_id The ID of the inquiry.
+   * @returns An Observable that emits void.
+   */
   getData(inquiry_id: number): Observable<void> {
     const url = this.apiUrl.replace('{inquiry_id}', inquiry_id.toString());
     return this.http.get<GeoJSONResponse[]>(url).pipe(
@@ -37,17 +44,27 @@ export class GeojsonService {
       catchError(this.handleError)
     );
   }
-
+  /**
+   * Refreshes the GeoJSON data for a specific inquiry.
+   * @param inquiry_id The ID of the inquiry.
+   */
   refreshData(inquiry_id: number): void {
     this.getData(inquiry_id).subscribe({
       error: err => console.error('Error refreshing data:', err),
     });
   }
-
+  /**
+   * Retrieves the current features.
+   * @returns An array of Feature objects.
+   */
   getFeatures(): Feature[] {
     return this.featuresSubject.getValue();
   }
-
+  /**
+   * Handles errors that occur during data retrieval.
+   * @param error The error that occurred.
+   * @returns An Observable that emits an error.
+   */
   private handleError(error: Error): Observable<never> {
     console.error('An error occurred:', error.message);
     return throwError(
