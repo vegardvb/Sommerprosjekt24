@@ -81,7 +81,7 @@ export class CesiumInteractionService {
         this.snackBar.open(
           'An error occurred while processing the click event.',
           'Close',
-          { duration: 3000 }
+          { duration: 3000, panelClass: ['custom-snackbar-container'] }
         );
       }
     }, ScreenSpaceEventType.LEFT_CLICK);
@@ -113,7 +113,10 @@ export class CesiumInteractionService {
       }
     } catch (error) {
       console.error('Error handling point click', error);
-      this.snackBar.open('Error selecting point', 'Close', { duration: 3000 });
+      this.snackBar.open('Error selecting point', 'Close', {
+        duration: 3000,
+        panelClass: ['custom-snackbar-container'],
+      });
     }
   }
 
@@ -134,7 +137,10 @@ export class CesiumInteractionService {
       }
     } catch (error) {
       console.error('Error handling image click', error);
-      this.snackBar.open('Error displaying image', 'Close', { duration: 3000 });
+      this.snackBar.open('Error displaying image', 'Close', {
+        duration: 3000,
+        panelClass: ['custom-snackbar-container'],
+      });
     }
   }
 
@@ -156,6 +162,7 @@ export class CesiumInteractionService {
       console.error('Error handling polyline click', error);
       this.snackBar.open('Error selecting polyline', 'Close', {
         duration: 3000,
+        panelClass: ['custom-snackbar-container'],
       });
     }
   }
@@ -174,11 +181,18 @@ export class CesiumInteractionService {
             pointEntity.point.show = new ConstantProperty(true);
           }
         });
+      } else {
+        pointEntities.forEach(pointEntity => {
+          if (pointEntity.point) {
+            pointEntity.point.show = new ConstantProperty(false);
+          }
+        });
       }
     } catch (error) {
       console.error('Error updating point visibility', error);
       this.snackBar.open('Error updating point visibility', 'Close', {
         duration: 3000,
+        panelClass: ['custom-snackbar-container'],
       });
     }
   }
@@ -197,6 +211,7 @@ export class CesiumInteractionService {
       console.error('Failed to load image URL', error);
       this.snackBar.open('Failed to load image URL', 'Close', {
         duration: 3000,
+        panelClass: ['custom-snackbar-container'],
       });
     }
   }
@@ -220,6 +235,7 @@ export class CesiumInteractionService {
             console.log('Coordinates updated successfully');
             this.snackBar.open('Coordinates updated successfully', 'Close', {
               duration: 3000,
+              panelClass: ['custom-snackbar-container'],
             }); // Show MatSnackBar
             this.entityUpdated.emit();
           },
@@ -227,20 +243,24 @@ export class CesiumInteractionService {
             console.error('Error updating coordinates', error);
             this.snackBar.open('Error updating coordinates', 'Close', {
               duration: 3000,
+              panelClass: ['custom-snackbar-container'],
             }); // Show error MatSnackBar
           },
         });
         this.toggleEditing();
       } else {
         console.error('Invalid entity ID');
-        this.snackBar.open('Invalid entity ID', 'Close', { duration: 3000 });
+        this.snackBar.open('Invalid entity ID', 'Close', {
+          duration: 3000,
+          panelClass: ['custom-snackbar-container'],
+        });
       }
     } else {
       console.error('No entity selected for updating coordinates');
       this.snackBar.open(
         'No entity selected for updating coordinates',
         'Close',
-        { duration: 3000 }
+        { duration: 3000, panelClass: ['custom-snackbar-container'] }
       );
     }
   }

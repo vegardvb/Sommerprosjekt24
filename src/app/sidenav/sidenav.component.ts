@@ -26,6 +26,7 @@ import { GeojsonService } from '../services/geojson.service';
 import { ActivatedRoute } from '@angular/router';
 import { CesiumInteractionService } from '../services/cesium-interaction.service';
 import { Subscription } from 'rxjs';
+import { SidenavPointService } from '../services/sidenav-point.service';
 
 /**
  * Component for the side navigation bar.
@@ -68,7 +69,8 @@ export class SidenavComponent implements OnInit, OnDestroy {
     public sidenavService: SidenavService,
     public geojsonService: GeojsonService,
     private snackBar: MatSnackBar,
-    private cesiumInteractionService: CesiumInteractionService
+    private cesiumInteractionService: CesiumInteractionService,
+    private sidenavPointService: SidenavPointService
   ) {}
 
   /**
@@ -91,9 +93,11 @@ export class SidenavComponent implements OnInit, OnDestroy {
       this.cesiumInteractionService.entityUpdated.subscribe(() => {
         if (this.inquiryId !== undefined) {
           this.geojsonService.refreshData(this.inquiryId);
+          this.sidenavPointService.refreshData(this.inquiryId);
         }
         this.snackBar.open('Entity updated successfully', '', {
           duration: 3000,
+          panelClass: ['custom-snackbar-container'],
         });
       })
     );
