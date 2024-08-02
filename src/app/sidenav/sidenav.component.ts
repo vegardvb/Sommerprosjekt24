@@ -163,8 +163,6 @@ export class SidenavComponent implements OnInit, OnDestroy {
         this.longitude = CesiumMath.toDegrees(cartographic.longitude);
         this.latitude = CesiumMath.toDegrees(cartographic.latitude);
         this.height = cartographic.height;
-      } else {
-        this.clearSelectedEntity();
       }
     } else {
       this.clearSelectedEntity();

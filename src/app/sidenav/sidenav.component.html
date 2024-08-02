@@ -36,10 +36,6 @@
 
     <div class="p-2">
       <div *ngIf="selectedEntity" class="coordinate-inputs">
-        <div *ngIf="selectedEntity.polyline" class="form-label">
-          To Edit, Select A Vertice On The Cable
-        </div>
-        <div *ngIf="!selectedEntity.polyline">
           <button (click)="toggleEditing()" class="btn edit-btn mb-3">
             {{ isEditing ? 'Disable Editing' : 'Enable Editing' }}
           </button>
@@ -87,7 +83,6 @@
           <button (click)="saveChanges()" class="save-btn mb-3">
             Save Changes
           </button>
-        </div>
       </div>
     </div>
   </div>
